@@ -9,7 +9,7 @@
     "dev": "npx tsx src/main.ts"
   },
   "dependencies": {
-    "@abandonware/bleno": "^0.6.1",
+    "bleno": "npm:@abandonware/bleno@^0.6.1",
     "commander": "^12.1.0",
     "dotenv": "^16.4.5"
   },
