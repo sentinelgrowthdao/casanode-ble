@@ -8,7 +8,12 @@
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"outDir": "./dist"
+		"outDir": "./dist",
+		"paths":
+		{
+			"@/*": ["./src/*"],
+			"@utils/*": ["./src/utils/*"],
+		}
 	},
 	"include": ["src"],
 	"exclude": ["node_modules", "dist"]
