@@ -12,6 +12,9 @@
 		"paths":
 		{
 			"@/*": ["./src/*"],
+			"@actions/*": ["./src/actions/*"],
+			"@characteristics/*": ["./src/characteristics/*"],
+			"@commands/*": ["./src/commands/*"],
 			"@utils/*": ["./src/utils/*"],
 		}
 	},
