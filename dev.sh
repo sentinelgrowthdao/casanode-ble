@@ -32,4 +32,5 @@ sudo apt update
 sudo apt install -y dvpn-node-manager
 
 # Run setcap command to grant cap_net_raw privileges to Node.js
+sudo apt install -y libcap2-bin
 sudo setcap cap_net_raw+eip $(eval readlink -f `which node`)
