@@ -33,15 +33,15 @@ export const daemonCommand = () =>
 	bleno.on('stateChange', (state: any) =>
 	{
 		console.log('stateChange');
-
+		
 		if (state === 'poweredOn')
 		{
-			Logger.log('Application started successfully.');
+			Logger.info('Application started successfully.');
 			bleno.startAdvertising('Casanode', [serviceUuid]);
 		}
 		else
 		{
-			Logger.log('Application stopped.');
+			Logger.info('Application stopped.');
 			bleno.stopAdvertising();
 		}
 	});
