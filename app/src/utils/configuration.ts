@@ -1,11 +1,15 @@
 import * as fs from 'fs';
 import * as dotenv from 'dotenv';
+import * as path from 'path';
 import { Logger } from '@utils/logger';
 
 export interface ConfigData
 {
 	[key: string]: string | number | boolean | undefined;
 	BLENO_DEVICE_NAME: string;
+	DOCKER_IMAGE_NAME: string;
+	DOCKER_CONTAINER_NAME: string;
+	CONFIG_DIR: string;
 }
 
 class ConfigurationLoader
@@ -15,8 +19,12 @@ class ConfigurationLoader
 	private config: ConfigData;
 	
 	// Default configuration
-	private defaultConfig: ConfigData = {
+	private defaultConfig: ConfigData =
+	{
 		BLENO_DEVICE_NAME: 'Casanode',
+		DOCKER_IMAGE_NAME: 'wajatmaka/sentinel-aarch64-alpine:v0.7.1',
+		DOCKER_CONTAINER_NAME: 'sentinel-dvpn-node',
+		CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/default/path/.sentinelnode',
 	};
 	
 	private constructor()
@@ -87,7 +95,7 @@ class ConfigurationLoader
 				return {};
 			}
 		}
-		catch (error)
+		catch(error)
 		{
 			Logger.error(`An error occurred while loading configuration file: ${error}`);
 			return {};
