@@ -5,7 +5,7 @@ export class Logger
 {
 	private static logFilePath = '/var/log/casanode/app-ble.log';
 	
-	public static log(message: string): void 
+	public static info(message: string): void 
 	{
 		const logMessage = `[INFO] ${message}\n`;
 		this.writeToLog(logMessage);
