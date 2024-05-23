@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { Logger } from '@utils/logger';
 
-export interface ConfigData
+export interface AppConfigData
 {
 	[key: string]: string | number | boolean | undefined;
 	BLENO_DEVICE_NAME: string;
@@ -16,10 +16,10 @@ class ConfigurationLoader
 {
 	private static instance: ConfigurationLoader;
 	private configFile = '/etc/casanode.conf';
-	private config: ConfigData;
+	private config: AppConfigData;
 	
 	// Default configuration
-	private defaultConfig: ConfigData =
+	private defaultConfig: AppConfigData =
 	{
 		BLENO_DEVICE_NAME: 'Casanode',
 		DOCKER_IMAGE_NAME: 'wajatmaka/sentinel-aarch64-alpine:v0.7.1',
@@ -47,9 +47,9 @@ class ConfigurationLoader
 	
 	/**
 	 * Get current configuration
-	 * @returns ConfigData
+	 * @returns AppConfigData
 	 */
-	public getConfig(): ConfigData
+	public getConfig(): AppConfigData
 	{
 		return this.config;
 	}
@@ -57,7 +57,7 @@ class ConfigurationLoader
 	/**
 	 * Load configuration from file and merge it with default configuration
 	 */
-	private loadConfig(): ConfigData
+	private loadConfig(): AppConfigData
 	{
 		const configFromFile = this.loadConfigFromFile();
 		// Merge default and file configurations
@@ -71,23 +71,23 @@ class ConfigurationLoader
 				acc[key] = value;
 			}
 			return acc;
-		}, {} as ConfigData);
+		}, {} as AppConfigData);
 		// Save filtered configuration
 		return filteredConfig;
 	}
 	
 	/**
 	 * Load configuration from file
-	 * @returns Partial<ConfigData>
+	 * @returns Partial<AppConfigData>
 	 */
-	private loadConfigFromFile(): Partial<ConfigData>
+	private loadConfigFromFile(): Partial<AppConfigData>
 	{
 		try
 		{
 			if(fs.existsSync(this.configFile))
 			{
 				const config = dotenv.parse(fs.readFileSync(this.configFile));
-				return config as Partial<ConfigData>;
+				return config as Partial<AppConfigData>;
 			}
 			else
 			{
