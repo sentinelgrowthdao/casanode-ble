@@ -342,3 +342,35 @@ export async function containerExists(): Promise<boolean>
 
 	return false;
 }
+
+/**
+ * Remove Docker container
+ * @returns boolean
+ */
+export async function containerRemove(): Promise<boolean>
+{
+	try
+	{
+		// Check if the container exists
+		const exists = await containerExists();
+		if (!exists)
+			return true;
+		
+		// Stop the container
+		await containerStop();
+		
+		// Remove the container
+		await docker.getContainer(config.DOCKER_CONTAINER_NAME).remove({ force: true });
+		Logger.info(`dVPN node container has been removed successfully.`);
+		return true;
+	}
+	catch (err)
+	{
+		if (err instanceof Error)
+			Logger.error(`Failed to remove the dVPN node container: ${err.message}`);
+		else
+			Logger.error(`Failed to remove the dVPN node container: ${String(err)}`);
+	}
+	
+	return false;
+}
