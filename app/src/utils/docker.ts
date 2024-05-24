@@ -261,3 +261,28 @@ async function startContainerWithPassphrase(containerName: string, walletPassphr
 		});
 	});
 }
+
+/**
+ * Stop Docker container
+ * @returns boolean
+ */
+export async function containerStop(): Promise<boolean>
+{
+	try
+	{
+		Logger.info(`Please wait while the dVPN node container is being stopped...`);
+		await docker.getContainer(config.DOCKER_CONTAINER_NAME).stop();
+		Logger.info(`dVPN node container has been stopped successfully.`);
+		return true;
+	}
+	catch(err)
+	{
+		if (err instanceof Error)
+			Logger.error(`Failed to stop the dVPN node container: ${err.message}`);
+		else
+			Logger.error(`Failed to stop the dVPN node container: ${String(err)}`);
+		
+		return false;
+	}
+}
+
