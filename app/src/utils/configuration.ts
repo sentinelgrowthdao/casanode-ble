@@ -24,7 +24,7 @@ class ConfigurationLoader
 		BLENO_DEVICE_NAME: 'Casanode',
 		DOCKER_IMAGE_NAME: 'wajatmaka/sentinel-aarch64-alpine:v0.7.1',
 		DOCKER_CONTAINER_NAME: 'sentinel-dvpn-node',
-		CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/default/path/.sentinelnode',
+		CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/home/casanode/.sentinelnode',
 	};
 	
 	private constructor()
