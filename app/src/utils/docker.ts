@@ -294,15 +294,17 @@ export async function containerRestart(): Promise<boolean>
 {
 	try
 	{
-		if(await containerRunning())
+		const isRunning = await containerRunning();
+		if(isRunning)
 		{
 			Logger.info(`Please wait while the dVPN node container is being restarted...`);
-			if (!containerStop())
+			const stopSuccess = await containerStop();
+			if (!stopSuccess)
 				return false;
 		}
 		
-		Logger.info(`Please wait while the dVPN node container is being restarted...`);
-		if(!containerStart())
+		const startSuccess = await containerStart();
+		if (!startSuccess)
 			return false;
 		
 		Logger.info(`dVPN node container has been restarted successfully.`);
