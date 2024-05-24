@@ -266,11 +266,11 @@ class NodeManager
 	}
 }
 
-// Exporter une instance unique de NodeManager
+// Create a singleton instance of NodeManager
 const nodeManager = NodeManager.getInstance();
 export default nodeManager;
 
-// Exporter des fonctions utilitaires
+// Export utility functions
 export const nodeConfig = (): NodeConfigData => nodeManager.getConfig();
 export const isNodeConfigFileAvailable = (): boolean => nodeManager.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'config.toml'));
 export const isWireguardConfigFileAvailable = (): boolean => nodeManager.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'wireguard.toml'));
