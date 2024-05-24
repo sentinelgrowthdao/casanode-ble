@@ -47,23 +47,6 @@ export async function inspectDockerContainer(): Promise<Docker.ContainerInspectI
 	return null;
 }
 
-export async function checkContainerExists(): Promise<boolean>
-{
-	try
-	{
-		const containerName = config.DOCKER_CONTAINER_NAME;
-		const containers = await docker.listContainers({ all: true });
-		const containerExists = containers.some(container => container.Names.includes(`/${containerName}`));
-		return containerExists;
-	}
-	catch (err)
-	{
-		Logger.error(`Error while checking if container ${config.DOCKER_CONTAINER_NAME} exists:\n${err?.toString()}`);
-	}
-
-	return false;
-}
-
 /**
  * Pull Docker image
  * @returns boolean
@@ -335,6 +318,26 @@ export async function containerRunning(): Promise<boolean>
 			Logger.error(`Failed to check if the container is running: ${err.message}`);
 		else
 			Logger.error(`Failed to check if the container is running: ${String(err)}`);
+	}
+
+	return false;
+}
+
+/**
+ * Check if the container exists
+ * @returns boolean
+ */
+export async function containerExists(): Promise<boolean>
+{
+	try
+	{
+		const containers = await docker.listContainers({ all: true });
+		const containerExists = containers.some(container => container.Names.includes(`/${config.DOCKER_CONTAINER_NAME}`));
+		return containerExists;
+	}
+	catch (err)
+	{
+		Logger.error(`Error while checking if container ${config.DOCKER_CONTAINER_NAME} exists:\n${err?.toString()}`);
 	}
 
 	return false;
