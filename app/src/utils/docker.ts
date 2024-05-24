@@ -286,3 +286,58 @@ export async function containerStop(): Promise<boolean>
 	}
 }
 
+/**
+ * Restart Docker container
+ * @returns boolean
+ */
+export async function containerRestart(): Promise<boolean>
+{
+	try
+	{
+		if(await containerRunning())
+		{
+			Logger.info(`Please wait while the dVPN node container is being restarted...`);
+			if (!containerStop())
+				return false;
+		}
+		
+		Logger.info(`Please wait while the dVPN node container is being restarted...`);
+		if(!containerStart())
+			return false;
+		
+		Logger.info(`dVPN node container has been restarted successfully.`);
+		return true;
+	}
+	catch (err)
+	{
+		if (err instanceof Error)
+			Logger.error(`Failed to restart the dVPN node container: ${err.message}`);
+		else
+			Logger.error(`Failed to restart the dVPN node container: ${String(err)}`);
+	}
+	
+	return false;
+}
+
+/**
+ * Check if the container is running
+ * @returns boolean
+ */
+export async function containerRunning(): Promise<boolean>
+{
+	try
+	{
+		const runningContainers = await docker.listContainers();
+		const isRunning = runningContainers.some(container => container.Names.includes(`/${config.DOCKER_CONTAINER_NAME}`));
+		return isRunning;
+	}
+	catch (err)
+	{
+		if (err instanceof Error)
+			Logger.error(`Failed to check if the container is running: ${err.message}`);
+		else
+			Logger.error(`Failed to check if the container is running: ${String(err)}`);
+	}
+
+	return false;
+}
