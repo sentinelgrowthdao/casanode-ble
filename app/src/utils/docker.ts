@@ -52,7 +52,7 @@ export async function inspectDockerContainer(): Promise<Docker.ContainerInspectI
  * Pull Docker image
  * @returns boolean
  */
-export async function pullImage(): Promise<boolean>
+export async function imagePull(): Promise<boolean>
 {
 	try
 	{
@@ -125,7 +125,7 @@ async function removeImage(imageName: string): Promise<boolean>
  * Remove Docker images
  * @returns boolean
  */
-export async function removeImages(): Promise<boolean>
+export async function imagesRemove(): Promise<boolean>
 {
 	try
 	{
