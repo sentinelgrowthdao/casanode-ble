@@ -303,6 +303,14 @@ async function startContainerWithPassphrase(containerName: string, walletPassphr
  */
 export async function containerStop(): Promise<boolean>
 {
+	// Check if container is running
+	const isRunning = await containerRunning();
+	if (!isRunning)
+	{
+		Logger.info(`dVPN node container is already stopped.`);
+		return true;
+	}
+	
 	try
 	{
 		await docker.getContainer(config.DOCKER_CONTAINER_NAME).stop();
