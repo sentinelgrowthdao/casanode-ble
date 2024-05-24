@@ -62,3 +62,50 @@ export async function checkContainerExists(): Promise<boolean>
 
 	return false;
 }
+
+/**
+ * Pull Docker image
+ * @returns boolean
+ */
+export async function pullImage(): Promise<boolean>
+{
+	try
+	{
+		const imageName = config.DOCKER_IMAGE_NAME;
+		const containerName = config.DOCKER_CONTAINER_NAME;
+		
+		Logger.info(`Pulling Docker image ${imageName}`);
+		await new Promise<void>((resolve, reject) =>
+		{
+			// Pull Docker image
+			docker.pull(imageName, (err: any, stream: any) =>
+			{
+				if (err)
+					return reject(err);
+				// Follow progress of pulling image
+				docker.modem.followProgress(stream, (err, res) =>
+				{
+					if (err)
+						return reject(err);
+					
+					resolve();
+				});
+			});
+		});
+		Logger.info(`Docker image ${imageName} pulled successfully`);
+		
+		// Tagging the image
+		const image = docker.getImage(imageName);
+		await image.tag({ repo: containerName });
+		
+		Logger.info(`Docker image ${imageName} tagged as ${containerName} successfully`);
+		
+		return true;
+	}
+	catch (err)
+	{
+		Logger.error(`Error while pulling Docker image ${config.DOCKER_IMAGE_NAME}:\n${err?.toString()}`);
+	}
+	
+	return false;
+}
