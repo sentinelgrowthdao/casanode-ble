@@ -208,7 +208,7 @@ export async function containerStart(walletPassphrase: string | null = null): Pr
 			Logger.error(`Failed to start the dVPN node container: ${err.message}`);
 		else
 			Logger.error(`Failed to start the dVPN node container: ${String(err)}`);
-		
+
 		return false;
 	}
 }
@@ -219,7 +219,7 @@ export async function containerStart(walletPassphrase: string | null = null): Pr
  */
 async function startContainerWithoutPassphrase(containerName: string): Promise<void>
 {
-    await docker.getContainer(containerName).start();
+	await docker.getContainer(containerName).start();
 }
 
 /**
