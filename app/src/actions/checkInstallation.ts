@@ -1,6 +1,6 @@
 import {
 	checkImageAvailability,
-	checkContainerExists,
+	containerExists,
 	containerRunning,
 } from '@utils/docker';
 
@@ -24,7 +24,7 @@ export const checkInstallation = async (): Promise<InstallationCheck> =>
 {
 	return {
 		image: await checkImageAvailability(),
-		containerExists: await checkContainerExists(),
+		containerExists: await containerExists(),
 		containerRunning: await containerRunning(),
 		sentinelConfig: isNodeConfigFileAvailable(),
 		wireguardConfig: isWireguardConfigFileAvailable(),
