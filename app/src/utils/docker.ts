@@ -95,6 +95,59 @@ export async function pullImage(): Promise<boolean>
 }
 
 /**
+ * Remove Docker image
+ * @param imageName string
+ * @returns boolean
+ */
+async function removeImage(imageName: string): Promise<boolean>
+{
+	try
+	{
+		const image: Docker.Image = docker.getImage(imageName);
+		Logger.info(`Removing Docker image ${imageName}...`);
+		await image.remove({ force: true });
+		Logger.info(`Docker image ${imageName} removed successfully.`);
+		return true;
+	}
+	catch (err)
+	{
+		if (err instanceof Error)
+			Logger.error(`Failed to remove Docker image ${imageName}: ${err.message}`);
+		else
+			Logger.error(`Failed to remove Docker image ${imageName}: ${String(err)}`);
+	}
+	
+	return false;
+}
+
+/**
+ * Remove Docker images
+ * @returns boolean
+ */
+export async function removeImages(): Promise<boolean>
+{
+	try
+	{
+		const imageName = config.DOCKER_IMAGE_NAME;
+		const containerName = config.DOCKER_CONTAINER_NAME;
+		
+		const removeOriginal = await removeImage(imageName);
+		const removeTagged = await removeImage(containerName);
+		
+		return removeOriginal && removeTagged;
+	}
+	catch (err)
+	{
+		if (err instanceof Error)
+			Logger.error(`Failed to remove Docker images: ${err.message}`);
+		else
+			Logger.error(`Failed to remove Docker images: ${String(err)}`);
+	}
+	
+	return false;
+}
+
+/**
  * Start Docker container
  * @param walletPassphrase string|null
  * @returns boolean
@@ -371,6 +424,6 @@ export async function containerRemove(): Promise<boolean>
 		else
 			Logger.error(`Failed to remove the dVPN node container: ${String(err)}`);
 	}
-	
+
 	return false;
 }
