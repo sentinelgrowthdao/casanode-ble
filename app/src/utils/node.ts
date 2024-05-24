@@ -12,6 +12,7 @@ export interface NodeConfigData
 	[key: string]: string | number | boolean | undefined;
 	moniker: string;
 	chain_id: string;
+	rpc_addresses: string;
 	node_ip: string;
 	node_type: string;
 	node_port: number;
@@ -34,6 +35,7 @@ class NodeManager
 	private nodeConfig: NodeConfigData = {
 		moniker: '',
 		chain_id: '',
+		rpc_addresses: '',
 		node_ip: '',
 		node_type: '',
 		node_port: 0,
@@ -116,10 +118,11 @@ class NodeManager
 			
 			// Parse configuration file content
 			this.nodeConfig.moniker = this.extractConfigValue(configFileContent, 'moniker');
+			this.nodeConfig.chain_id = this.extractConfigValue(configFileContent, 'id');
+			this.nodeConfig.rpc_addresses = this.extractConfigValue(configFileContent, 'rpc_addresses');
 			this.nodeConfig.node_type = this.extractConfigValue(configFileContent, 'type');
 			this.nodeConfig.node_ip = this.extractConfigValue(configFileContent, 'remote_url').split('/')[2].split(':')[0];
 			this.nodeConfig.node_port = parseInt(this.extractConfigValue(configFileContent, 'listen_on').split(':')[1]);
-			this.nodeConfig.chain_id = this.extractConfigValue(configFileContent, 'id');
 			this.nodeConfig.max_peers = parseInt(this.extractConfigValue(configFileContent, 'max_peers'));
 			this.nodeConfig.backend = this.extractConfigValue(configFileContent, 'backend');
 			this.nodeConfig.wallet_name = this.extractConfigValue(configFileContent, 'from');
@@ -201,6 +204,7 @@ class NodeManager
 		{
 			this.updateConfigValue(configFilePath, 'moniker', this.nodeConfig.moniker);
 			this.updateConfigValue(configFilePath, 'id', this.nodeConfig.chain_id);
+			this.updateConfigValue(configFilePath, 'rpc_addresses', this.nodeConfig.rpc_addresses);
 			this.updateConfigValue(configFilePath, 'type', this.nodeConfig.node_type);
 			this.updateConfigValue(configFilePath, 'listen_on', `0.0.0.0:${this.nodeConfig.node_port}`);
 			this.updateConfigValue(configFilePath, 'remote_url', `https://${this.nodeConfig.node_ip}:${this.nodeConfig.node_port}`);
