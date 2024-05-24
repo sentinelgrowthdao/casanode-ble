@@ -163,14 +163,6 @@ class NodeManager
 	{
 		const regex = new RegExp(`^${key}\\s*=\\s*"?([^"\\r\\n]*)"?`, 'm');
 		const match = content.match(regex);
-		
-		if(key === 'handshake')
-		{
-			console.log(content, key)
-			console.log(regex);
-			console.log('match='+match[1]);
-			process.exit(1);
-		}
 		// Return the value if found, otherwise an empty string
 		return match ? match[1].trim() : '';
 	}
