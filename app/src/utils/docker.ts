@@ -122,8 +122,6 @@ export async function containerStart(walletPassphrase: string | null = null): Pr
 	
 	try
 	{
-		Logger.info(`Please wait while the dVPN node container is being started...`);
-		
 		const containerList = await docker.listContainers({ all: true });
 		const containerExists = containerList.some(container => container.Names.includes(`/${config.DOCKER_CONTAINER_NAME}`));
 		
@@ -270,7 +268,6 @@ export async function containerStop(): Promise<boolean>
 {
 	try
 	{
-		Logger.info(`Please wait while the dVPN node container is being stopped...`);
 		await docker.getContainer(config.DOCKER_CONTAINER_NAME).stop();
 		Logger.info(`dVPN node container has been stopped successfully.`);
 		return true;
@@ -297,7 +294,6 @@ export async function containerRestart(): Promise<boolean>
 		const isRunning = await containerRunning();
 		if(isRunning)
 		{
-			Logger.info(`Please wait while the dVPN node container is being restarted...`);
 			const stopSuccess = await containerStop();
 			if (!stopSuccess)
 				return false;
