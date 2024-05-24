@@ -458,6 +458,26 @@ async function streamToString(stream: Readable): Promise<string>
 }
 
 /**
+ * Get container status
+ * @returns string
+ */
+export async function containerStatus(): Promise<string>
+{
+	// Check if the container exists
+	const exists = await containerExists();
+	if(exists)
+	{
+		const isRunning = await containerRunning();
+		if(isRunning)
+			return 'running';
+		else
+			return 'stopped';
+	}
+	
+	return 'unavailable';
+}
+
+/**
  * Get container logs
  * @returns string | null
  */
