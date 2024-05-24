@@ -1,4 +1,5 @@
 import Docker from 'dockerode';
+import { Readable } from 'stream';
 import config from './configuration';
 import { Logger } from './logger';
 import { nodeConfig, type NodeConfigData } from '@utils/node';
@@ -426,4 +427,69 @@ export async function containerRemove(): Promise<boolean>
 	}
 
 	return false;
+}
+
+/**
+ * Convert buffer to stream
+ * @param buffer
+ */
+async function bufferToStream(buffer: Buffer): Promise<Readable>
+{
+	const readable = new Readable();
+	readable.push(buffer);
+	readable.push(null); // No more data
+	return readable;
+}
+
+/**
+ * Convert stream to string
+ * @param stream 
+ * @returns string
+ */
+async function streamToString(stream: Readable): Promise<string>
+{
+	const chunks: any[] = [];
+	return new Promise((resolve, reject) =>
+	{
+		stream.on('data', (chunk) => chunks.push(chunk));
+		stream.on('error', reject);
+		stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+	});
+}
+
+/**
+ * Get container logs
+ * @returns string | null
+ */
+export async function containerLogs(): Promise<string | null>
+{
+	try
+	{
+		// Get the container
+		const container = docker.getContainer(config.DOCKER_CONTAINER_NAME);
+		// Get the logs
+		const logBuffer = await container.logs({
+			stdout: true,
+			stderr: true,
+			tail: 100
+		});
+		
+		// Convert buffer to stream
+		const logStream = await bufferToStream(logBuffer);
+		// Convert stream to string
+		const logs = await streamToString(logStream as Readable);
+		
+		Logger.info(`Docker logs retrieved successfully.`);
+		return logs;
+	}
+	catch (err)
+	{
+		if (err instanceof Error)
+			Logger.error(`Failed to retrieve the dVPN node container logs: ${err.message}`);
+		else
+			Logger.error(`Failed to retrieve the dVPN node container logs: ${String(err)}`);
+		
+	}
+	
+	return null;
 }
