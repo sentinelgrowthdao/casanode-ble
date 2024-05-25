@@ -1,9 +1,8 @@
 import Docker from 'dockerode';
-import { Readable } from 'stream';
+import { Readable, PassThrough } from 'stream';
 import config from './configuration';
 import { Logger } from './logger';
 import { nodeConfig, type NodeConfigData } from '@utils/node';
-
 
 class DockerManager
 {
@@ -542,6 +541,93 @@ class DockerManager
 		
 		return null;
 	}
+
+	/**
+	 * Execute a container command
+	 * @param argv string[]
+	 * @param stdin string[]|null
+	 * @returns string
+	 */
+	public async containerCommand(argv: string[], stdin: string[] | null = null): Promise<string | null>
+	{
+		const configNode: NodeConfigData = nodeConfig();
+		const containerName = config.DOCKER_CONTAINER_NAME;
+		const configDir = config.CONFIG_DIR;
+		
+		try
+		{
+			// Create options for the container
+			const createOptions: Docker.ContainerCreateOptions =
+			{
+				HostConfig:
+				{
+					Binds: [`${configDir}:/root/.sentinelnode`],
+					AutoRemove: true
+				},
+				AttachStdout: true,
+				AttachStderr: true,
+				AttachStdin: false,
+				OpenStdin: true,
+				StdinOnce: false,
+				Tty: false,
+			};
+			
+			// Create a stream for the container
+			const outputStream = new PassThrough();
+			
+			// Execute the command
+			await this.docker.run(containerName, argv, outputStream, createOptions, (err) =>
+			{
+				if (err instanceof Error)
+					Logger.error(`Error executing container command '${argv.join(' ')}': ${err.message}`);
+				else
+					Logger.error(`Error executing container command '${argv.join(' ')}': ${String(err)}`);
+			})
+			// Attach to the container
+			.on('container', function (container)
+			{
+				// Attach to the container to interact with it
+				container.attach({stream: true, hijack: true, stdin: true, stdout: true, stderr: true}, function (err: any, stream: any)
+				{
+					if (err)
+					{
+						if (err instanceof Error)
+							Logger.error(`Error attaching to container: ${err.message}`);
+						else
+							Logger.error(`Error attaching to container: ${String(err)}`);
+						
+						// Leave the function
+						return;
+					}
+					
+					// If stdin data is provided, write it to the container's stdin
+					if(stdin !== null)
+					{
+						stdin.forEach((line) =>
+							{
+								stream.write(line);
+								stream.write(`\n`);
+							});
+					}
+				});
+			});
+			
+			// Convert stream to string
+			const logs = await this.streamToString(outputStream);
+			Logger.info(`Container command '${argv.join(' ')}' executed successfully.`);
+			return logs;
+		}
+		catch (err)
+		{
+			if (err instanceof Error)
+				Logger.error(`Failed to execute container command '${argv.join(' ')}': ${err.message}`);
+			else
+				Logger.error(`Failed to execute container command '${argv.join(' ')}': ${String(err)}`);
+			
+		}
+		
+		return null;
+	}
 }
 
 // Create a singleton instance of DockerManager
@@ -561,3 +647,4 @@ export const containerExists = (): Promise<boolean> => dockerManager.containerEx
 export const containerRemove = (): Promise<boolean> => dockerManager.containerRemove();
 export const containerStatus = (): Promise<string> => dockerManager.containerStatus();
 export const containerLogs = (): Promise<string | null> => dockerManager.containerLogs();
+export const containerCommand = (argv: string[], stdin: string[] | null = null): Promise<string | null> => dockerManager.containerCommand(argv, stdin);
