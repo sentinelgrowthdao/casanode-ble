@@ -425,7 +425,7 @@ class NodeManager
 	 */
 	public async walletCreate(): Promise<string[]|null>
 	{
-		// If wallet does exist, return false
+		// If wallet does exist
 		if(await this.walletExists())
 			return null;
 		
@@ -441,35 +441,102 @@ class NodeManager
 		// If the wallet has been created
 		if(output)
 		{
-			// Regex to extract data
-			const nodeAddressRegex = /\bsentnode\w+\b/;
-			const publicAddressRegex = /\bsent(?!node)\w+\b/;
-			const mnemonicRegex = /^(?!.*\*\*Important\*\*)\b(?:\w+\s+){23}\w+\b/m;
-			
-			// Extract node address
-			const nodeAddressMatch = output.match(nodeAddressRegex);
-			const nodeAddress = nodeAddressMatch ? nodeAddressMatch[0] : '';
-			
-			// Extract public address
-			const publicAddressMatch = output.match(publicAddressRegex);
-			const publicAddress = publicAddressMatch ? publicAddressMatch[0] : '';
-			
-			// Extract mnemonic phrase
-			const mnemonicMatch = output.match(mnemonicRegex);
-			const mnemonicArray = mnemonicMatch ? mnemonicMatch[0].trim().split(/\s+/) : [];
+			// Parse the output
+			const parsedOutput = this.parseKeysAddOutput(output);
 			
 			// If the node address and public address have been extracted
-			if(nodeAddress && publicAddress && mnemonicArray.length === 24)
+			if(parsedOutput && parsedOutput.nodeAddress && parsedOutput.publicAddress && parsedOutput.mnemonicArray.length === 24)
 			{
 				// Store the addresses
-				this.nodeConfig.walletNodeAddress = nodeAddress;
-				this.nodeConfig.walletPublicAddress = publicAddress;
+				this.nodeConfig.walletNodeAddress = parsedOutput.nodeAddress as string;
+				this.nodeConfig.walletPublicAddress = parsedOutput.publicAddress as string;
 				// Return the mnemonic
-				return mnemonicArray;
+				return parsedOutput.mnemonicArray as string[];
+			}
+		}
+		
+		// An error occurred
+		return null;
+	}
+	
+	/**
+	 * Recover wallet from mnemonic phrase
+	 * @param mnemonic: string
+	 * @returns boolean
+	 */
+	public async walletRecover(mnemonic: string): Promise<boolean>
+	{
+		// If wallet does exist, return false
+		if(await this.walletExists())
+			return false;
+		
+		let stdin: string[]|null = null
+		
+		// Add mnemonic to the stdin
+		stdin = [mnemonic];
+		
+		// If the backend is file, add the passphrase to the stdin
+		if(this.nodeConfig.backend === 'file')
+			stdin = [mnemonic, this.nodeConfig.walletPassphrase, this.nodeConfig.walletPassphrase,];
+		
+		// Recoverr new wallet
+		const output: string|null = await containerCommand(['process', 'keys', 'add', '--recover'], stdin);
+		
+		// If the wallet has been created
+		if(output)
+		{
+			// Parse the output
+			const parsedOutput = this.parseKeysAddOutput(output);
+			// If the node address and public address have been extracted
+			if(parsedOutput && parsedOutput.nodeAddress && parsedOutput.publicAddress && parsedOutput.mnemonicArray.length === 24)
+			{
+				// Store the addresses
+				this.nodeConfig.walletNodeAddress = parsedOutput.nodeAddress as string;
+				this.nodeConfig.walletPublicAddress = parsedOutput.publicAddress as string;
+				// Return success
+				return true;
 			}
 		}
 		
 		// An error occurred, return false
+		return false;
+	}
+	
+	/**
+	 * Parse the output of the keys add command
+	 * @param output: string
+	 * @returns { [key: string]: string | string[] } | null
+	 */
+	private parseKeysAddOutput(output: string): { [key: string]: string | string[] } | null
+	{
+		// Regex to extract data
+		const nodeAddressRegex = /\bsentnode\w+\b/;
+		const publicAddressRegex = /\bsent(?!node)\w+\b/;
+		const mnemonicRegex = /^(?!.*\*\*Important\*\*)\b(?:\w+\s+){23}\w+\b/m;
+		
+		// Extract node address
+		const nodeAddressMatch = output.match(nodeAddressRegex);
+		const nodeAddress = nodeAddressMatch ? nodeAddressMatch[0] : '';
+		
+		// Extract public address
+		const publicAddressMatch = output.match(publicAddressRegex);
+		const publicAddress = publicAddressMatch ? publicAddressMatch[0] : '';
+		
+		// Extract mnemonic phrase
+		const mnemonicMatch = output.match(mnemonicRegex);
+		const mnemonicArray = mnemonicMatch ? mnemonicMatch[0].trim().split(/\s+/) : [];
+		
+		// If the node address and public address have been extracted
+		if(nodeAddress && publicAddress && mnemonicArray.length === 24)
+		{
+			// Return data
+			return {
+				nodeAddress: nodeAddress,
+				publicAddress: publicAddress,
+				mnemonicArray: mnemonicArray,
+			};
+		}
+		// Else, return null
 		return null;
 	}
 }
@@ -489,3 +556,4 @@ export const walletExists = (): Promise<boolean> => nodeManager.walletExists();
 export const walletRemove = (): Promise<boolean> => nodeManager.walletRemove();
 export const walletLoadAddresses = (): Promise<boolean> => nodeManager.walletLoadAddresses();
 export const walletCreate = (): Promise<string[]|null> => nodeManager.walletCreate();
+export const walletRecover = (mnemonic: string): Promise<boolean> => nodeManager.walletRecover(mnemonic);
