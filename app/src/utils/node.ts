@@ -367,3 +367,4 @@ export const isV2RayConfigFileAvailable = (): boolean => nodeManager.isConfigFil
 export const createNodeConfig = (): Promise<boolean> => nodeManager.createNodeConfig();
 export const createVpnConfig = (): Promise<boolean> => nodeManager.createVpnConfig();
 export const walletExists = (): Promise<boolean> => nodeManager.walletExists();
+export const walletRemove = (): Promise<boolean> => nodeManager.walletRemove();
