@@ -330,6 +330,29 @@ class NodeManager
 		// Return if the wallet exists
 		return output !== null && output.includes(this.nodeConfig.wallet_name);
 	}
+	
+	/**
+	 * Remove wallet keys
+	 * @returns boolean
+	 */
+	public async walletRemove(): Promise<boolean>
+	{
+		// If wallet does not exist, return false
+		if(!await this.walletExists())
+			return true;
+		
+		let stdin: string[]|null = null
+		
+		// If the backend is file, add the passphrase to the stdin
+		if(this.nodeConfig.backend === 'file')
+			stdin = [this.nodeConfig.walletPassphrase];
+		
+		// Remove wallet keys
+		const output: string|null = await containerCommand(['process', 'keys', 'delete', this.nodeConfig.wallet_name], stdin);
+		
+		// Return if the wallet has been removed
+		return output === '';
+	}
 }
 
 // Create a singleton instance of NodeManager
