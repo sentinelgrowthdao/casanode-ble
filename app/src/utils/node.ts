@@ -29,6 +29,8 @@ export interface NodeConfigData
 	gigabyte_prices: string;
 	hourly_prices: string;
 	walletPassphrase: string;
+	walletPublicAddress: string;
+	walletNodeAddress: string;
 }
 
 class NodeManager
@@ -53,6 +55,8 @@ class NodeManager
 		gigabyte_prices: '',
 		hourly_prices: '',
 		walletPassphrase: '',
+		walletPublicAddress: '',
+		walletNodeAddress: '',
 	};
 	
 	private constructor()
@@ -353,6 +357,58 @@ class NodeManager
 		// Return if the wallet has been removed
 		return output === '';
 	}
+	
+	/**
+	 * Load wallet addresses (node address + public address)
+	 * @returns boolean
+	 */
+	public async walletLoadAddresses(): Promise<boolean>
+	{
+		// If wallet does not exist, return false
+		if(!await this.walletExists())
+		{
+			// Reset the addresses
+			this.nodeConfig.walletPublicAddress = '';
+			this.nodeConfig.walletNodeAddress = '';
+			// Return an error
+			return false;
+		}
+		
+		let stdin: string[]|null = null
+		
+		// If the backend is file, add the passphrase to the stdin
+		if(this.nodeConfig.backend === 'file')
+			stdin = [this.nodeConfig.walletPassphrase];
+		
+		// Remove wallet keys
+		const output: string|null = await containerCommand(['process', 'keys', 'show'], stdin);
+		
+		// Parse lines to find the wallet addresses
+		const lines = output?.split('\n') || [];
+		for (let line of lines)
+		{
+			// Find the line containing the wallet name
+			if(line.includes(this.nodeConfig.wallet_name))
+			{
+				// Split the line to extract the addresses
+				const parts = line.trim().split(/\s+/);
+				if(parts.length === 3)
+				{
+					// Store the addresses
+					this.nodeConfig.walletNodeAddress = parts[1];
+					this.nodeConfig.walletPublicAddress = parts[2];
+					// Return success
+					return true;
+				}
+			}
+		}
+		
+		// Reset the addresses
+		this.nodeConfig.walletPublicAddress = '';
+		this.nodeConfig.walletNodeAddress = '';
+		// Return an error if the addresses have not been loaded
+		return false;
+	}
 }
 
 // Create a singleton instance of NodeManager
@@ -368,3 +424,4 @@ export const createNodeConfig = (): Promise<boolean> => nodeManager.createNodeCo
 export const createVpnConfig = (): Promise<boolean> => nodeManager.createVpnConfig();
 export const walletExists = (): Promise<boolean> => nodeManager.walletExists();
 export const walletRemove = (): Promise<boolean> => nodeManager.walletRemove();
+export const walletLoadAddresses = (): Promise<boolean> => nodeManager.walletLoadAddresses();
