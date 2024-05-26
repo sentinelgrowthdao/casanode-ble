@@ -354,8 +354,17 @@ class NodeManager
 		// Remove wallet keys
 		const output: string|null = await containerCommand(['process', 'keys', 'delete', this.nodeConfig.wallet_name], stdin);
 		
-		// Return if the wallet has been removed
-		return output === '';
+		// If the wallet has been removed
+		if(output === '')
+		{
+			// Reset the addresses
+			this.nodeConfig.walletPublicAddress = '';
+			this.nodeConfig.walletNodeAddress = '';
+			// Return success
+			return true;
+		}
+		// Else, return an error
+		return false;
 	}
 	
 	/**
