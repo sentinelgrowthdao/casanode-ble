@@ -488,3 +488,4 @@ export const createVpnConfig = (): Promise<boolean> => nodeManager.createVpnConf
 export const walletExists = (): Promise<boolean> => nodeManager.walletExists();
 export const walletRemove = (): Promise<boolean> => nodeManager.walletRemove();
 export const walletLoadAddresses = (): Promise<boolean> => nodeManager.walletLoadAddresses();
+export const walletCreate = (): Promise<string[]|null> => nodeManager.walletCreate();
