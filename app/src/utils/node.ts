@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import config from './configuration';
 import { Logger } from '@utils/logger';
+import { containerCommand } from '@utils/docker';
 
 // Defaults values for node configuration
 const DATACENTER_GIGABYTE_PRICES="52573ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,9204ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1180852ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,122740ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,15342624udvpn";
@@ -263,6 +264,54 @@ class NodeManager
 		const newValue = `${key} = "${value}"`;
 		const newContent = content.replace(sectionRegex, `$1${newValue}`);
 		fs.writeFileSync(filePath, newContent, 'utf8');
+	}
+	
+	/**
+	 * Create node configuration file
+	 * @returns boolean
+	 */
+	public async createNodeConfig(): Promise<boolean>
+	{
+		// Create configuration file
+		const output: string|null = await containerCommand(['process', 'config', 'init']);
+		
+		// Return if the configuration file has been created
+		if(output !== null && output === '')
+			return true
+		else
+		{
+			Logger.error(`Failed to create node configuration file: ${output?.trim()}`);
+			return false;
+		}
+	}
+	
+	/**
+	 * Create VPN configuration file
+	 * @returns boolean
+	 */
+	public async createVpnConfig(): Promise<boolean>
+	{
+		let output: string|null = '';
+		
+		// Create WireGuard configuration file
+		if(this.nodeConfig.node_type === 'wireguard')
+		{
+			output = await containerCommand(['process', 'wireguard', 'config', 'init']);
+		}
+		// Create V2Ray configuration file
+		else if(this.nodeConfig.node_type === 'v2ray')
+		{
+			output = await containerCommand(['process', 'v2ray', 'config', 'init']);
+		}
+		
+		// Return if the configuration file has been created
+		if(output !== null && output === '')
+			return true
+		else
+		{
+			Logger.error(`Failed to create VPN configuration file: ${output?.trim()}`);
+			return false;
+		}
 	}
 }
 
