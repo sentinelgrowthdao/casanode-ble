@@ -5,11 +5,17 @@ import { Logger } from '@utils/logger';
 
 export interface AppConfigData
 {
-	[key: string]: string | number | boolean | undefined;
+	[key: string]: string | number | boolean | string[] | undefined;
 	BLENO_DEVICE_NAME: string;
 	DOCKER_IMAGE_NAME: string;
 	DOCKER_CONTAINER_NAME: string;
 	CONFIG_DIR: string;
+	API_BALANCE: string[];
+}
+
+export interface ConfigFileData
+{
+	[key: string]: string;
 }
 
 class ConfigurationLoader
@@ -25,6 +31,11 @@ class ConfigurationLoader
 		DOCKER_IMAGE_NAME: 'wajatmaka/sentinel-aarch64-alpine:v0.7.1',
 		DOCKER_CONTAINER_NAME: 'sentinel-dvpn-node',
 		CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/home/casanode/.sentinelnode',
+		API_BALANCE: [
+			"https://api-sentinel.busurnode.com/cosmos/bank/v1beta1/balances/",
+			"https://api.sentinel.quokkastake.io/cosmos/bank/v1beta1/balances/",
+			"https://wapi.foxinodes.net/api/v1/sentinel/address/"
+		]
 	};
 	
 	private constructor()
@@ -86,8 +97,28 @@ class ConfigurationLoader
 		{
 			if(fs.existsSync(this.configFile))
 			{
-				const config = dotenv.parse(fs.readFileSync(this.configFile));
-				return config as Partial<AppConfigData>;
+				// Parse configuration file
+				const config: ConfigFileData = dotenv.parse(fs.readFileSync(this.configFile));
+				const parsedConfig: Partial<AppConfigData> = {};
+				
+				// Manually parse arrays
+				for (const key in config)
+				{
+					let value = config[key];
+					// Check if value is an array
+					if(value.startsWith('[') && value.endsWith(']'))
+					{
+						parsedConfig[key] = value
+							.slice(1, -1)
+							.split(',')
+							.map(item => item.trim());
+					}
+					else
+					{
+						parsedConfig[key] = value;
+					}
+				}
+				return parsedConfig;
 			}
 			else
 			{
