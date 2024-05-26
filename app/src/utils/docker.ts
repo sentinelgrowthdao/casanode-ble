@@ -584,8 +584,9 @@ class DockerManager
 					Logger.error(`Error executing container command '${argv.join(' ')}': ${String(err)}`);
 				else
 				{
-					const log = await this.streamToString(outputStream);
-					Logger.info(`Error executing container command '${argv.join(' ')}': ${log}`);
+					// Convert buffer to stream
+					const output = await this.passThroughToString(outputStream);
+					Logger.info(`Error executing container command '${argv.join(' ')}': ${output}`);
 				}
 			})
 			// Attach to the container
@@ -617,8 +618,8 @@ class DockerManager
 				});
 			});
 			
-			// Convert stream to string
-			const logs = await this.streamToString(outputStream);
+			// Convert buffer to stream
+			const logs = await this.passThroughToString(outputStream);
 			Logger.info(`Container command '${argv.join(' ')}' executed successfully.`);
 			return logs;
 		}
@@ -632,6 +633,30 @@ class DockerManager
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Convert PassThrough stream to string
+	 * @param passThroughStream PassThrough
+	 * @returns string
+	 */
+	private async passThroughToString(passThroughStream: PassThrough): Promise<string>
+	{
+		const chunks: Buffer[] = [];
+		return new Promise((resolve, reject) =>
+		{
+			passThroughStream.on('data', (chunk: Buffer) => chunks.push(chunk));
+			passThroughStream.on('error', reject);
+			passThroughStream.on('end', () =>
+			{
+				const buffer = Buffer.concat(chunks);
+				let result = buffer.toString('utf-8');
+				
+				// Remove non-ASCII characters
+				result = result.replace(/[^\x20-\x7E\n\r]/g, '');
+				resolve(result);
+			});
+		});
 	}
 }
 
