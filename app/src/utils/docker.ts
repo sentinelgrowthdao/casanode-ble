@@ -576,12 +576,17 @@ class DockerManager
 			const outputStream = new PassThrough();
 			
 			// Execute the command
-			await this.docker.run(containerName, argv, outputStream, createOptions, (err) =>
+			await this.docker.run(containerName, argv, outputStream, createOptions, async (err) =>
 			{
 				if (err instanceof Error)
 					Logger.error(`Error executing container command '${argv.join(' ')}': ${err.message}`);
-				else
+				else if(err)
 					Logger.error(`Error executing container command '${argv.join(' ')}': ${String(err)}`);
+				else
+				{
+					const log = await this.streamToString(outputStream);
+					Logger.info(`Error executing container command '${argv.join(' ')}': ${log}`);
+				}
 			})
 			// Attach to the container
 			.on('container', function (container)
