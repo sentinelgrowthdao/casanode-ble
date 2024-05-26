@@ -28,6 +28,7 @@ export interface NodeConfigData
 	node_location: string;
 	gigabyte_prices: string;
 	hourly_prices: string;
+	walletPassphrase: string;
 }
 
 class NodeManager
@@ -51,6 +52,7 @@ class NodeManager
 		node_location: '',
 		gigabyte_prices: '',
 		hourly_prices: '',
+		walletPassphrase: '',
 	};
 	
 	private constructor()
@@ -313,6 +315,21 @@ class NodeManager
 			return false;
 		}
 	}
+	
+	public async walletExists(): Promise<boolean>
+	{
+		let stdin: string[]|null = null
+		
+		// If the backend is file, add the passphrase to the stdin
+		if(this.nodeConfig.backend === 'file')
+			stdin = [this.nodeConfig.walletPassphrase];
+		
+		// List all wallet keys
+		const output: string|null = await containerCommand(['process', 'keys', 'list'], stdin);
+		
+		// Return if the wallet exists
+		return output !== null && output.includes(this.nodeConfig.wallet_name);
+	}
 }
 
 // Create a singleton instance of NodeManager
@@ -326,3 +343,4 @@ export const isWireguardConfigFileAvailable = (): boolean => nodeManager.isConfi
 export const isV2RayConfigFileAvailable = (): boolean => nodeManager.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'v2ray.toml'));
 export const createNodeConfig = (): Promise<boolean> => nodeManager.createNodeConfig();
 export const createVpnConfig = (): Promise<boolean> => nodeManager.createVpnConfig();
+export const walletExists = (): Promise<boolean> => nodeManager.walletExists();
