@@ -3,6 +3,7 @@ import {
 	daemonCommand,
 	checkInstallationCommand,
 	dockerCommand,
+	nodeCommand,
 } from '@commands/index';
 
 // Create a new program and set program information
@@ -38,6 +39,14 @@ program.command('docker')
 	.option('-st, --status', 'Display the status of the Casanode Docker container')
 	.option('-l, --logs', 'Display the logs of the Casanode Docker container')
 	.action((argv) => dockerCommand(argv));
+
+// Node commands
+program.command('node')
+	.description('Node commands')
+	.option('-s, --show-config', 'Show the node configuration')
+	.option('-c, --config', 'Generate the node configuration')
+	.option('-v, --vpn', 'Generate the VPN configuration')
+	.action((argv) => nodeCommand(argv));
 
 // If no command is provided, run the daemon process
 program.action(() => { daemonCommand(); });
