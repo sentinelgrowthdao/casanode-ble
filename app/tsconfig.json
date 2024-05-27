@@ -15,6 +15,7 @@
 			"@actions/*": ["./src/actions/*"],
 			"@characteristics/*": ["./src/characteristics/*"],
 			"@commands/*": ["./src/commands/*"],
+			"@types/*": ["./src/types/*"],
 			"@utils/*": ["./src/utils/*"],
 		},
 		"typeRoots": [
