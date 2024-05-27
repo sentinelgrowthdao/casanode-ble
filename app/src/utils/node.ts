@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import axios from 'axios';
 import config from './configuration';
 import { Logger } from '@utils/logger';
 import { containerCommand } from '@utils/docker';
@@ -7,6 +8,25 @@ import { containerCommand } from '@utils/docker';
 // Defaults values for node configuration
 const DATACENTER_GIGABYTE_PRICES="52573ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,9204ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1180852ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,122740ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,15342624udvpn";
 const DATACENTER_HOURLY_PRICES="18480ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,770ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1871892ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,18897ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,4160000udvpn";
+
+// Balance
+export interface BalanceWallet
+{
+	denom: string;
+	amount: number;
+}
+// Response from the API
+export interface BalancesResponse
+{
+	balances: {
+		denom: string;
+		amount: string;
+	}[];
+	pagination: {
+		next_key: string | null;
+		total: string;
+	};
+}
 
 export interface NodeConfigData
 {
@@ -539,6 +559,68 @@ class NodeManager
 		// Else, return null
 		return null;
 	}
+	
+	/**
+	 * Get wallet balance
+	 * @param publicAddress string|null
+	 * @returns 
+	 */
+	public async getWalletBalance(publicAddress: string|null = null): Promise<BalanceWallet>
+	{
+		let apiResponse: BalancesResponse|null = null;
+		
+		// Default wallet balance
+		let walletBalance: BalanceWallet =
+		{
+			denom: 'DVPN',
+			amount: 0,
+		};
+		
+		// If address is empty, use the node address
+		if(publicAddress === null || publicAddress.trim().length === 0)
+			publicAddress = this.nodeConfig.walletPublicAddress;
+		
+		// If address is still empty, return 0 balance
+		if(publicAddress === null || publicAddress.trim().length === 0)
+			return walletBalance;
+		
+		// Try each API endpoint
+		for(const url of config.API_BALANCE)
+		{
+			try
+			{
+				// Get wallet balance
+				const response = await axios.get(`${url}${publicAddress}`);
+				if(response.data)
+				{
+					apiResponse = response.data as BalancesResponse;
+					break;
+				}
+			}
+			catch(error)
+			{
+				Logger.error(`API ${url} is unreachable. Trying another API...`);
+			}
+		}
+		
+		// If the API response is invalid
+		if(!apiResponse)
+		{
+			Logger.error('Failed to retrieve wallet balance.');
+			return walletBalance;
+		}
+		
+		// Find the DVPN balance
+		const dvpnObject = apiResponse.balances?.find((balance: any) => balance.denom === 'udvpn');
+		if(dvpnObject)
+		{
+			// Convert the balance (udvpn) to DVPN
+			walletBalance.amount = parseInt(dvpnObject.amount, 10) / 1000000;
+		}
+		
+		// Return the wallet balance formatted
+		return walletBalance;
+	}
 }
 
 // Create a singleton instance of NodeManager
@@ -557,3 +639,4 @@ export const walletRemove = (): Promise<boolean> => nodeManager.walletRemove();
 export const walletLoadAddresses = (): Promise<boolean> => nodeManager.walletLoadAddresses();
 export const walletCreate = (): Promise<string[]|null> => nodeManager.walletCreate();
 export const walletRecover = (mnemonic: string): Promise<boolean> => nodeManager.walletRecover(mnemonic);
+export const walletBalance = (publicAddress: string|null = null): Promise<BalanceWallet> => nodeManager.getWalletBalance(publicAddress);
