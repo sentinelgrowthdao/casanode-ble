@@ -360,12 +360,33 @@ class NodeManager
 	}
 	
 	/**
+	 * Check if the passphrase is valid
+	 * @param passphrase string|null
+	 * @returns 
+	 */
+	public isPassphraseValid(passphrase: string | null): boolean
+	{
+		// Return false if the passphrase is required but not provided
+		if(this.nodeConfig.backend === 'file' && passphrase === null || passphrase?.trim().length === 0)
+			return false;
+		// Return true if the passphrase is valid
+		return true;
+	}
+	
+	/**
 	 * Check if the wallet exists
 	 * @param passphrase string|null
 	 * @returns boolean|undefined
 	 */
 	public async walletExists(passphrase: string|null = null): Promise<boolean|undefined>
 	{
+		// If passphrase required and not provided
+		if(!this.isPassphraseValid(passphrase))
+		{
+			Logger.error('Passphrase is required to check if the wallet exists.');
+			return false;
+		}
+		
 		// Stdin for the command
 		let stdin: string[]|null = this.buildStdinCommand(passphrase);
 		
@@ -391,6 +412,13 @@ class NodeManager
 	 */
 	public async walletRemove(passphrase: string|null = null): Promise<boolean|undefined>
 	{
+		// If passphrase required and not provided
+		if(!this.isPassphraseValid(passphrase))
+		{
+			Logger.error('Passphrase is required to remove the wallet.');
+			return false;
+		}
+		
 		// Check if wallet does not exists or passphrase is invalid
 		const exists = await this.walletExists(passphrase);
 		if(!exists || exists === undefined)
@@ -426,6 +454,13 @@ class NodeManager
 	 */
 	public async walletLoadAddresses(passphrase: string|null = null): Promise<boolean|undefined>
 	{
+		// If passphrase required and not provided
+		if(!this.isPassphraseValid(passphrase))
+		{
+			Logger.error('Passphrase is required to load the wallet addresses.');
+			return false;
+		}
+		
 		// If wallet does not exist, return false
 		const exists = await this.walletExists(passphrase);
 		if(exists === undefined)
@@ -483,6 +518,13 @@ class NodeManager
 	 */
 	public async walletCreate(passphrase: string|null = null): Promise<string[]|null|undefined>
 	{
+		// If passphrase required and not provided
+		if(!this.isPassphraseValid(passphrase))
+		{
+			Logger.error('Passphrase is required to create a new wallet.');
+			return null;
+		}
+		
 		// Check if wallet exists, return error if it does
 		const exists = await this.walletExists(passphrase);
 		if(exists)
@@ -523,6 +565,13 @@ class NodeManager
 	 */
 	public async walletRecover(mnemonic: string, passphrase: string|null = null): Promise<boolean|undefined>
 	{
+		// If passphrase required and not provided
+		if(!this.isPassphraseValid(passphrase))
+		{
+			Logger.error('Passphrase is required to recover the wallet.');
+			return false;
+		}
+		
 		// Check if wallet exists, return error if it does
 		const exists = await this.walletExists(passphrase);
 		if(exists)
