@@ -3,7 +3,7 @@ import * as path from 'path';
 import axios from 'axios';
 import config from './configuration';
 import { Logger } from '@utils/logger';
-import { containerCommand } from '@utils/docker';
+import { isPassphraseError, containerCommand } from '@utils/docker';
 
 // Defaults values for node configuration
 const DATACENTER_GIGABYTE_PRICES="52573ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,9204ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1180852ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,122740ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,15342624udvpn";
@@ -48,7 +48,6 @@ export interface NodeConfigData
 	node_location: string;
 	gigabyte_prices: string;
 	hourly_prices: string;
-	walletPassphrase: string;
 	walletPublicAddress: string;
 	walletNodeAddress: string;
 }
@@ -74,7 +73,6 @@ class NodeManager
 		node_location: '',
 		gigabyte_prices: '',
 		hourly_prices: '',
-		walletPassphrase: '',
 		walletPublicAddress: '',
 		walletNodeAddress: '',
 	};
@@ -340,16 +338,47 @@ class NodeManager
 		}
 	}
 	
-	public async walletExists(): Promise<boolean>
+	/**
+	 * Build the stdin for the command
+	 * @param passphrase string|null
+	 * @param passphraseRepeat number
+	 * @param stdin string[]|null
+	 * @returns string[]|null
+	 */
+	private buildStdinCommand(passphrase: string|null = null, passphraseRepeat: number = 1, stdin: string[]|null = null): string[]|null
 	{
-		let stdin: string[]|null = null
+		// If passphrase required, add it to the stdin
+		if(this.nodeConfig.backend === 'file' && passphrase !== null)
+		{
+			if(stdin === null)
+				stdin = [];
+			for(let i = 0; i < passphraseRepeat; i++)
+				stdin.push(passphrase);
+		}
+		// Return the stdin
+		return stdin;
+	}
+	
+	/**
+	 * Check if the wallet exists
+	 * @param passphrase string|null
+	 * @returns boolean|undefined
+	 */
+	public async walletExists(passphrase: string|null = null): Promise<boolean|undefined>
+	{
+		// Stdin for the command
+		let stdin: string[]|null = this.buildStdinCommand(passphrase);
 		
-		// If the backend is file, add the passphrase to the stdin
-		if(this.nodeConfig.backend === 'file')
-			stdin = [this.nodeConfig.walletPassphrase];
+		// If wallet name if empty
+		if(this.nodeConfig.wallet_name.trim().length === 0)
+			return undefined;
 		
 		// List all wallet keys
 		const output: string|null = await containerCommand(['process', 'keys', 'list'], stdin);
+		
+		// Check if the passphrase is incorrect
+		if(output === null || isPassphraseError(output))
+			return undefined;
 		
 		// Return if the wallet exists
 		return output !== null && output.includes(this.nodeConfig.wallet_name);
@@ -357,22 +386,25 @@ class NodeManager
 	
 	/**
 	 * Remove wallet keys
-	 * @returns boolean
+	 * @param passphrase: string|null
+	 * @returns boolean|undefined
 	 */
-	public async walletRemove(): Promise<boolean>
+	public async walletRemove(passphrase: string|null = null): Promise<boolean|undefined>
 	{
-		// If wallet does not exist, return false
-		if(!await this.walletExists())
-			return true;
+		// Check if wallet does not exists or passphrase is invalid
+		const exists = await this.walletExists(passphrase);
+		if(!exists || exists === undefined)
+			return exists === undefined ? undefined : true;
 		
-		let stdin: string[]|null = null
-		
-		// If the backend is file, add the passphrase to the stdin
-		if(this.nodeConfig.backend === 'file')
-			stdin = [this.nodeConfig.walletPassphrase];
+		// Stdin for the command
+		let stdin: string[]|null = this.buildStdinCommand(passphrase);
 		
 		// Remove wallet keys
 		const output: string|null = await containerCommand(['process', 'keys', 'delete', this.nodeConfig.wallet_name], stdin);
+		
+		// Check if the passphrase is incorrect
+		if(output === null || isPassphraseError(output))
+			return undefined;
 		
 		// If the wallet has been removed
 		if(output === '')
@@ -389,12 +421,16 @@ class NodeManager
 	
 	/**
 	 * Load wallet addresses (node address + public address)
-	 * @returns boolean
+	 * @param passphrase: string|null
+	 * @returns boolean|undefined
 	 */
-	public async walletLoadAddresses(): Promise<boolean>
+	public async walletLoadAddresses(passphrase: string|null = null): Promise<boolean|undefined>
 	{
 		// If wallet does not exist, return false
-		if(!await this.walletExists())
+		const exists = await this.walletExists(passphrase);
+		if(exists === undefined)
+			return undefined;
+		else if(!exists)
 		{
 			// Reset the addresses
 			this.nodeConfig.walletPublicAddress = '';
@@ -403,14 +439,15 @@ class NodeManager
 			return false;
 		}
 		
-		let stdin: string[]|null = null
-		
-		// If the backend is file, add the passphrase to the stdin
-		if(this.nodeConfig.backend === 'file')
-			stdin = [this.nodeConfig.walletPassphrase];
+		// Stdin for the command
+		let stdin: string[]|null = this.buildStdinCommand(passphrase);
 		
 		// Remove wallet keys
 		const output: string|null = await containerCommand(['process', 'keys', 'show'], stdin);
+		
+		// Check if the passphrase is incorrect
+		if(output === null || isPassphraseError(output))
+			return undefined;
 		
 		// Parse lines to find the wallet addresses
 		const lines = output?.split('\n') || [];
@@ -441,38 +478,37 @@ class NodeManager
 	
 	/**
 	 * Create a new wallet
-	 * @returns string[]|null
+	 * @param passphrase: string|null
+	 * @returns string[]|null|undefined
 	 */
-	public async walletCreate(): Promise<string[]|null>
+	public async walletCreate(passphrase: string|null = null): Promise<string[]|null|undefined>
 	{
-		// If wallet does exist
-		if(await this.walletExists())
-			return null;
+		// Check if wallet exists, return error if it does
+		const exists = await this.walletExists(passphrase);
+		if(exists)
+			return exists === undefined ? undefined : null;
 		
-		let stdin: string[]|null = null
-		
-		// If the backend is file, add the passphrase to the stdin
-		if(this.nodeConfig.backend === 'file')
-			stdin = [this.nodeConfig.walletPassphrase, this.nodeConfig.walletPassphrase,];
+		// Stdin for the command
+		let stdin: string[]|null = this.buildStdinCommand(passphrase, 2);
 		
 		// Create new wallet
 		const output: string|null = await containerCommand(['process', 'keys', 'add'], stdin);
 		
-		// If the wallet has been created
-		if(output)
+		// Check if the passphrase is incorrect
+		if(output === null || isPassphraseError(output))
+			return undefined;
+		
+		// Parse the output
+		const parsedOutput = this.parseKeysAddOutput(output);
+		
+		// If the node address and public address have been extracted
+		if(parsedOutput && parsedOutput.nodeAddress && parsedOutput.publicAddress && parsedOutput.mnemonicArray.length === 24)
 		{
-			// Parse the output
-			const parsedOutput = this.parseKeysAddOutput(output);
-			
-			// If the node address and public address have been extracted
-			if(parsedOutput && parsedOutput.nodeAddress && parsedOutput.publicAddress && parsedOutput.mnemonicArray.length === 24)
-			{
-				// Store the addresses
-				this.nodeConfig.walletNodeAddress = parsedOutput.nodeAddress as string;
-				this.nodeConfig.walletPublicAddress = parsedOutput.publicAddress as string;
-				// Return the mnemonic
-				return parsedOutput.mnemonicArray as string[];
-			}
+			// Store the addresses
+			this.nodeConfig.walletNodeAddress = parsedOutput.nodeAddress as string;
+			this.nodeConfig.walletPublicAddress = parsedOutput.publicAddress as string;
+			// Return the mnemonic
+			return parsedOutput.mnemonicArray as string[];
 		}
 		
 		// An error occurred
@@ -482,40 +518,36 @@ class NodeManager
 	/**
 	 * Recover wallet from mnemonic phrase
 	 * @param mnemonic: string
+	 * @param passphrase: string|null|undefined
 	 * @returns boolean
 	 */
-	public async walletRecover(mnemonic: string): Promise<boolean>
+	public async walletRecover(mnemonic: string, passphrase: string|null = null): Promise<boolean|undefined>
 	{
-		// If wallet does exist, return false
-		if(await this.walletExists())
-			return false;
+		// Check if wallet exists, return error if it does
+		const exists = await this.walletExists(passphrase);
+		if(exists)
+			return exists === undefined ? undefined : false;
 		
-		let stdin: string[]|null = null
-		
-		// Add mnemonic to the stdin
-		stdin = [mnemonic];
-		
-		// If the backend is file, add the passphrase to the stdin
-		if(this.nodeConfig.backend === 'file')
-			stdin = [mnemonic, this.nodeConfig.walletPassphrase, this.nodeConfig.walletPassphrase,];
+		// Stdin for the command
+		let stdin: string[]|null = this.buildStdinCommand(passphrase, 2, [mnemonic]);
 		
 		// Recoverr new wallet
 		const output: string|null = await containerCommand(['process', 'keys', 'add', '--recover'], stdin);
 		
-		// If the wallet has been created
-		if(output)
+		// Check if the passphrase is incorrect
+		if(output === null || isPassphraseError(output))
+			return undefined;
+		
+		// Parse the output
+		const parsedOutput = this.parseKeysAddOutput(output);
+		// If the node address and public address have been extracted
+		if(parsedOutput && parsedOutput.nodeAddress && parsedOutput.publicAddress && parsedOutput.mnemonicArray.length === 24)
 		{
-			// Parse the output
-			const parsedOutput = this.parseKeysAddOutput(output);
-			// If the node address and public address have been extracted
-			if(parsedOutput && parsedOutput.nodeAddress && parsedOutput.publicAddress && parsedOutput.mnemonicArray.length === 24)
-			{
-				// Store the addresses
-				this.nodeConfig.walletNodeAddress = parsedOutput.nodeAddress as string;
-				this.nodeConfig.walletPublicAddress = parsedOutput.publicAddress as string;
-				// Return success
-				return true;
-			}
+			// Store the addresses
+			this.nodeConfig.walletNodeAddress = parsedOutput.nodeAddress as string;
+			this.nodeConfig.walletPublicAddress = parsedOutput.publicAddress as string;
+			// Return success
+			return true;
 		}
 		
 		// An error occurred, return false
@@ -634,9 +666,9 @@ export const isWireguardConfigFileAvailable = (): boolean => nodeManager.isConfi
 export const isV2RayConfigFileAvailable = (): boolean => nodeManager.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'v2ray.toml'));
 export const createNodeConfig = (): Promise<boolean> => nodeManager.createNodeConfig();
 export const createVpnConfig = (): Promise<boolean> => nodeManager.createVpnConfig();
-export const walletExists = (): Promise<boolean> => nodeManager.walletExists();
-export const walletRemove = (): Promise<boolean> => nodeManager.walletRemove();
-export const walletLoadAddresses = (): Promise<boolean> => nodeManager.walletLoadAddresses();
-export const walletCreate = (): Promise<string[]|null> => nodeManager.walletCreate();
-export const walletRecover = (mnemonic: string): Promise<boolean> => nodeManager.walletRecover(mnemonic);
+export const walletExists = (passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletExists(passphrase);
+export const walletRemove = (passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletRemove(passphrase);
+export const walletLoadAddresses = (passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletLoadAddresses(passphrase);
+export const walletCreate = (passphrase: string|null = null): Promise<string[]|null|undefined> => nodeManager.walletCreate(passphrase);
+export const walletRecover = (mnemonic: string, passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletRecover(mnemonic, passphrase);
 export const walletBalance = (publicAddress: string|null = null): Promise<BalanceWallet> => nodeManager.getWalletBalance(publicAddress);
