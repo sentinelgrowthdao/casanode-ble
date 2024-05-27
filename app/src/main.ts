@@ -4,6 +4,7 @@ import {
 	checkInstallationCommand,
 	dockerCommand,
 	nodeCommand,
+	walletCommand,
 } from '@commands/index';
 
 // Create a new program and set program information
@@ -47,6 +48,18 @@ program.command('node')
 	.option('-c, --config', 'Generate the node configuration')
 	.option('-v, --vpn', 'Generate the VPN configuration')
 	.action((argv) => nodeCommand(argv));
+
+// Wallet commands
+program.command('wallet')
+	.description('Manage the wallet')
+	.option('-b, --balance', 'Display the wallet balance')
+	.option('-a, --addresses', 'Load the wallet addresses')
+	.option('-c, --create', 'Create a new wallet')
+	.option('-r, --recover', 'Recover an existing wallet')
+	.option('-rm, --remove', 'Remove the wallet')
+	.option('-p, --passphrase <passphrase>', 'Passphrase for the wallet')
+	.option('-m, --mnemonic <mnemonic>', 'Mnemonic for wallet recovery (only for recover)')
+	.action((argv) => walletCommand(argv));
 
 // If no command is provided, run the daemon process
 program.action(() => { daemonCommand(); });
