@@ -9,6 +9,13 @@ class DockerManager
 	private static instance: DockerManager;
 	private docker: Docker;
 	
+	// Passphrase error messages
+	public static passphraseErrors = [
+		'incorrect passphrase',
+		'too many failed passphrase attempts',
+		'password must be at least 8 characters',
+	];
+	
 	private constructor()
 	{
 		this.docker = new Docker();
@@ -606,6 +613,18 @@ class DockerManager
 						return;
 					}
 					
+					// Handle the output stream
+					stream.on('data', (data: Buffer) =>
+					{
+						// If the data contains an error keyword, stop the container
+						if(isPassphraseError(data.toString()))
+						{
+							Logger.error(`Container command '${argv.join(' ')}' failed: ${data.toString()}`);
+							// Stop the container
+							container.stop();
+						}
+					});
+					
 					// If stdin data is provided, write it to the container's stdin
 					if(stdin !== null)
 					{
@@ -658,6 +677,16 @@ class DockerManager
 			});
 		});
 	}
+	
+	/**
+	 * Check if output is passphrase error
+	 * @param output string
+	 * @returns boolean
+	 */
+	public isPassphraseError(output: string): boolean
+	{
+		return DockerManager.passphraseErrors.some(keyword => output.toLowerCase().includes(keyword));
+	}
 }
 
 // Create a singleton instance of DockerManager
@@ -665,6 +694,7 @@ const dockerManager = DockerManager.getInstance();
 export default dockerManager;
 
 // Export utility functions
+export const isPassphraseError = (output: string) => dockerManager.isPassphraseError(output);
 export const checkImageAvailability = (): Promise<boolean> => dockerManager.checkImageAvailability();
 export const inspectDockerContainer = (): Promise<Docker.ContainerInspectInfo | null> => dockerManager.inspectDockerContainer();
 export const imagePull = (): Promise<boolean> => dockerManager.imagePull();
