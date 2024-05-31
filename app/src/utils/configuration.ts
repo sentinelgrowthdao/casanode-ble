@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import axios from 'axios';
 import { Logger } from '@utils/logger';
 
 export interface AppConfigData
@@ -11,11 +12,18 @@ export interface AppConfigData
 	DOCKER_CONTAINER_NAME: string;
 	CONFIG_DIR: string;
 	API_BALANCE: string[];
+	FOXINODES_API_CHECK_IP: string;
 }
 
 export interface ConfigFileData
 {
 	[key: string]: string;
+}
+
+export interface RemoteAddressData
+{
+	ip: string;
+	country: string;
 }
 
 class ConfigurationLoader
@@ -35,7 +43,8 @@ class ConfigurationLoader
 			"https://api-sentinel.busurnode.com/cosmos/bank/v1beta1/balances/",
 			"https://api.sentinel.quokkastake.io/cosmos/bank/v1beta1/balances/",
 			"https://wapi.foxinodes.net/api/v1/sentinel/address/"
-		]
+		],
+		FOXINODES_API_CHECK_IP: "https://wapi.foxinodes.net/api/v1/sentinel/check-ip"
 	};
 	
 	private constructor()
@@ -132,8 +141,58 @@ class ConfigurationLoader
 			return {};
 		}
 	}
+	
+	/**
+	 * Get remote address
+	 * @returns Promise<RemoteAddressData>
+	 */
+	public async getRemoteAddress(): Promise<RemoteAddressData>
+	{
+		// Initialize default values
+		let nodeIP = "0.0.0.0";
+		let nodeCountry = "NA";
+		
+		try
+		{
+			// Attempt to get the IP and country from the primary API
+			const response = await axios.get(this.config.FOXINODES_API_CHECK_IP);
+			if(response.status === 200)
+			{
+				const data = response.data;
+				nodeIP = data.ip || nodeIP;
+				nodeCountry = data.iso_code || nodeCountry;
+			}
+		}
+		catch (error)
+		{
+			Logger.error(`Primary API call failed: ${error}. Trying fallback method.`);
+			try
+			{
+				// Fallback to checkip.dyndns.org
+				const response = await axios.get("http://checkip.dyndns.org/");
+				if(response.status === 200)
+				{
+					const value = response.data;
+					nodeIP = value.split("Current IP Address: ")[1].split("<")[0];
+				}
+			}
+			catch (fallbackError)
+			{
+				Logger.error(`Fallback method also failed: ${fallbackError}.`);
+			}
+		}
+		
+		// Return IP and country
+		return {
+			ip: nodeIP,
+			country: nodeCountry
+		};
+	}
 }
+
 
 // Exporter une instance unique de ConfigurationLoader
 const configurationLoader = ConfigurationLoader.getInstance();
 export default configurationLoader.getConfig();
+
+export const getRemoteAddress = async (): Promise<RemoteAddressData> => configurationLoader.getRemoteAddress();
