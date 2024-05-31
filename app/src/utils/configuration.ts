@@ -13,6 +13,8 @@ export interface AppConfigData
 	CONFIG_DIR: string;
 	API_BALANCE: string[];
 	FOXINODES_API_CHECK_IP: string;
+	FOXINODES_API_DVPN_CONFIG: string;
+	FOXINODES_API_CHECK_PORT: string;
 }
 
 export interface ConfigFileData
@@ -44,7 +46,9 @@ class ConfigurationLoader
 			"https://api.sentinel.quokkastake.io/cosmos/bank/v1beta1/balances/",
 			"https://wapi.foxinodes.net/api/v1/sentinel/address/"
 		],
-		FOXINODES_API_CHECK_IP: "https://wapi.foxinodes.net/api/v1/sentinel/check-ip"
+		FOXINODES_API_CHECK_IP: "https://wapi.foxinodes.net/api/v1/sentinel/check-ip",
+		FOXINODES_API_DVPN_CONFIG: "https://wapi.foxinodes.net/api/v1/sentinel/dvpn-node/configuration",
+		FOXINODES_API_CHECK_PORT: "https://wapi.foxinodes.net/api/v1/sentinel/dvpn-node/check-port/",
 	};
 	
 	private constructor()
@@ -188,6 +192,68 @@ class ConfigurationLoader
 			country: nodeCountry
 		};
 	}
+	
+	/**
+	 * Refresh network configuration from the API
+	 * @returns Promise<boolean>
+	 */
+	public async refreshNetworkConfiguration(): Promise<boolean>
+	{
+		try
+		{
+			// Fetch the configuration from the API
+			const response = await axios.get(this.config.FOXINODES_API_DVPN_CONFIG);
+			if(response.status === 200)
+			{
+				const data = response.data;
+				// Check if the data is valid
+				if(data && data.error === false)
+				{
+					// Extract the configuration data
+					const chainId = data.chain_id;
+					const rpcAddresses = data.rpc_addresses;
+					const gas = data.gas;
+					const gasAdjustment = data.gas_adjustment;
+					const gasPrice = data.gas_price;
+					const datacenterGigabytePrices = data.datacenter.gigabyte_prices;
+					const datacenterHourlyPrices = data.datacenter.hourly_prices;
+					const residentialGigabytePrices = data.residential.gigabyte_prices;
+					const residentialHourlyPrices = data.residential.hourly_prices;
+					
+					// Update the configuration
+					this.config = {
+						...this.config,
+						CHAIN_ID: chainId,
+						RPC_ADDRESSES: rpcAddresses,
+						GAS: gas,
+						GAS_ADJUSTMENT: gasAdjustment,
+						GAS_PRICE: gasPrice,
+						DATACENTER_GIGABYTE_PRICES: datacenterGigabytePrices,
+						DATACENTER_HOURLY_PRICES: datacenterHourlyPrices,
+						RESIDENTIAL_GIGABYTE_PRICES: residentialGigabytePrices,
+						RESIDENTIAL_HOURLY_PRICES: residentialHourlyPrices
+					};
+					
+					// Log
+					Logger.info("Network configuration has been refreshed.");
+					return true;
+				}
+				else
+				{
+					Logger.error("Invalid network configuration data.");
+				}
+			}
+		}
+		catch (err)
+		{
+			if (err instanceof Error)
+				Logger.error(`Failed to refresh network configuration: ${err.message}`);
+			else
+				Logger.error(`Failed to refresh network configuration: ${String(err)}`);
+		}
+		
+		return false;
+	}
 }
 
 
@@ -196,3 +262,4 @@ const configurationLoader = ConfigurationLoader.getInstance();
 export default configurationLoader.getConfig();
 
 export const getRemoteAddress = async (): Promise<RemoteAddressData> => configurationLoader.getRemoteAddress();
+export const refreshNetworkConfiguration = async (): Promise<boolean> => configurationLoader.refreshNetworkConfiguration();
