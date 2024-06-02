@@ -64,13 +64,11 @@ export class NodeTypeCharacteristic
 		// Get the value from the buffer
 		const value = data.toString('utf-8').trim();
 		
-		// Check if the value is too short
-		if (value.length <= 8) 
+		// Check if the value is valid
+		if (value !== 'residential' && value !== 'datacenter')
 		{
-			Logger.error('NodeTypeCharacteristic - onWriteRequest: value is too short');
-			// callback(this.Bleno.Characteristic.RESULT_ATTR_NOT_LONG);
-			callback(this.Bleno.Characteristic.RESULT_INVALID_ATTRIBUTE_LENGTH);
-			// callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+			Logger.error('NodeTypeCharacteristic - onWriteRequest: value is invalid');
+			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			return;
 		}
 		
