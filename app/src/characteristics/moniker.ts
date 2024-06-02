@@ -31,7 +31,7 @@ export class MonikerCharacteristic
 		
 		return new this.Bleno.Characteristic({
 			uuid: this.characteristicUuid,
-			properties: ['read', 'write', 'notify'],
+			properties: ['read', 'write'],
 			onReadRequest: this.onReadRequest.bind(this),
 			onWriteRequest: this.onWriteRequest.bind(this),
 		});
