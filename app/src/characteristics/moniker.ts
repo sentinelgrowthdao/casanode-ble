@@ -68,9 +68,7 @@ export class MonikerCharacteristic
 		if (value.length <= 8) 
 		{
 			Logger.error('MonikerCharacteristic - onWriteRequest: value is too short');
-			// callback(this.Bleno.Characteristic.RESULT_ATTR_NOT_LONG);
 			callback(this.Bleno.Characteristic.RESULT_INVALID_ATTRIBUTE_LENGTH);
-			// callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			return;
 		}
 		
