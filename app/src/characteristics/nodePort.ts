@@ -71,7 +71,7 @@ export class NodePortCharacteristic
 		const value = parseInt(data.toString('utf-8').trim());
 		
 		// Check if the value is valid
-		if (isNaN(value) || value < 0 || value > 65535)
+		if (isNaN(value) || value < 1 || value > 65535)
 		{
 			Logger.error('NodePortCharacteristic - onWriteRequest: value is invalid');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
