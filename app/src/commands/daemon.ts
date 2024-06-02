@@ -17,6 +17,7 @@ import { NodeTypeCharacteristic } from '@characteristics/nodeType';
 import { NodeIpCharacteristic } from '@/characteristics/nodeIp';
 import { NodePortCharacteristic } from '@/characteristics/nodePort';
 import { VpnTypeCharacteristic } from '@/characteristics/vpnType';
+import { VpnPortCharacteristic } from '@/characteristics/vpnPort';
 
 // TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
 const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -26,6 +27,7 @@ const CHAR_NODE_TYPE_UUID = '0000180d-0000-1000-8000-00805f9b34fe';
 const CHAR_NODE_IP_UUID = '0000180d-0000-1000-8000-00805f9b34ff';
 const CHAR_NODE_PORT_UUID = '0000180d-0000-1000-8000-00805f9b3500';
 const CHAR_VPN_TYPE_UUID = '0000180d-0000-1000-8000-00805f9b3501';
+const CHAR_VPN_PORT_UUID = '0000180d-0000-1000-8000-00805f9b3502';
 
 export const daemonCommand = () =>
 {
@@ -45,7 +47,8 @@ export const daemonCommand = () =>
 			new NodeTypeCharacteristic(CHAR_NODE_TYPE_UUID).create(),
 			new NodeIpCharacteristic(CHAR_NODE_IP_UUID).create(),
 			new NodePortCharacteristic(CHAR_NODE_PORT_UUID).create(),
-			new VpnTypeCharacteristic(CHAR_VPN_TYPE_UUID).create()
+			new VpnTypeCharacteristic(CHAR_VPN_TYPE_UUID).create(),
+			new VpnPortCharacteristic(CHAR_VPN_PORT_UUID).create(),
 		]
 	});
 	

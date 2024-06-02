@@ -752,6 +752,16 @@ class NodeManager
 	{
 		this.nodeConfig.vpn_type = vpnType;
 	}
+	
+	/**
+	 * Set VPN port but do not save it to the configuration file
+	 * @param vpnPort number
+	 * @returns void
+	 */
+	public setVpnPort(vpnPort: number): void
+	{
+		this.nodeConfig.vpn_port = vpnPort;
+	}
 }
 
 // Create a singleton instance of NodeManager
