@@ -762,6 +762,16 @@ class NodeManager
 	{
 		this.nodeConfig.vpn_port = vpnPort;
 	}
+	
+	/**
+	 * Set maximum peers but do not save it to the configuration file
+	 * @param maxPeers number
+	 * @returns void
+	 */
+	public setMaxPeers(maxPeers: number): void
+	{
+		this.nodeConfig.max_peers = maxPeers;
+	}
 }
 
 // Create a singleton instance of NodeManager
