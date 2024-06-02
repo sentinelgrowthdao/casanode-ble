@@ -15,6 +15,7 @@ import { HelloCharacteristic } from '@characteristics/hello';
 import { MonikerCharacteristic } from '@characteristics/moniker';
 import { NodeTypeCharacteristic } from '@characteristics/nodeType';
 import { NodeIpCharacteristic } from '@/characteristics/nodeIp';
+import { NodePortCharacteristic } from '@/characteristics/nodePort';
 
 // TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
 const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -22,6 +23,7 @@ const CHAR_HELLO_UUID = '0000180d-0000-1000-8000-00805f9b34fc';
 const CHAR_MONIKER_UUID = '0000180d-0000-1000-8000-00805f9b34fd';
 const CHAR_NODE_TYPE_UUID = '0000180d-0000-1000-8000-00805f9b34fe';
 const CHAR_NODE_IP_UUID = '0000180d-0000-1000-8000-00805f9b34ff';
+const CHAR_NODE_PORT_UUID = '0000180d-0000-1000-8000-00805f9b3500';
 
 export const daemonCommand = () =>
 {
@@ -40,6 +42,7 @@ export const daemonCommand = () =>
 			new MonikerCharacteristic(CHAR_MONIKER_UUID).create(),
 			new NodeTypeCharacteristic(CHAR_NODE_TYPE_UUID).create(),
 			new NodeIpCharacteristic(CHAR_NODE_IP_UUID).create(),
+			new NodePortCharacteristic(CHAR_NODE_PORT_UUID).create(),
 		]
 	});
 	

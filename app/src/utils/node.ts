@@ -732,6 +732,16 @@ class NodeManager
 	{
 		this.nodeConfig.node_ip = nodeIp;
 	}
+	
+	/**
+	 * Set node port but do not save it to the configuration file
+	 * @param nodePort number
+	 * @returns void
+	 */
+	public setNodePort(nodePort: number): void
+	{
+		this.nodeConfig.node_port = nodePort;
+	}
 }
 
 // Create a singleton instance of NodeManager
