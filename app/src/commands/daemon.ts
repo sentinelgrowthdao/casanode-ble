@@ -12,32 +12,42 @@ import { Logger } from '@utils/logger';
 import config from '@utils/configuration';
 
 import { HelloCharacteristic } from '@characteristics/hello';
+import { MonikerCharacteristic } from '@characteristics/moniker';
+
+// TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
+const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
+const CHAR_HELLO_UUID = '0000180d-0000-1000-8000-00805f9b34fc';
+const CHAR_MONIKER_UUID = '0000180d-0000-1000-8000-00805f9b34fd';
 
 export const daemonCommand = () =>
 {
 	console.log('Daemon process started');
+	Logger.info('Daemon process started.');
 	
+	// Dynamically import the Bleno module using CommonJS require
 	const require = createRequire(import.meta.url);
 	const bleno = require('bleno');
 	
-	const serviceUuid = '0000180d-0000-1000-8000-00805f9b34fb';
-	const helloCharacteristicUuid = '0000180d-0000-1000-8000-00805f9b34fc';
-	
+	// Create the primary service with the specified UUID and characteristics
 	const service = new bleno.PrimaryService({
-		uuid: serviceUuid,
+		uuid: NODE_BLE_UUID,
 		characteristics: [
-			HelloCharacteristic.createHelloCharacteristic(helloCharacteristicUuid)
+			HelloCharacteristic.create(CHAR_HELLO_UUID),
+			new MonikerCharacteristic(CHAR_MONIKER_UUID).create(CHAR_MONIKER_UUID)
 		]
 	});
 	
+	/**
+	 * Event listener for the stateChange event
+	 * @param state string
+	 */
 	bleno.on('stateChange', (state: any) =>
 	{
-		console.log('stateChange');
-		
+		// If the state is powered on, start advertising the service
 		if (state === 'poweredOn')
 		{
 			Logger.info('Application started successfully.');
-			bleno.startAdvertising('Casanode', [serviceUuid]);
+			bleno.startAdvertising('Casanode', [NODE_BLE_UUID]);
 		}
 		else
 		{
@@ -46,13 +56,22 @@ export const daemonCommand = () =>
 		}
 	});
 	
+	/**
+	 * Event listener for the advertisingStart event
+	 * @param error any
+	 */
 	bleno.on('advertisingStart', (error: any) => 
 	{
-		console.log('advertisingStart');
 		if (!error) 
 		{
 			console.log('Advertising...');
+			Logger.info('Advertising...');
 			bleno.setServices([service]);
+		}
+		else
+		{
+			console.error('Advertising failed: ' + error);
+			Logger.error('Advertising failed: ' + error);
 		}
 	});
 };
