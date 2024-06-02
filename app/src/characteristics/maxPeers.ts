@@ -73,7 +73,7 @@ export class MaxPeersCharacteristic
 		// Check if the value is valid
 		if (isNaN(value) || value < 1 || value > 99999)
 		{
-			Logger.error('MaxPeersCharacteristic - onWriteRequest: value is invalid');
+			Logger.error('Invalid value received via Bluetooth for "max_peers".');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			return;
 		}
@@ -83,6 +83,6 @@ export class MaxPeersCharacteristic
 		
 		// Notify the subscriber if the value is set
 		callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-		Logger.info('MaxPeersCharacteristic - onWriteRequest: value = ' + value);
+		Logger.info(`Parameter "max_peers" updated via Bluetooth to: ${value}`);
 	}
 }

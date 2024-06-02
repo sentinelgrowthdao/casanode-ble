@@ -74,7 +74,7 @@ export class NodeIpCharacteristic
 		// Check if the value is valid
 		if (isValidIP(value) === false)
 		{
-			Logger.error('NodeIpCharacteristic - onWriteRequest: value is invalid');
+			Logger.error('Invalid value received via Bluetooth for "node_ip".');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			return;
 		}
@@ -84,6 +84,6 @@ export class NodeIpCharacteristic
 		
 		// Notify the subscriber if the value is set
 		callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-		Logger.info('NodeIpCharacteristic - onWriteRequest: value = ' + value);
+		Logger.info(`Parameter "node_ip" updated via Bluetooth to: ${value}`);
 	}
 }

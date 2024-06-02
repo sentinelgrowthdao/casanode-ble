@@ -73,7 +73,7 @@ export class VpnTypeCharacteristic
 		// Check if the value is valid
 		if (value !== 'wireguard' && value !== 'v2ray')
 		{
-			Logger.error('VpnTypeCharacteristic - onWriteRequest: value is invalid');
+			Logger.error('Invalid value received via Bluetooth for "vpn_type".');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			return;
 		}
@@ -83,6 +83,6 @@ export class VpnTypeCharacteristic
 		
 		// Notify the subscriber if the value is set
 		callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-		Logger.info('VpnTypeCharacteristic - onWriteRequest: value = ' + value);
+		Logger.info(`Parameter "vpn_type" updated via Bluetooth to: ${value}`);
 	}
 }

@@ -73,7 +73,7 @@ export class MonikerCharacteristic
 		// Check if the value is too short
 		if (value.length <= 8) 
 		{
-			Logger.error('MonikerCharacteristic - onWriteRequest: value is too short');
+			Logger.error('Invalid value received via Bluetooth for "moniker".');
 			callback(this.Bleno.Characteristic.RESULT_INVALID_ATTRIBUTE_LENGTH);
 			return;
 		}
@@ -83,6 +83,6 @@ export class MonikerCharacteristic
 		
 		// Notify the subscriber if the value is set
 		callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-		Logger.info('MonikerCharacteristic - onWriteRequest: value = ' + value);
+		Logger.info(`Parameter "moniker" updated via Bluetooth to: ${value}`);
 	}
 }

@@ -73,7 +73,7 @@ export class VpnPortCharacteristic
 		// Check if the value is valid
 		if (isNaN(value) || value < 1 || value > 65535)
 		{
-			Logger.error('VpnPortCharacteristic - onWriteRequest: value is invalid');
+			Logger.error('Invalid value received via Bluetooth for "vpn_port".');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			return;
 		}
@@ -83,6 +83,6 @@ export class VpnPortCharacteristic
 		
 		// Notify the subscriber if the value is set
 		callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-		Logger.info('VpnPortCharacteristic - onWriteRequest: value = ' + value);
+		Logger.info(`Parameter "vpn_port" updated via Bluetooth to: ${value}`);
 	}
 }

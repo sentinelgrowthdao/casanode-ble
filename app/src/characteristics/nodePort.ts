@@ -73,7 +73,7 @@ export class NodePortCharacteristic
 		// Check if the value is valid
 		if (isNaN(value) || value < 1 || value > 65535)
 		{
-			Logger.error('NodePortCharacteristic - onWriteRequest: value is invalid');
+			Logger.error('Invalid value received via Bluetooth for "node_port".');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			return;
 		}
@@ -83,6 +83,6 @@ export class NodePortCharacteristic
 		
 		// Notify the subscriber if the value is set
 		callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-		Logger.info('NodePortCharacteristic - onWriteRequest: value = ' + value);
+		Logger.info(`Parameter "node_port" updated via Bluetooth to: ${value}`);
 	}
 }

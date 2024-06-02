@@ -73,7 +73,7 @@ export class NodeTypeCharacteristic
 		// Check if the value is valid
 		if (value !== 'residential' && value !== 'datacenter')
 		{
-			Logger.error('NodeTypeCharacteristic - onWriteRequest: value is invalid');
+			Logger.error('Invalid value received via Bluetooth for "node_type".');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			return;
 		}
@@ -83,6 +83,6 @@ export class NodeTypeCharacteristic
 		
 		// Notify the subscriber if the value is set
 		callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-		Logger.info('NodeTypeCharacteristic - onWriteRequest: value = ' + value);
+		Logger.info(`Parameter "node_type" updated via Bluetooth to: ${value}`);
 	}
 }
