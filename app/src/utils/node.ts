@@ -706,10 +706,20 @@ class NodeManager
 	/**
 	 * Set moniker but do not save it to the configuration file
 	 * @param moniker string
+	 * @return void
 	 */
 	public setMoniker(moniker: string): void
 	{
 		this.nodeConfig.moniker = moniker;
+	}
+	/**
+	 * Set node type but do not save it to the configuration file
+	 * @param nodeType string
+	 * @returns void
+	 */
+	public setNodeType(nodeType: string): void
+	{
+		this.nodeConfig.node_type = nodeType;
 	}
 }
 
