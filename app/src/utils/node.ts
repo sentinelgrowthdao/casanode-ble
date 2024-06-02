@@ -35,7 +35,7 @@ export interface NodeConfigData
 	chain_id: string;
 	rpc_addresses: string;
 	node_ip: string;
-	node_type: string;
+	vpn_type: string;
 	node_port: number;
 	vpn_port: number;
 	backend: string;
@@ -45,7 +45,7 @@ export interface NodeConfigData
 	gas: string;
 	gas_adjustment: string;
 	gas_prices: string;
-	node_location: string;
+	node_type: string;
 	gigabyte_prices: string;
 	hourly_prices: string;
 	walletPublicAddress: string;
@@ -57,10 +57,11 @@ class NodeManager
 	private static instance: NodeManager;
 	private nodeConfig: NodeConfigData = {
 		moniker: '',
+		node_type: '',
 		chain_id: '',
 		rpc_addresses: '',
 		node_ip: '',
-		node_type: '',
+		vpn_type: '',
 		node_port: 0,
 		vpn_port: 0,
 		backend: '',
@@ -70,7 +71,6 @@ class NodeManager
 		gas: '',
 		gas_adjustment: '',
 		gas_prices: '',
-		node_location: '',
 		gigabyte_prices: '',
 		hourly_prices: '',
 		walletPublicAddress: '',
@@ -143,9 +143,10 @@ class NodeManager
 			
 			// Parse configuration file content
 			this.nodeConfig.moniker = this.extractConfigValue(configFileContent, 'moniker');
+			this.nodeConfig.node_type = this.nodeConfig.hourly_prices === DATACENTER_HOURLY_PRICES ? 'datacenter' : this.nodeConfig.hourly_prices ? 'residential' : '';
 			this.nodeConfig.chain_id = this.extractConfigValue(configFileContent, 'id');
 			this.nodeConfig.rpc_addresses = this.extractConfigValue(configFileContent, 'rpc_addresses');
-			this.nodeConfig.node_type = this.extractConfigValue(configFileContent, 'type');
+			this.nodeConfig.vpn_type = this.extractConfigValue(configFileContent, 'type');
 			this.nodeConfig.node_ip = this.extractConfigValue(configFileContent, 'remote_url').split('/')[2].split(':')[0];
 			this.nodeConfig.node_port = parseInt(this.extractConfigValue(configFileContent, 'listen_on').split(':')[1]);
 			this.nodeConfig.max_peers = parseInt(this.extractConfigValue(configFileContent, 'max_peers'));
@@ -157,17 +158,16 @@ class NodeManager
 			this.nodeConfig.gas_prices = this.extractConfigValue(configFileContent, 'gas_prices');
 			this.nodeConfig.gigabyte_prices = this.extractConfigValue(configFileContent, 'gigabyte_prices');
 			this.nodeConfig.hourly_prices = this.extractConfigValue(configFileContent, 'hourly_prices');
-			this.nodeConfig.node_location = this.nodeConfig.hourly_prices === DATACENTER_HOURLY_PRICES ? 'datacenter' : this.nodeConfig.hourly_prices ? 'residential' : '';
 			
 			// Load WireGuard configuration file content
-			if(this.nodeConfig.node_type === 'wireguard')
+			if(this.nodeConfig.vpn_type === 'wireguard')
 			{
 				const wireguardConfigPath = path.join(config.CONFIG_DIR, 'wireguard.toml');
 				const wireguardConfigContent = fs.readFileSync(wireguardConfigPath, 'utf8');
 				this.nodeConfig.vpn_port = parseInt(this.extractConfigValue(wireguardConfigContent, 'listen_port'));
 			}
 			// Load V2Ray configuration file content
-			else if(this.nodeConfig.node_type === 'v2ray')
+			else if(this.nodeConfig.vpn_type === 'v2ray')
 			{
 				const v2rayConfigPath = path.join(config.CONFIG_DIR, 'v2ray.toml');
 				const v2rayConfigContent = fs.readFileSync(v2rayConfigPath, 'utf8');
@@ -230,7 +230,7 @@ class NodeManager
 			this.updateConfigValue(configFilePath, 'moniker', this.nodeConfig.moniker);
 			this.updateConfigValue(configFilePath, 'id', this.nodeConfig.chain_id);
 			this.updateConfigValue(configFilePath, 'rpc_addresses', this.nodeConfig.rpc_addresses);
-			this.updateConfigValue(configFilePath, 'type', this.nodeConfig.node_type);
+			this.updateConfigValue(configFilePath, 'type', this.nodeConfig.vpn_type);
 			this.updateConfigValue(configFilePath, 'listen_on', `0.0.0.0:${this.nodeConfig.node_port}`);
 			this.updateConfigValue(configFilePath, 'remote_url', `https://${this.nodeConfig.node_ip}:${this.nodeConfig.node_port}`);
 			this.updateConfigValue(configFilePath, 'backend', this.nodeConfig.backend);
@@ -240,12 +240,12 @@ class NodeManager
 			this.updateConfigValue(configFilePath, 'gas_adjustment', this.nodeConfig.gas_adjustment);
 			this.updateConfigValue(configFilePath, 'gas_prices', this.nodeConfig.gas_prices);
 			
-			if(this.nodeConfig.node_type === 'wireguard')
+			if(this.nodeConfig.vpn_type === 'wireguard')
 			{
 				const wireguardConfigPath = path.join(config.CONFIG_DIR, 'wireguard.toml');
 				this.updateConfigValue(wireguardConfigPath, 'listen_port', this.nodeConfig.vpn_port);
 			}
-			else if(this.nodeConfig.node_type === 'v2ray')
+			else if(this.nodeConfig.vpn_type === 'v2ray')
 			{
 				const v2rayConfigPath = path.join(config.CONFIG_DIR, 'v2ray.toml');
 				this.updateConfigValue(v2rayConfigPath, 'listen_port', this.nodeConfig.vpn_port);
@@ -318,12 +318,12 @@ class NodeManager
 		let output: string|null = '';
 		
 		// Create WireGuard configuration file
-		if(this.nodeConfig.node_type === 'wireguard')
+		if(this.nodeConfig.vpn_type === 'wireguard')
 		{
 			output = await containerCommand(['process', 'wireguard', 'config', 'init']);
 		}
 		// Create V2Ray configuration file
-		else if(this.nodeConfig.node_type === 'v2ray')
+		else if(this.nodeConfig.vpn_type === 'v2ray')
 		{
 			output = await containerCommand(['process', 'v2ray', 'config', 'init']);
 		}
