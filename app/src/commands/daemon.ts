@@ -66,6 +66,7 @@ export const daemonCommand = () =>
 		{
 			console.log('Advertising...');
 			Logger.info('Advertising...');
+			// Set the services to be advertised
 			bleno.setServices([service]);
 		}
 		else
