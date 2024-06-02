@@ -80,7 +80,7 @@ export class NodeIpCharacteristic
 		}
 		
 		// Set the value in the configuration
-		nodeManager.setNodeType(value);
+		nodeManager.setNodeIp(value);
 		
 		// Notify the subscriber if the value is set
 		callback(this.Bleno.Characteristic.RESULT_SUCCESS);

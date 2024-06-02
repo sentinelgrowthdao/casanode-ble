@@ -712,6 +712,7 @@ class NodeManager
 	{
 		this.nodeConfig.moniker = moniker;
 	}
+	
 	/**
 	 * Set node type but do not save it to the configuration file
 	 * @param nodeType string
@@ -720,6 +721,16 @@ class NodeManager
 	public setNodeType(nodeType: string): void
 	{
 		this.nodeConfig.node_type = nodeType;
+	}
+	
+	/**
+	 * Set node ip but do not save it to the configuration file
+	 * @param nodeIp string
+	 * @returns void
+	 */
+	public setNodeIp(nodeIp: string): void
+	{
+		this.nodeConfig.node_ip = nodeIp;
 	}
 }
 
