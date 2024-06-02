@@ -21,7 +21,7 @@ const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
 const CHAR_HELLO_UUID = '0000180d-0000-1000-8000-00805f9b34fc';
 const CHAR_MONIKER_UUID = '0000180d-0000-1000-8000-00805f9b34fd';
 const CHAR_NODE_TYPE_UUID = '0000180d-0000-1000-8000-00805f9b34fe';
-const CHAR_IP_ADDRESS_UUID = '0000180d-0000-1000-8000-00805f9b34ff';
+const CHAR_NODE_IP_UUID = '0000180d-0000-1000-8000-00805f9b34ff';
 
 export const daemonCommand = () =>
 {
@@ -39,7 +39,7 @@ export const daemonCommand = () =>
 			HelloCharacteristic.create(CHAR_HELLO_UUID),
 			new MonikerCharacteristic(CHAR_MONIKER_UUID).create(CHAR_MONIKER_UUID),
 			new NodeTypeCharacteristic(CHAR_NODE_TYPE_UUID).create(CHAR_NODE_TYPE_UUID),
-			new NodeIpCharacteristic(CHAR_IP_ADDRESS_UUID).create(CHAR_IP_ADDRESS_UUID),
+			new NodeIpCharacteristic(CHAR_NODE_IP_UUID).create(CHAR_NODE_IP_UUID),
 		]
 	});
 	
