@@ -52,7 +52,7 @@ export class NodePortCharacteristic
 	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
 	{
 		// Get the value from the configuration
-		const value = nodeManager.getConfig().node_type;
+		const value = nodeManager.getConfig().node_port.toString();
 		// Return the value to the subscriber
 		callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(value));
 	}
