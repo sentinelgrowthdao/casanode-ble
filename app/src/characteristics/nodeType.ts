@@ -12,19 +12,25 @@ export class NodeTypeCharacteristic
 	private Bleno: any = undefined;
 	
 	/**
+	 * UUID of the characteristic
+	 * @type string
+	 */
+	private characteristicUuid: string = '';
+	
+	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(private characteristicUuid: string) 
+	constructor(private uuid: string) 
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
+		this.characteristicUuid = uuid;
 	}
 	
 	/**
 	 * Create a new instance of NodeTypeCharacteristic
-	 * @param uuid - UUID of the characteristic
 	 */
-	public create(uuid: string)//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic 
 	{
 		if(this.Bleno === undefined)
 			return null;
