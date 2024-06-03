@@ -143,7 +143,6 @@ class NodeManager
 			
 			// Parse configuration file content
 			this.nodeConfig.moniker = this.extractConfigValue(configFileContent, 'moniker');
-			this.nodeConfig.node_type = this.nodeConfig.hourly_prices === DATACENTER_HOURLY_PRICES ? 'datacenter' : this.nodeConfig.hourly_prices ? 'residential' : '';
 			this.nodeConfig.chain_id = this.extractConfigValue(configFileContent, 'id');
 			this.nodeConfig.rpc_addresses = this.extractConfigValue(configFileContent, 'rpc_addresses');
 			this.nodeConfig.vpn_type = this.extractConfigValue(configFileContent, 'type');
@@ -158,6 +157,9 @@ class NodeManager
 			this.nodeConfig.gas_prices = this.extractConfigValue(configFileContent, 'gas_prices');
 			this.nodeConfig.gigabyte_prices = this.extractConfigValue(configFileContent, 'gigabyte_prices');
 			this.nodeConfig.hourly_prices = this.extractConfigValue(configFileContent, 'hourly_prices');
+			
+			// Set the node type based on the prices
+			this.nodeConfig.node_type = this.nodeConfig.hourly_prices === DATACENTER_HOURLY_PRICES ? 'datacenter' : this.nodeConfig.hourly_prices ? 'residential' : '';
 			
 			// Load WireGuard configuration file content
 			if(this.nodeConfig.vpn_type === 'wireguard')
