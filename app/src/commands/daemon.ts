@@ -63,7 +63,7 @@ export const daemonCommand = async () =>
 			new MaxPeersCharacteristic(CHAR_MAX_PEERS_UUID).create(),
 			new NodeConfigCharacteristic(CHAR_NODE_CONFIG_UUID).create(),
 			new NodeLocationCharacteristic(CHAR_NODE_LOCATION_UUID).create(),
-			new CertExpirityCharacteristic(CHAR_CERT_EXPIRITY_UUID).create()
+			new CertExpirityCharacteristic(CHAR_CERT_EXPIRITY_UUID).create(),
 		]
 	});
 	
