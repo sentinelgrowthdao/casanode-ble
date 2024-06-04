@@ -100,21 +100,21 @@ class CertificateManager
 	
 	/**
 	 * Get certificate information
-	 * @returns boolean
+	 * @returns CertificateInfo | null
 	 */
-	public async info(): Promise<CertificateInfo | boolean>
+	public info(): CertificateInfo | null
 	{
 		try
 		{
-			// If certificate files do not exist, return false
-			if (!await fs.pathExists(this.certFilePath) || !await fs.pathExists(this.keyFilePath))
+			// If certificate files do not exist
+			if (!fs.pathExistsSync(this.certFilePath) || !fs.pathExistsSync(this.keyFilePath))
 			{
 				Logger.info("Certificate or key file not found.");
-				return false;
+				return null;
 			}
 			
 			// Read certificate file
-			const pemCert = await fs.readFile(this.certFilePath, 'utf-8');
+			const pemCert = fs.readFileSync(this.certFilePath, 'utf-8');
 			const cert = forge.pki.certificateFromPem(pemCert);
 			
 			// Return certificate information
@@ -133,7 +133,7 @@ class CertificateManager
 				Logger.error(`Failed to read certificate: ${String(error)}`);
 		}
 		
-		return false;
+		return null;
 	}
 	
 	/**

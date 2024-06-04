@@ -21,6 +21,7 @@ import { VpnPortCharacteristic } from '@/characteristics/vpnPort';
 import { MaxPeersCharacteristic } from '@/characteristics/maxPeers';
 import { NodeConfigCharacteristic } from '@/characteristics/nodeConfig';
 import { NodeLocationCharacteristic } from '@/characteristics/nodeLocation';
+import { CertExpirityCharacteristic } from '@/characteristics/certExpirity';
 
 // TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
 const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -34,6 +35,7 @@ const CHAR_VPN_PORT_UUID = '0000180d-0000-1000-8000-00805f9b3502';
 const CHAR_MAX_PEERS_UUID = '0000180d-0000-1000-8000-00805f9b3503';
 const CHAR_NODE_CONFIG_UUID = '0000180d-0000-1000-8000-00805f9b3504';
 const CHAR_NODE_LOCATION_UUID = '0000180d-0000-1000-8000-00805f9b3505';
+const CHAR_CERT_EXPIRITY_UUID = '0000180d-0000-1000-8000-00805f9b3506';
 
 export const daemonCommand = async () =>
 {
@@ -60,7 +62,8 @@ export const daemonCommand = async () =>
 			new VpnPortCharacteristic(CHAR_VPN_PORT_UUID).create(),
 			new MaxPeersCharacteristic(CHAR_MAX_PEERS_UUID).create(),
 			new NodeConfigCharacteristic(CHAR_NODE_CONFIG_UUID).create(),
-			new NodeLocationCharacteristic(CHAR_NODE_LOCATION_UUID).create()
+			new NodeLocationCharacteristic(CHAR_NODE_LOCATION_UUID).create(),
+			new CertExpirityCharacteristic(CHAR_CERT_EXPIRITY_UUID).create()
 		]
 	});
 	
