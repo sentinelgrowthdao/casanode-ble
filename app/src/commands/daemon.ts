@@ -19,7 +19,7 @@ import { NodePortCharacteristic } from '@/characteristics/nodePort';
 import { VpnTypeCharacteristic } from '@/characteristics/vpnType';
 import { VpnPortCharacteristic } from '@/characteristics/vpnPort';
 import { MaxPeersCharacteristic } from '@/characteristics/maxPeers';
-import { nodeConfigCharacteristic } from '@/characteristics/nodeConfig';
+import { NodeConfigCharacteristic } from '@/characteristics/nodeConfig';
 
 // TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
 const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -54,7 +54,7 @@ export const daemonCommand = () =>
 			new VpnTypeCharacteristic(CHAR_VPN_TYPE_UUID).create(),
 			new VpnPortCharacteristic(CHAR_VPN_PORT_UUID).create(),
 			new MaxPeersCharacteristic(CHAR_MAX_PEERS_UUID).create(),
-			new nodeConfigCharacteristic(CHAR_NODE_CONFIG_UUID).create(),
+			new NodeConfigCharacteristic(CHAR_NODE_CONFIG_UUID).create(),
 		]
 	});
 	

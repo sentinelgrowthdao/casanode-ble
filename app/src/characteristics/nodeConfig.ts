@@ -3,7 +3,7 @@ import { createRequire } from 'module';
 import { Logger } from '@utils/logger';
 import nodeManager, { NodeConfigData } from '@utils/node';
 
-export class nodeConfigCharacteristic
+export class NodeConfigCharacteristic
 {
 	/**
 	 * Bleno instance
@@ -28,7 +28,7 @@ export class nodeConfigCharacteristic
 	}
 	
 	/**
-	 * Create a new instance of nodeConfigCharacteristic
+	 * Create a new instance of NodeConfigCharacteristic
 	 */
 	public create()//: typeof Bleno.Characteristic 
 	{
