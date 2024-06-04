@@ -9,6 +9,11 @@
 
 import { createRequire } from 'module';	// <- Used to import the Bleno module in the same way as require
 import { Logger } from '@utils/logger';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execPromise = promisify(exec);
+
 import nodeManager from '@utils/node';
 
 import { HelloCharacteristic } from '@characteristics/hello';
@@ -24,6 +29,8 @@ import { NodeLocationCharacteristic } from '@/characteristics/nodeLocation';
 import { CertExpirityCharacteristic } from '@/characteristics/certExpirity';
 import { BandwidthSpeedCharacteristic } from '@/characteristics/bandwidthSpeed';
 import { SystemUptimeCharacteristic } from '@/characteristics/systemUptime';
+import { SystemInfosCharacteristic } from '@/characteristics/systemInfos';
+import { DockerImageCharacteristic } from '@/characteristics/dockerImage';
 
 // TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
 const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -40,6 +47,8 @@ const CHAR_NODE_LOCATION_UUID = '0000180d-0000-1000-8000-00805f9b3505';
 const CHAR_CERT_EXPIRITY_UUID = '0000180d-0000-1000-8000-00805f9b3506';
 const CHAR_BANDWIDTH_SPEED_UUID = '0000180d-0000-1000-8000-00805f9b3507';
 const CHAR_SYSTEM_UPTIME_UUID = '0000180d-0000-1000-8000-00805f9b3508';
+const CHAR_SYSTEM_INFOS_UUID = '0000180d-0000-1000-8000-00805f9b3509';
+const CHAR_DOCKER_IMAGE_UUID = '0000180d-0000-1000-8000-00805f9b350a';
 
 export const daemonCommand = async () =>
 {
@@ -51,6 +60,11 @@ export const daemonCommand = async () =>
 	
 	// Initialize the node uptime
 	nodeManager.setSystemUptime(Math.floor(Date.now() / 1000));
+	
+	// Initialize the system information
+	nodeManager.setSystemOs(`${await runCommand('lsb_release -is')} ${await runCommand('lsb_release -rs')}`);
+	nodeManager.setSystemKernel(`${await runCommand('uname -r')}`);
+	nodeManager.setSystemArch(`${await runCommand('uname -m')}`);
 	
 	// Dynamically import the Bleno module using CommonJS require
 	const require = createRequire(import.meta.url);
@@ -73,6 +87,8 @@ export const daemonCommand = async () =>
 			new CertExpirityCharacteristic(CHAR_CERT_EXPIRITY_UUID).create(),
 			new BandwidthSpeedCharacteristic(CHAR_BANDWIDTH_SPEED_UUID).create(),
 			new SystemUptimeCharacteristic(CHAR_SYSTEM_UPTIME_UUID).create(),
+			new SystemInfosCharacteristic(CHAR_SYSTEM_INFOS_UUID).create(),
+			new DockerImageCharacteristic(CHAR_DOCKER_IMAGE_UUID).create(),
 		]
 	});
 	
@@ -115,3 +131,14 @@ export const daemonCommand = async () =>
 		}
 	});
 };
+
+/**
+ * Run a command asynchronously
+ * @param command string
+ * @returns string
+ */
+async function runCommand(command: string): Promise<string>
+{
+	const { stdout, stderr } = await execPromise(command);
+	return stdout.trim() || '';
+}

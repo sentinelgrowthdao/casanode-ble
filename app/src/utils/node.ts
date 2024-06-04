@@ -53,6 +53,9 @@ export interface NodeConfigData
 	walletNodeAddress: string;
 	nodeLocation: string;
 	systemUptime: number;
+	systemOs: string;
+	systemKernel: string;
+	systemArch: string;
 }
 
 class NodeManager
@@ -82,6 +85,12 @@ class NodeManager
 		nodeLocation: '',
 		// Contains the uptime of the node
 		systemUptime: 0,
+		// Contains the OS of the node
+		systemOs: '',
+		// Contains the kernel of the node
+		systemKernel: '',
+		// Contains the architecture of the node
+		systemArch: '',
 	};
 	
 	private constructor()
@@ -800,6 +809,33 @@ class NodeManager
 	{
 		this.nodeConfig.systemUptime = uptime;
 	}
+	
+	/**
+	 * Set system OS
+	 * @param os: string
+	 */
+	public setSystemOs(os: string): void
+	{
+		this.nodeConfig.systemOs = os;
+	}
+	/**
+	 * Set system kernel
+	 * @param kernel: string
+	 */
+	public setSystemKernel(kernel: string): void
+	{
+		this.nodeConfig.systemKernel = kernel;
+	}
+	
+	/**
+	 * Set system architecture
+	 * @param arch: string
+	 */
+	public setSystemArch(arch: string): void
+	{
+		this.nodeConfig.systemArch = arch;
+	}
+	
 }
 
 // Create a singleton instance of NodeManager
