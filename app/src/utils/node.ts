@@ -4,6 +4,7 @@ import axios from 'axios';
 import config from './configuration';
 import { Logger } from '@utils/logger';
 import { isPassphraseError, containerCommand } from '@utils/docker';
+import { getRemoteAddress } from '@utils/configuration';
 
 // Defaults values for node configuration
 const DATACENTER_GIGABYTE_PRICES="52573ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,9204ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1180852ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,122740ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,15342624udvpn";
@@ -75,6 +76,8 @@ class NodeManager
 		hourly_prices: '',
 		walletPublicAddress: '',
 		walletNodeAddress: '',
+		// Contains the country code of the node
+		nodeLocation: '',
 	};
 	
 	private constructor()
@@ -181,6 +184,16 @@ class NodeManager
 		{
 			Logger.error(`Error loading node configuration: ${error}`);
 		}
+	}
+	
+	/**
+	 * Refresh node location
+	 * @returns void
+	 */
+	public async refreshNodeLocation(): Promise<void>
+	{
+		const remoteAddress = await getRemoteAddress();
+		this.nodeConfig.nodeLocation = remoteAddress.country ?? 'N/A';
 	}
 	
 	/**

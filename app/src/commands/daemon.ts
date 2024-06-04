@@ -9,7 +9,7 @@
 
 import { createRequire } from 'module';	// <- Used to import the Bleno module in the same way as require
 import { Logger } from '@utils/logger';
-import config from '@utils/configuration';
+import nodeManager from '@utils/node';
 
 import { HelloCharacteristic } from '@characteristics/hello';
 import { MonikerCharacteristic } from '@characteristics/moniker';
@@ -20,6 +20,7 @@ import { VpnTypeCharacteristic } from '@/characteristics/vpnType';
 import { VpnPortCharacteristic } from '@/characteristics/vpnPort';
 import { MaxPeersCharacteristic } from '@/characteristics/maxPeers';
 import { NodeConfigCharacteristic } from '@/characteristics/nodeConfig';
+import { NodeLocationCharacteristic } from '@/characteristics/nodeLocation';
 
 // TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
 const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -32,11 +33,15 @@ const CHAR_VPN_TYPE_UUID = '0000180d-0000-1000-8000-00805f9b3501';
 const CHAR_VPN_PORT_UUID = '0000180d-0000-1000-8000-00805f9b3502';
 const CHAR_MAX_PEERS_UUID = '0000180d-0000-1000-8000-00805f9b3503';
 const CHAR_NODE_CONFIG_UUID = '0000180d-0000-1000-8000-00805f9b3504';
+const CHAR_NODE_LOCATION_UUID = '0000180d-0000-1000-8000-00805f9b3505';
 
-export const daemonCommand = () =>
+export const daemonCommand = async () =>
 {
 	console.log('Daemon process started');
 	Logger.info('Daemon process started.');
+	
+	// Load the node location
+	await nodeManager.refreshNodeLocation();
 	
 	// Dynamically import the Bleno module using CommonJS require
 	const require = createRequire(import.meta.url);
@@ -55,6 +60,7 @@ export const daemonCommand = () =>
 			new VpnPortCharacteristic(CHAR_VPN_PORT_UUID).create(),
 			new MaxPeersCharacteristic(CHAR_MAX_PEERS_UUID).create(),
 			new NodeConfigCharacteristic(CHAR_NODE_CONFIG_UUID).create(),
+			new NodeLocationCharacteristic(CHAR_NODE_LOCATION_UUID).create()
 		]
 	});
 	
