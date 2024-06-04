@@ -51,6 +51,7 @@ export interface NodeConfigData
 	hourly_prices: string;
 	walletPublicAddress: string;
 	walletNodeAddress: string;
+	nodeLocation: string;
 }
 
 class NodeManager
