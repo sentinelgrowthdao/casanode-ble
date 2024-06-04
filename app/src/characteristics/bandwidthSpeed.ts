@@ -2,7 +2,6 @@ import { createRequire } from 'module';
 
 import { Logger } from '@utils/logger';
 import nodeManager from '@utils/node';
-import certificateManager from '@utils/certificate';
 
 export class BandwidthSpeedCharacteristic
 {
