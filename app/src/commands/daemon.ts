@@ -23,6 +23,7 @@ import { NodeConfigCharacteristic } from '@/characteristics/nodeConfig';
 import { NodeLocationCharacteristic } from '@/characteristics/nodeLocation';
 import { CertExpirityCharacteristic } from '@/characteristics/certExpirity';
 import { BandwidthSpeedCharacteristic } from '@/characteristics/bandwidthSpeed';
+import { SystemUptimeCharacteristic } from '@/characteristics/systemUptime';
 
 // TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
 const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -38,6 +39,7 @@ const CHAR_NODE_CONFIG_UUID = '0000180d-0000-1000-8000-00805f9b3504';
 const CHAR_NODE_LOCATION_UUID = '0000180d-0000-1000-8000-00805f9b3505';
 const CHAR_CERT_EXPIRITY_UUID = '0000180d-0000-1000-8000-00805f9b3506';
 const CHAR_BANDWIDTH_SPEED_UUID = '0000180d-0000-1000-8000-00805f9b3507';
+const CHAR_SYSTEM_UPTIME_UUID = '0000180d-0000-1000-8000-00805f9b3508';
 
 export const daemonCommand = async () =>
 {
@@ -46,6 +48,9 @@ export const daemonCommand = async () =>
 	
 	// Load the node location
 	await nodeManager.refreshNodeLocation();
+	
+	// Initialize the node uptime
+	nodeManager.setSystemUptime(Math.floor(Date.now() / 1000));
 	
 	// Dynamically import the Bleno module using CommonJS require
 	const require = createRequire(import.meta.url);
@@ -67,6 +72,7 @@ export const daemonCommand = async () =>
 			new NodeLocationCharacteristic(CHAR_NODE_LOCATION_UUID).create(),
 			new CertExpirityCharacteristic(CHAR_CERT_EXPIRITY_UUID).create(),
 			new BandwidthSpeedCharacteristic(CHAR_BANDWIDTH_SPEED_UUID).create(),
+			new SystemUptimeCharacteristic(CHAR_SYSTEM_UPTIME_UUID).create(),
 		]
 	});
 	

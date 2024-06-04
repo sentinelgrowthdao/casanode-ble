@@ -52,6 +52,7 @@ export interface NodeConfigData
 	walletPublicAddress: string;
 	walletNodeAddress: string;
 	nodeLocation: string;
+	systemUptime: number;
 }
 
 class NodeManager
@@ -79,6 +80,8 @@ class NodeManager
 		walletNodeAddress: '',
 		// Contains the country code of the node
 		nodeLocation: '',
+		// Contains the uptime of the node
+		systemUptime: 0,
 	};
 	
 	private constructor()
@@ -787,6 +790,15 @@ class NodeManager
 	public setMaxPeers(maxPeers: number): void
 	{
 		this.nodeConfig.max_peers = maxPeers;
+	}
+	
+	/**
+	 * Set system uptime
+	 * @param uptime: number
+	 */
+	public setSystemUptime(uptime: number): void
+	{
+		this.nodeConfig.systemUptime = uptime;
 	}
 }
 
