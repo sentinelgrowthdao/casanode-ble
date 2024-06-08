@@ -56,6 +56,7 @@ export interface NodeConfigData
 	systemOs: string;
 	systemKernel: string;
 	systemArch: string;
+	casanodeVersion: string;
 }
 
 class NodeManager
@@ -91,6 +92,8 @@ class NodeManager
 		systemKernel: '',
 		// Contains the architecture of the node
 		systemArch: '',
+		// Contains the version of the node
+		casanodeVersion: '1.0.0',
 	};
 	
 	private constructor()

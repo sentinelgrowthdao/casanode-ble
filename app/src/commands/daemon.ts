@@ -29,8 +29,11 @@ import { NodeLocationCharacteristic } from '@/characteristics/nodeLocation';
 import { CertExpirityCharacteristic } from '@/characteristics/certExpirity';
 import { BandwidthSpeedCharacteristic } from '@/characteristics/bandwidthSpeed';
 import { SystemUptimeCharacteristic } from '@/characteristics/systemUptime';
-import { SystemInfosCharacteristic } from '@/characteristics/systemInfos';
+import { CasanodeVersionCharacteristic } from '@/characteristics/casanodeVersion';
 import { DockerImageCharacteristic } from '@/characteristics/dockerImage';
+import { SystemArchCharacteristic } from '@/characteristics/systemArch';
+import { SystemOsCharacteristic } from '@/characteristics/systemOs';
+import { SystemKernelCharacteristic } from '@/characteristics/systemKernel';
 
 // TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
 const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -47,8 +50,11 @@ const CHAR_NODE_LOCATION_UUID = '0000180d-0000-1000-8000-00805f9b3505';
 const CHAR_CERT_EXPIRITY_UUID = '0000180d-0000-1000-8000-00805f9b3506';
 const CHAR_BANDWIDTH_SPEED_UUID = '0000180d-0000-1000-8000-00805f9b3507';
 const CHAR_SYSTEM_UPTIME_UUID = '0000180d-0000-1000-8000-00805f9b3508';
-const CHAR_SYSTEM_INFOS_UUID = '0000180d-0000-1000-8000-00805f9b3509';
+const CHAR_CASANODE_VERSION_UUID = '0000180d-0000-1000-8000-00805f9b3509';
 const CHAR_DOCKER_IMAGE_UUID = '0000180d-0000-1000-8000-00805f9b350a';
+const CHAR_SYSTEM_OS_UUID = '0000180d-0000-1000-8000-00805f9b350b';
+const CHAR_SYSTEM_ARCH_UUID = '0000180d-0000-1000-8000-00805f9b350c';
+const CHAR_SYSTEM_KERNEL_UUID = '0000180d-0000-1000-8000-00805f9b350d';
 
 export const daemonCommand = async () =>
 {
@@ -87,8 +93,11 @@ export const daemonCommand = async () =>
 			new CertExpirityCharacteristic(CHAR_CERT_EXPIRITY_UUID).create(),
 			new BandwidthSpeedCharacteristic(CHAR_BANDWIDTH_SPEED_UUID).create(),
 			new SystemUptimeCharacteristic(CHAR_SYSTEM_UPTIME_UUID).create(),
-			new SystemInfosCharacteristic(CHAR_SYSTEM_INFOS_UUID).create(),
+			new CasanodeVersionCharacteristic(CHAR_CASANODE_VERSION_UUID).create(),
 			new DockerImageCharacteristic(CHAR_DOCKER_IMAGE_UUID).create(),
+			new SystemArchCharacteristic(CHAR_SYSTEM_ARCH_UUID).create(),
+			new SystemOsCharacteristic(CHAR_SYSTEM_OS_UUID).create(),
+			new SystemKernelCharacteristic(CHAR_SYSTEM_KERNEL_UUID).create(),
 		]
 	});
 	

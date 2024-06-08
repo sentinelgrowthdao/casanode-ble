@@ -2,7 +2,7 @@ import { createRequire } from 'module';
 
 import nodeManager from '@utils/node';
 
-export class SystemInfosCharacteristic
+export class SystemKernelCharacteristic
 {
 	/**
 	 * Bleno instance
@@ -27,7 +27,7 @@ export class SystemInfosCharacteristic
 	}
 	
 	/**
-	 * Create a new instance of SystemInfosCharacteristic
+	 * Create a new instance of SystemKernelCharacteristic
 	 */
 	public create()//: typeof Bleno.Characteristic 
 	{
@@ -49,13 +49,9 @@ export class SystemInfosCharacteristic
 	 */
 	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
 	{
-		const info = {
-			casanodeVersion: '1.0.0',
-			systemOs: nodeManager.getConfig().systemOs,
-			systemKernel: nodeManager.getConfig().systemKernel,
-			systemArch: nodeManager.getConfig().systemArch,
-		};
+		// Get the value from the node manager
+		const value = nodeManager.getConfig().systemKernel;
 		// Return the value to the subscriber
-		callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(JSON.stringify(info)));
+		callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(value));
 	}
 }
