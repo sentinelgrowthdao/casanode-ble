@@ -34,6 +34,8 @@ import { DockerImageCharacteristic } from '@/characteristics/dockerImage';
 import { SystemArchCharacteristic } from '@/characteristics/systemArch';
 import { SystemOsCharacteristic } from '@/characteristics/systemOs';
 import { SystemKernelCharacteristic } from '@/characteristics/systemKernel';
+import { PublicAddressCharacteristic } from '@/characteristics/publicAddress';
+import { NodeAddressCharacteristic } from '@/characteristics/nodeAddress';
 
 // TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
 const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -55,6 +57,8 @@ const CHAR_DOCKER_IMAGE_UUID = '0000180d-0000-1000-8000-00805f9b350a';
 const CHAR_SYSTEM_OS_UUID = '0000180d-0000-1000-8000-00805f9b350b';
 const CHAR_SYSTEM_ARCH_UUID = '0000180d-0000-1000-8000-00805f9b350c';
 const CHAR_SYSTEM_KERNEL_UUID = '0000180d-0000-1000-8000-00805f9b350d';
+const CHAR_PUBLIC_ADDRESS_UUID = '0000180d-0000-1000-8000-00805f9b350f';
+const CHAR_ADDRESS_NODE_UUID = '0000180d-0000-1000-8000-00805f9b3510';
 
 export const daemonCommand = async () =>
 {
@@ -98,6 +102,8 @@ export const daemonCommand = async () =>
 			new SystemArchCharacteristic(CHAR_SYSTEM_ARCH_UUID).create(),
 			new SystemOsCharacteristic(CHAR_SYSTEM_OS_UUID).create(),
 			new SystemKernelCharacteristic(CHAR_SYSTEM_KERNEL_UUID).create(),
+			new PublicAddressCharacteristic(CHAR_PUBLIC_ADDRESS_UUID).create(),
+			new NodeAddressCharacteristic(CHAR_ADDRESS_NODE_UUID).create(),
 		]
 	});
 	
