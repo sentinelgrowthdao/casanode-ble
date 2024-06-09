@@ -103,7 +103,7 @@ export class NodePassphraseCharacteristic
 				
 				// Notify the subscriber if the value is set
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-				Logger.info(`Parameter "passphrase" updated via Bluetooth to: ${value}`);
+				Logger.info(`Parameter "passphrase" updated via Bluetooth.`);
 			}
 		}).catch((error) =>
 		{
