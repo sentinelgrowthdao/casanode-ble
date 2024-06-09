@@ -410,6 +410,33 @@ class NodeManager
 	}
 	
 	/**
+	 * Check if passphrase can unlock the wallet
+	 * @param passphrase string|null
+	 * @returns boolean
+	 */
+	public async walletUnlock(passphrase: string|null = null): Promise<boolean>
+	{
+		// If passphrase required and not provided
+		if(!this.isPassphraseValid(passphrase))
+		{
+			Logger.error('Passphrase is required to check if the wallet exists.');
+			return false;
+		}
+		
+		// Stdin for the command
+		let stdin: string[]|null = this.buildStdinCommand(passphrase);
+		// List all wallet keys
+		const output: string|null = await containerCommand(['process', 'keys', 'list'], stdin);
+		
+		// If an error occurred
+		if(output === null || output.includes('incorrect passphrase'))
+			return false;
+		
+		// Passphrase can unlock the wallet
+		return true;
+	}
+	
+	/**
 	 * Check if the wallet exists
 	 * @param passphrase string|null
 	 * @returns boolean|undefined
@@ -888,6 +915,7 @@ export const createNodeConfig = (): Promise<boolean> => nodeManager.createNodeCo
 export const createVpnConfig = (): Promise<boolean> => nodeManager.createVpnConfig();
 export const passphraseRequired = (): boolean => nodeManager.passphraseRequired();
 export const passphraseAvailable = (): boolean => nodeManager.passphraseAvailable();
+export const walletUnlock = (passphrase: string|null = null): Promise<boolean> => nodeManager.walletUnlock(passphrase);
 export const walletExists = (passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletExists(passphrase);
 export const walletRemove = (passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletRemove(passphrase);
 export const walletLoadAddresses = (passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletLoadAddresses(passphrase);
