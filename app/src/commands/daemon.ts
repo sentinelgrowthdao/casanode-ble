@@ -33,6 +33,7 @@ import { SystemKernelCharacteristic } from '@/characteristics/systemKernel';
 import { NodePassphraseCharacteristic } from '@/characteristics/nodePassphrase';
 import { PublicAddressCharacteristic } from '@/characteristics/publicAddress';
 import { NodeAddressCharacteristic } from '@/characteristics/nodeAddress';
+import { NodeBalanceCharacteristic } from '@/characteristics/nodeBalance';
 
 // TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
 const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -57,6 +58,7 @@ const CHAR_SYSTEM_KERNEL_UUID = '0000180d-0000-1000-8000-00805f9b350d';
 const CHAR_NODE_PASSPHRASE_UUID = '0000180d-0000-1000-8000-00805f9b350e';
 const CHAR_PUBLIC_ADDRESS_UUID = '0000180d-0000-1000-8000-00805f9b350f';
 const CHAR_ADDRESS_NODE_UUID = '0000180d-0000-1000-8000-00805f9b3510';
+const CHAR_NODE_BALANCE_UUID = '0000180d-0000-1000-8000-00805f9b3511';
 
 export const daemonCommand = async () =>
 {
@@ -98,6 +100,7 @@ export const daemonCommand = async () =>
 			new NodePassphraseCharacteristic(CHAR_NODE_PASSPHRASE_UUID).create(),
 			new PublicAddressCharacteristic(CHAR_PUBLIC_ADDRESS_UUID).create(),
 			new NodeAddressCharacteristic(CHAR_ADDRESS_NODE_UUID).create(),
+			new NodeBalanceCharacteristic(CHAR_NODE_BALANCE_UUID).create(),
 		]
 	});
 	
