@@ -2,6 +2,7 @@ import { createRequire } from 'module';
 
 import { Logger } from '@utils/logger';
 import nodeManager from '@utils/node';
+import { walletLoadAddresses } from '@utils/node';
 
 export class PublicAddressCharacteristic
 {
@@ -51,8 +52,35 @@ export class PublicAddressCharacteristic
 	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
 	{
 		// Get the value from the configuration
-		const value = nodeManager.getConfig().walletPublicAddress;
-		// Return the value to the subscriber
-		callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(value));
+		const address = nodeManager.getConfig().walletPublicAddress;
+		// If address is empty
+		if(address === '')
+		{
+			// If the passphrase is unavailable
+			if(!nodeManager.passphraseAvailable())
+			{
+				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from(''));
+				return true;
+			}
+			
+			// Get the wallet passphrase stored in the configuration
+			const passphrase = nodeManager.getConfig().walletPassphrase;
+			// Load wallet informations
+			walletLoadAddresses(passphrase).then(() =>
+			{
+				// Get the value from the configuration
+				const address = nodeManager.getConfig().walletPublicAddress;
+				// Return the value to the subscriber
+				callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(address));
+			}).catch((error: any) => {
+				Logger.error(`Error while loading the wallet addresses: ${error}`);
+				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from(''));
+			});
+		}
+		else
+		{
+			// Return the value to the subscriber
+			callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(address));
+		}
 	}
 }
