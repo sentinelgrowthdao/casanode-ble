@@ -429,7 +429,7 @@ class NodeManager
 		const output: string|null = await containerCommand(['process', 'keys', 'list'], stdin);
 		
 		// If an error occurred
-		if(output === null || output.includes('incorrect passphrase'))
+		if(output === null || !output.includes('Name'))
 			return false;
 		
 		// Passphrase can unlock the wallet
