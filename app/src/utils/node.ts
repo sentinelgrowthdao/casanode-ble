@@ -51,6 +51,7 @@ export interface NodeConfigData
 	hourly_prices: string;
 	walletPublicAddress: string;
 	walletNodeAddress: string;
+	walletPassphrase: string;
 	nodeLocation: string;
 	systemUptime: number;
 	systemOs: string;
@@ -80,8 +81,12 @@ class NodeManager
 		gas_prices: '',
 		gigabyte_prices: '',
 		hourly_prices: '',
+		// Contains the public address of the wallet
 		walletPublicAddress: '',
+		// Contains the node address of the wallet
 		walletNodeAddress: '',
+		// Contains the passphrase of the wallet
+		walletPassphrase: '',
 		// Contains the country code of the node
 		nodeLocation: '',
 		// Contains the uptime of the node
@@ -839,6 +844,35 @@ class NodeManager
 		this.nodeConfig.systemArch = arch;
 	}
 	
+	/**
+	 * Check if the passphrase is required
+	 * @returns boolean
+	 */
+	public passphraseRequired(): boolean
+	{
+		return this.nodeConfig.backend === 'file';
+	}
+	
+	/**
+	 * Check if the passphrase can be used
+	 * @returns boolean
+	 */
+	public passphraseAvailable(): boolean
+	{
+		return (this.passphraseRequired() && this.nodeConfig.walletPassphrase.trim().length > 0)
+				|| (!this.passphraseRequired());
+	}
+	
+	/**
+	 * Set the passphrase
+	 * @param passphrase string
+	 * @returns void
+	 */
+	public setPassphrase(passphrase: string): void
+	{
+		this.nodeConfig.walletPassphrase = passphrase;
+	}
+	
 }
 
 // Create a singleton instance of NodeManager
@@ -852,6 +886,8 @@ export const isWireguardConfigFileAvailable = (): boolean => nodeManager.isConfi
 export const isV2RayConfigFileAvailable = (): boolean => nodeManager.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'v2ray.toml'));
 export const createNodeConfig = (): Promise<boolean> => nodeManager.createNodeConfig();
 export const createVpnConfig = (): Promise<boolean> => nodeManager.createVpnConfig();
+export const passphraseRequired = (): boolean => nodeManager.passphraseRequired();
+export const passphraseAvailable = (): boolean => nodeManager.passphraseAvailable();
 export const walletExists = (passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletExists(passphrase);
 export const walletRemove = (passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletRemove(passphrase);
 export const walletLoadAddresses = (passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletLoadAddresses(passphrase);
