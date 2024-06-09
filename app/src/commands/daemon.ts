@@ -9,12 +9,8 @@
 
 import { createRequire } from 'module';	// <- Used to import the Bleno module in the same way as require
 import { Logger } from '@utils/logger';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 
-const execPromise = promisify(exec);
-
-import nodeManager from '@utils/node';
+import { loadingNodeInformations, loadingSystemInformations } from '@actions/startup';
 
 import { HelloCharacteristic } from '@characteristics/hello';
 import { MonikerCharacteristic } from '@characteristics/moniker';
@@ -65,16 +61,11 @@ export const daemonCommand = async () =>
 	console.log('Daemon process started');
 	Logger.info('Daemon process started.');
 	
-	// Load the node location
-	await nodeManager.refreshNodeLocation();
+	// Load the system information
+	await loadingSystemInformations();
 	
-	// Initialize the node uptime
-	nodeManager.setSystemUptime(Math.floor(Date.now() / 1000));
-	
-	// Initialize the system information
-	nodeManager.setSystemOs(`${await runCommand('lsb_release -is')} ${await runCommand('lsb_release -rs')}`);
-	nodeManager.setSystemKernel(`${await runCommand('uname -r')}`);
-	nodeManager.setSystemArch(`${await runCommand('uname -m')}`);
+	// Load the node information
+	await loadingNodeInformations();
 	
 	// Dynamically import the Bleno module using CommonJS require
 	const require = createRequire(import.meta.url);
@@ -146,14 +137,3 @@ export const daemonCommand = async () =>
 		}
 	});
 };
-
-/**
- * Run a command asynchronously
- * @param command string
- * @returns string
- */
-async function runCommand(command: string): Promise<string>
-{
-	const { stdout, stderr } = await execPromise(command);
-	return stdout.trim() || '';
-}
