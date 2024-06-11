@@ -35,6 +35,7 @@ import { PublicAddressCharacteristic } from '@/characteristics/publicAddress';
 import { NodeAddressCharacteristic } from '@/characteristics/nodeAddress';
 import { NodeBalanceCharacteristic } from '@/characteristics/nodeBalance';
 import { NodeStatusCharacteristic } from '@/characteristics/nodeStatus';
+import { CheckInstallationCharacteristic } from '@/characteristics/checkInstallation';
 
 // TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
 const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -61,6 +62,7 @@ const CHAR_PUBLIC_ADDRESS_UUID = '0000180d-0000-1000-8000-00805f9b350f';
 const CHAR_ADDRESS_NODE_UUID = '0000180d-0000-1000-8000-00805f9b3510';
 const CHAR_NODE_BALANCE_UUID = '0000180d-0000-1000-8000-00805f9b3511';
 const CHAR_NODE_STATUS_UUID = '0000180d-0000-1000-8000-00805f9b3512';
+const CHAR_CHECK_INSTALL_UUID = '0000180d-0000-1000-8000-00805f9b3513';
 
 export const daemonCommand = async () =>
 {
@@ -104,6 +106,7 @@ export const daemonCommand = async () =>
 			new NodeAddressCharacteristic(CHAR_ADDRESS_NODE_UUID).create(),
 			new NodeBalanceCharacteristic(CHAR_NODE_BALANCE_UUID).create(),
 			new NodeStatusCharacteristic(CHAR_NODE_STATUS_UUID).create(),
+			new CheckInstallationCharacteristic(CHAR_CHECK_INSTALL_UUID).create(),
 		]
 	});
 	
