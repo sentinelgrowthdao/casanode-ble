@@ -9,7 +9,6 @@ export const checkInstallationCommand = async (options: any) =>
 	console.log(`Installation status:`);
 	console.log(`Docker image: ${status.image ? 'available' : 'not available'}`);
 	console.log(`Docker container: ${status.containerExists ? 'exists' : 'does not exist'}`);
-	console.log(`Sentinel config: ${status.sentinelConfig ? 'available' : 'not available'}`);
-	console.log(`Wireguard config: ${status.wireguardConfig ? 'available' : 'not available'}`);
-	console.log(`V2Ray config: ${status.v2rayConfig ? 'available' : 'not available'}`);
+	console.log(`Node config: ${status.nodeConfig ? 'available' : 'not available'}`);
+	console.log(`Vpn config: ${status.vpnConfig ? 'available' : 'not available'}`);
 };
