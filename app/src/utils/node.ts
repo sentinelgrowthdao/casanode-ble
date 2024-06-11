@@ -778,9 +778,8 @@ class NodeManager
 		// Detect if the node is installed
 		if(install.image === false
 			|| install.containerExists === false
-			|| install.sentinelConfig === false
-			|| install.wireguardConfig === false
-			|| install.v2rayConfig === false)
+			|| install.nodeConfig === false
+			|| install.vpnConfig === false)
 			return 'uninstalled';
 		
 		// Detect if the node is running
