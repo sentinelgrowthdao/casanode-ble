@@ -278,34 +278,66 @@ class NodeManager
 			this.updateConfigValue(configFilePath, 'gas', this.nodeConfig.gas);
 			this.updateConfigValue(configFilePath, 'gas_adjustment', this.nodeConfig.gas_adjustment);
 			this.updateConfigValue(configFilePath, 'gas_prices', this.nodeConfig.gas_prices);
+			this.updateConfigValue(configFilePath, 'gigabyte_prices', this.nodeConfig.gigabyte_prices);
+			this.updateConfigValue(configFilePath, 'hourly_prices', this.nodeConfig.hourly_prices);
 			
-			if(this.nodeConfig.vpn_type === 'wireguard')
-			{
-				const wireguardConfigPath = path.join(config.CONFIG_DIR, 'wireguard.toml');
-				this.updateConfigValue(wireguardConfigPath, 'listen_port', this.nodeConfig.vpn_port);
-			}
-			else if(this.nodeConfig.vpn_type === 'v2ray')
-			{
-				const v2rayConfigPath = path.join(config.CONFIG_DIR, 'v2ray.toml');
-				this.updateConfigValue(v2rayConfigPath, 'listen_port', this.nodeConfig.vpn_port);
-			}
-			
-			if(this.nodeConfig.node_type === 'datacenter')
-			{
-				this.updateConfigValue(configFilePath, 'gigabyte_prices', DATACENTER_GIGABYTE_PRICES);
-				this.updateConfigValue(configFilePath, 'hourly_prices', DATACENTER_HOURLY_PRICES);
-			}
-			else if(this.nodeConfig.node_type === 'residential')
-			{
-				this.updateConfigValue(configFilePath, 'gigabyte_prices', RESIDENTIAL_GIGABYTE_PRICES);
-				this.updateConfigValue(configFilePath, 'gas_prices', RESIDENTIAL_HOURLY_PRICES);
-			}
+			// Apply VPN configuration changes
+			this.applyVpnConfigChanges();
 			
 			Logger.info("Configuration files have been refreshed.");
 		}
 		catch (error)
 		{
 			Logger.error(`Error refreshing configuration files: ${error}`);
+		}
+	}
+	
+	/**
+	 * Apply VPN configuration changes
+	 * @returns void
+	 */
+	private applyVpnConfigChanges(): void
+	{
+		const wireguardConfigPath = path.join(config.CONFIG_DIR, 'wireguard.toml');
+		const v2rayConfigPath = path.join(config.CONFIG_DIR, 'v2ray.toml');
+		
+		// Update VPN configuration files
+		if(this.nodeConfig.vpn_type === 'wireguard')
+		{
+			// If file does not exist, create it
+			if(!this.isConfigFileAvailable(wireguardConfigPath))
+			{
+				// If the other configuration file exists
+				if(this.isConfigFileAvailable(v2rayConfigPath))
+				{
+					// Remove the other configuration file
+					
+				}
+				
+				// Generate the configuration file
+				
+			}
+			
+			// Update the listen port
+			this.updateConfigValue(wireguardConfigPath, 'listen_port', this.nodeConfig.vpn_port);
+		}
+		else if(this.nodeConfig.vpn_type === 'v2ray')
+		{
+			// If file does not exist, create it
+			if(!this.isConfigFileAvailable(v2rayConfigPath))
+			{
+				// If the other configuration file exists
+				if(this.isConfigFileAvailable(wireguardConfigPath))
+				{
+					// Remove the other configuration file
+					
+				}
+				
+				// Generate the configuration file
+				
+			}
+			// Update the listen port
+			this.updateConfigValue(v2rayConfigPath, 'listen_port', this.nodeConfig.vpn_port);
 		}
 	}
 	
@@ -820,6 +852,17 @@ class NodeManager
 	public setNodeType(nodeType: string): void
 	{
 		this.nodeConfig.node_type = nodeType;
+		// Set the prices based on the node type
+		if(this.nodeConfig.node_type === 'datacenter')
+		{
+			this.nodeConfig.gigabyte_prices = DATACENTER_GIGABYTE_PRICES;
+			this.nodeConfig.hourly_prices = DATACENTER_HOURLY_PRICES;
+		}
+		else if(this.nodeConfig.node_type === 'residential')
+		{
+			this.nodeConfig.gigabyte_prices = RESIDENTIAL_GIGABYTE_PRICES;
+			this.nodeConfig.hourly_prices = RESIDENTIAL_HOURLY_PRICES;
+		}
 	}
 	
 	/**
@@ -850,6 +893,8 @@ class NodeManager
 	public setVpnType(vpnType: string): void
 	{
 		this.nodeConfig.vpn_type = vpnType;
+		// Update handshake configuration based on the VPN type
+		this.nodeConfig.handshake = vpnType === 'wireguard' ? true : false;
 	}
 	
 	/**
