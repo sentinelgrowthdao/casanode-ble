@@ -18,7 +18,8 @@ class DockerManager
 	
 	private constructor()
 	{
-		this.docker = new Docker();
+		const socketPath = '/run/user/1000/docker.sock';
+		this.docker = new Docker({ socketPath: socketPath });
 	}
 	
 	/**
