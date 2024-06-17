@@ -383,7 +383,12 @@ class NodeManager
 		
 		// Return if the configuration file has been created
 		if(output !== null && output === '')
-			return true
+		{
+			// Load the node configuration
+			await this.loadNodeConfig();
+			// Return success
+			return true;
+		}
 		else
 		{
 			Logger.error(`Failed to create node configuration file: ${output?.trim()}`);
@@ -412,7 +417,12 @@ class NodeManager
 		
 		// Return if the configuration file has been created
 		if(output !== null && output === '')
-			return true
+		{
+			// Load the node configuration
+			await this.loadNodeConfig();
+			// Return success
+			return true;
+		}
 		else
 		{
 			Logger.error(`Failed to create VPN configuration file: ${output?.trim()}`);
