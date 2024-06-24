@@ -38,6 +38,7 @@ import { NodeStatusCharacteristic } from '@/characteristics/nodeStatus';
 import { CheckInstallationCharacteristic } from '@/characteristics/checkInstallation';
 import { InstallDockerImageCharacteristic } from '@/characteristics/installDockerImage';
 import { InstallConfigsCharacteristic } from '@/characteristics/installConfigs';
+import { NodeMnemonicCharacteristic } from '@/characteristics/nodeMnemonic';
 
 // TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
 const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -67,6 +68,7 @@ const CHAR_NODE_STATUS_UUID = '0000180d-0000-1000-8000-00805f9b3512';
 const CHAR_CHECK_INSTALL_UUID = '0000180d-0000-1000-8000-00805f9b3513';
 const CHAR_INSTALL_IMAGE_UUID = '0000180d-0000-1000-8000-00805f9b3514';
 const CHAR_INSTALL_CONFIGS_UUID = '0000180d-0000-1000-8000-00805f9b3515';
+const CHAR_MNEMONIC_UUID = '0000180d-0000-1000-8000-00805f9b351d';
 
 export const daemonCommand = async () =>
 {
@@ -112,7 +114,8 @@ export const daemonCommand = async () =>
 			new NodeStatusCharacteristic(CHAR_NODE_STATUS_UUID).create(),
 			new CheckInstallationCharacteristic(CHAR_CHECK_INSTALL_UUID).create(),
 			new InstallDockerImageCharacteristic(CHAR_INSTALL_IMAGE_UUID).create(),
-			new InstallConfigsCharacteristic(CHAR_INSTALL_CONFIGS_UUID).create()
+			new InstallConfigsCharacteristic(CHAR_INSTALL_CONFIGS_UUID).create(),
+			new NodeMnemonicCharacteristic(CHAR_MNEMONIC_UUID).create()
 		]
 	});
 	

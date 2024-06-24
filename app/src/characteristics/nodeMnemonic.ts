@@ -1,0 +1,156 @@
+import { createRequire } from 'module';
+import { Logger } from '@utils/logger';
+import crypto from 'crypto';
+import nodeManager from '@utils/node';
+
+export class NodeMnemonicCharacteristic
+{
+	private Bleno: any = undefined;
+	private characteristicUuid: string = '';
+	private dataBuffer: Buffer = Buffer.alloc(0);
+	private expectedLength: number = 0;
+	private lastTimestamp: number = 0;
+	private readIndex: number = 0;
+	private writeIndex: number = 0;
+	
+	constructor(uuid: string)
+	{
+		const require = createRequire(import.meta.url);
+		this.Bleno = require('bleno');
+		this.characteristicUuid = uuid;
+		
+		
+		this.dataBuffer = Buffer.alloc(0);
+		this.expectedLength = 0;
+		this.lastTimestamp = 0;
+		this.writeIndex = 0;
+	}
+
+	public create()
+	{
+		if (this.Bleno === undefined)
+			return null;
+		
+		return new this.Bleno.Characteristic({
+			uuid: this.characteristicUuid,
+			properties: ['read', 'write'],
+			onReadRequest: this.onReadRequest.bind(this),
+			onWriteRequest: this.onWriteRequest.bind(this),
+		});
+	}
+	
+	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
+	{
+		const currentTimestamp = Date.now();
+		if (this.readIndex === 0 || (currentTimestamp - this.lastTimestamp) > 3000 || this.dataBuffer.length === 0)
+		{
+			const mnemonic: string[] = nodeManager.getConfig().walletMnemonic;
+			if (!mnemonic || mnemonic.length === 0)
+			{
+				Logger.error('No mnemonic found in nodeManager.');
+				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from('Mnemonic not found'));
+				return;
+			}
+			
+			const mnemonicStr = mnemonic.join(' ');
+			const hash = crypto.createHash('sha256').update(mnemonicStr).digest('hex');
+			const dataToSend = `${mnemonicStr} ${hash}`;
+			const dataBuffer = Buffer.from(dataToSend);
+			
+			this.dataBuffer = dataBuffer;
+			this.expectedLength = dataBuffer.length;
+			this.lastTimestamp = currentTimestamp;
+			this.readIndex = 1;
+			
+			// console.log(`dataBuffer = ${this.dataBuffer} expectedLength = ${this.expectedLength}`);
+			
+			const lengthBuffer = Buffer.alloc(4);
+			lengthBuffer.writeUInt32LE(this.expectedLength, 0);
+			callback(this.Bleno.Characteristic.RESULT_SUCCESS, lengthBuffer);
+		}
+		else
+		{
+			// Calculate the chunk size
+			const index = this.readIndex -1;
+			const chunkSize = Math.min(20, this.expectedLength - (index * 20));
+			// Create the chunk buffer
+			const chunk = Buffer.alloc(chunkSize);
+			// Copy the chunk data from the data buffer
+			this.dataBuffer.copy(chunk, 0, 0, chunkSize);
+			
+			// console.log(`chunkSize = ${chunkSize}, readIndex = ${index}, dataBuffer = ${this.dataBuffer}, chunk = ${chunk}`);
+			
+			// Update the data buffer to remove the chunk
+			const remainingData = Buffer.alloc(this.dataBuffer.length - chunkSize);
+			this.dataBuffer.copy(remainingData, 0, chunkSize);
+			this.dataBuffer = remainingData;
+			
+			// console.log(`remainingData = ${remainingData}`);
+			
+			// Update the read index
+			this.readIndex++;
+			this.lastTimestamp = currentTimestamp;
+			
+			// Return the chunk data
+			callback(this.Bleno.Characteristic.RESULT_SUCCESS, chunk);
+		}
+	}
+	
+	public onWriteRequest(data: Buffer, offset: number, withoutResponse: boolean, callback: (result: number) => void)
+	{
+		// console.log('data:"'+data.toString('utf-8')+'"');
+		
+		const currentTimestamp = Date.now();
+		if (this.writeIndex === 0 || (currentTimestamp - this.lastTimestamp) > 3000)
+		{
+			this.dataBuffer = Buffer.alloc(0);
+			this.expectedLength = data.readUInt32LE(0);
+			this.lastTimestamp = currentTimestamp;
+			this.writeIndex = 1;
+			
+			// console.log(`expectedLength = ${this.expectedLength}`);
+			
+			callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+			return;
+		}
+		
+		console.log(`data: "${data.toString('utf-8')}" length: ${data.length}`);
+		
+		this.dataBuffer = Buffer.concat([this.dataBuffer, data]);
+		this.lastTimestamp = currentTimestamp;
+		this.writeIndex++;
+		
+		// console.log(`dataBuffer = "${this.dataBuffer}" receivedLength = ${this.dataBuffer.length}, expectedLength = ${this.expectedLength}`);
+		
+		const receivedLength = this.dataBuffer.length;
+		if (receivedLength === this.expectedLength)
+		{
+			const receivedStr = this.dataBuffer.toString('utf-8');
+			const parts = receivedStr.split(' ');
+			const hash = parts.pop();
+			const mnemonic = parts.join(' ');
+			
+			// Generate the hash of the received mnemonic
+			const calculatedHash = crypto.createHash('sha256').update(mnemonic).digest('hex');
+			
+			console.log(`receivedStr: ${receivedStr} hash: ${hash} mnemonic: ${mnemonic} calculatedHash: ${calculatedHash}`);
+			
+			// Check if the hash matches
+			if(calculatedHash === hash)
+			{
+				nodeManager.setMnemonic(mnemonic.split(' '));
+				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+				console.info(`Mnemonic updated via Bluetooth to: ${mnemonic}`);
+			}
+			else
+			{
+				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+				console.error('Hash mismatch for received mnemonic');
+			}
+		}
+		else
+		{
+			callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+		}
+	}
+}

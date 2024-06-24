@@ -34,7 +34,7 @@ export interface BalancesResponse
 
 export interface NodeConfigData
 {
-	[key: string]: string | number | boolean | undefined;
+	[key: string]: string | string[] | number | boolean | undefined;
 	moniker: string;
 	chain_id: string;
 	rpc_addresses: string;
@@ -55,6 +55,7 @@ export interface NodeConfigData
 	walletPublicAddress: string;
 	walletNodeAddress: string;
 	walletPassphrase: string;
+	walletMnemonic: string[];
 	nodeLocation: string;
 	systemUptime: number;
 	systemOs: string;
@@ -90,6 +91,8 @@ class NodeManager
 		walletNodeAddress: '',
 		// Contains the passphrase of the wallet
 		walletPassphrase: '',
+		// Contains the mnemonic of the wallet
+		walletMnemonic: [],
 		// Contains the country code of the node
 		nodeLocation: '',
 		// Contains the uptime of the node
@@ -991,6 +994,13 @@ class NodeManager
 		this.nodeConfig.walletPassphrase = passphrase;
 	}
 	
+	/**
+	 * Set the mnemonic
+	 */
+	public setMnemonic(mnemonic: string[]): void
+	{
+		this.nodeConfig.walletMnemonic = mnemonic;
+	}
 }
 
 // Create a singleton instance of NodeManager
