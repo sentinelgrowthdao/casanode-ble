@@ -5,14 +5,50 @@ import nodeManager from '@utils/node';
 
 export class NodeMnemonicCharacteristic
 {
+	/**
+	 * Bleno instance
+	 * @type any
+	 */
 	private Bleno: any = undefined;
+	/**
+	 * UUID of the characteristic
+	 * @type string
+	 */
 	private characteristicUuid: string = '';
+	
+	/**
+	 * Data buffer
+	 * @type Buffer
+	 */
 	private dataBuffer: Buffer = Buffer.alloc(0);
+	
+	/**
+	 * Expected length of the data
+	 * @type number
+	 */
 	private expectedLength: number = 0;
+	
+	/**
+	 * Last timestamp
+	 * @type number
+	 */
 	private lastTimestamp: number = 0;
+	
+	/**
+	 * Read index
+	 * @type number
+	 */
 	private readIndex: number = 0;
+	
+	/**
+	 * Write index
+	 * @type number
+	 */
 	private writeIndex: number = 0;
 	
+	/**
+	 * Create a new instance of Characteristic
+	 */
 	constructor(uuid: string)
 	{
 		const require = createRequire(import.meta.url);
@@ -25,7 +61,10 @@ export class NodeMnemonicCharacteristic
 		this.lastTimestamp = 0;
 		this.writeIndex = 0;
 	}
-
+	
+	/**
+	 * Create a new instance of NodeTypeCharacteristic
+	 */
 	public create()
 	{
 		if (this.Bleno === undefined)
@@ -39,6 +78,12 @@ export class NodeMnemonicCharacteristic
 		});
 	}
 	
+	/**
+	 * Called when the characteristic is read
+	 * @param offset number
+	 * @param callback (result: number, data: Buffer) => void
+	 * @returns void
+	 */
 	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		const currentTimestamp = Date.now();
@@ -96,6 +141,14 @@ export class NodeMnemonicCharacteristic
 		}
 	}
 	
+	/**
+	 * Called when the characteristic is written
+	 * @param data Buffer
+	 * @param offset number
+	 * @param withoutResponse boolean
+	 * @param callback (result: number) => void
+	 * @returns void
+	 */
 	public onWriteRequest(data: Buffer, offset: number, withoutResponse: boolean, callback: (result: number) => void)
 	{
 		// console.log('data:"'+data.toString('utf-8')+'"');
