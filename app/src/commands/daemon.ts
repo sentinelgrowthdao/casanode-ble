@@ -39,6 +39,7 @@ import { CheckInstallationCharacteristic } from '@/characteristics/checkInstalla
 import { InstallDockerImageCharacteristic } from '@/characteristics/installDockerImage';
 import { InstallConfigsCharacteristic } from '@/characteristics/installConfigs';
 import { NodeMnemonicCharacteristic } from '@/characteristics/nodeMnemonic';
+import { WalletActionsCharacteristic } from '@/characteristics/walletActions';
 
 // TODO: Add the UUIDs for the BLE service and characteristics in the configuration file
 const NODE_BLE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
@@ -69,6 +70,7 @@ const CHAR_CHECK_INSTALL_UUID = '0000180d-0000-1000-8000-00805f9b3513';
 const CHAR_INSTALL_IMAGE_UUID = '0000180d-0000-1000-8000-00805f9b3514';
 const CHAR_INSTALL_CONFIGS_UUID = '0000180d-0000-1000-8000-00805f9b3515';
 const CHAR_MNEMONIC_UUID = '0000180d-0000-1000-8000-00805f9b351d';
+const CHAR_WALLET_ACTIONS_UUID = '0000180d-0000-1000-8000-00805f9b351e';
 
 export const daemonCommand = async () =>
 {
@@ -115,7 +117,8 @@ export const daemonCommand = async () =>
 			new CheckInstallationCharacteristic(CHAR_CHECK_INSTALL_UUID).create(),
 			new InstallDockerImageCharacteristic(CHAR_INSTALL_IMAGE_UUID).create(),
 			new InstallConfigsCharacteristic(CHAR_INSTALL_CONFIGS_UUID).create(),
-			new NodeMnemonicCharacteristic(CHAR_MNEMONIC_UUID).create()
+			new NodeMnemonicCharacteristic(CHAR_MNEMONIC_UUID).create(),
+			new WalletActionsCharacteristic(CHAR_WALLET_ACTIONS_UUID).create(),
 		]
 	});
 	
