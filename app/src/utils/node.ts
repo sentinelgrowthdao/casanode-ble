@@ -685,7 +685,7 @@ class NodeManager
 	 * @param passphrase: string|null|undefined
 	 * @returns boolean
 	 */
-	public async walletRecover(mnemonic: string, passphrase: string|null = null): Promise<boolean|undefined>
+	public async walletRecover(mnemonic: string|string[], passphrase: string|null = null): Promise<boolean|undefined>
 	{
 		// If passphrase required and not provided
 		if(!this.isPassphraseValid(passphrase))
@@ -698,6 +698,10 @@ class NodeManager
 		const exists = await this.walletExists(passphrase);
 		if(exists)
 			return exists === undefined ? undefined : false;
+		
+		// Convert string[] to string
+		if(Array.isArray(mnemonic))
+			mnemonic = mnemonic.join(' ');
 		
 		// Stdin for the command
 		let stdin: string[]|null = this.buildStdinCommand(passphrase, 2, [mnemonic]);
@@ -1021,5 +1025,5 @@ export const walletExists = (passphrase: string|null = null): Promise<boolean|un
 export const walletRemove = (passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletRemove(passphrase);
 export const walletLoadAddresses = (passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletLoadAddresses(passphrase);
 export const walletCreate = (passphrase: string|null = null): Promise<string[]|null|undefined> => nodeManager.walletCreate(passphrase);
-export const walletRecover = (mnemonic: string, passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletRecover(mnemonic, passphrase);
+export const walletRecover = (mnemonic: string|string[], passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletRecover(mnemonic, passphrase);
 export const walletBalance = (publicAddress: string|null = null): Promise<BalanceWallet> => nodeManager.getWalletBalance(publicAddress);
