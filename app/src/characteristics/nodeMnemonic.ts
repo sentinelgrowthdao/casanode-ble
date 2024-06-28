@@ -188,17 +188,25 @@ export class NodeMnemonicCharacteristic
 			
 			console.log(`receivedStr: ${receivedStr} hash: ${hash} mnemonic: ${mnemonic} calculatedHash: ${calculatedHash}`);
 			
-			// Check if the hash matches
-			if(calculatedHash === hash)
+			// Mnemonic regex
+			const mnemonicRegex = /^(\b\w+\b\s*){24}$/;
+			
+			// Check if the hash matches and mnemonic is valid
+			if(calculatedHash === hash && mnemonicRegex.test(mnemonic))
 			{
 				nodeManager.setMnemonic(mnemonic.split(' '));
-				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 				console.info(`Mnemonic updated via Bluetooth to: ${mnemonic}`);
+				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 			}
 			else
 			{
+				// If mnemonic is invalid
+				if(!mnemonicRegex.test(mnemonic))
+					Logger.error('Mnemonic format is invalid');
+				else
+					Logger.error('Hash mismatch for received mnemonic');
+				
 				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-				console.error('Hash mismatch for received mnemonic');
 			}
 		}
 		else
