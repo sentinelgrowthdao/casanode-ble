@@ -1005,6 +1005,14 @@ class NodeManager
 	{
 		this.nodeConfig.walletMnemonic = mnemonic;
 	}
+	
+	/**
+	 * Set the backend
+	 */
+	public setBackend(backend: string): void
+	{
+		this.nodeConfig.backend = backend;
+	}
 }
 
 // Create a singleton instance of NodeManager
