@@ -73,7 +73,7 @@ export class NodeKeyringBackendCharacteristic
 		const value = data.toString('utf-8').trim();
 		
 		// Check if the value is valid
-		if (value === 'test' || value === 'file')
+		if (value !== 'test' && value !== 'file')
 		{
 			Logger.error('Invalid value received via Bluetooth for "backend".');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
