@@ -462,7 +462,7 @@ class NodeManager
 	public isPassphraseValid(passphrase: string | null): boolean
 	{
 		// Return false if the passphrase is required but not provided
-		if(this.nodeConfig.backend === 'file' && passphrase === null || passphrase?.trim().length === 0)
+		if(this.nodeConfig.backend === 'file' && (passphrase === null || passphrase?.trim().length === 0))
 			return false;
 		// Return true if the passphrase is valid
 		return true;
