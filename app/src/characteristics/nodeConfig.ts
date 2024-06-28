@@ -58,7 +58,7 @@ export class NodeConfigCharacteristic
 		// Check if the value is invalid
 		if (value !== 'apply') 
 		{
-			Logger.error('Invalid value received via Bluetooth for "moniker".');
+			Logger.error('Invalid value received via Bluetooth for updating the node configuration.');
 			callback(this.Bleno.Characteristic.RESULT_INVALID_ATTRIBUTE_LENGTH);
 			return;
 		}
@@ -68,6 +68,6 @@ export class NodeConfigCharacteristic
 		
 		// Notify the subscriber if the value is set
 		callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-		Logger.info(`Parameter "moniker" updated via Bluetooth to: ${value}`);
+		Logger.info(`Node configuration updated.`);
 	}
 }
