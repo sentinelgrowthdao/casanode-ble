@@ -198,7 +198,7 @@ class NodeManager
 			
 			// Extract the node port
 			if (listen_on && listen_on !== "" && listen_on.includes(':'))
-				this.nodeConfig.node_port = parseInt(remote_url.split(':')[1]);
+				this.nodeConfig.node_port = parseInt(listen_on.split(':')[1]);
 			else
 				this.nodeConfig.node_port = 0;
 			
