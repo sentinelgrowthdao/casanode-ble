@@ -170,3 +170,7 @@ class CertificateManager
 // Create a singleton instance of certificateManager
 const certificateManager = CertificateManager.getInstance();
 export default certificateManager;
+
+export const certificateGenerate = (): Promise<boolean> => certificateManager.generate();
+export const certificateInfo = (): CertificateInfo | null => certificateManager.info();
+export const certificateRemove = (): Promise<boolean> => certificateManager.remove();
