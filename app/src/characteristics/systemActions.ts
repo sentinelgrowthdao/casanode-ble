@@ -205,6 +205,9 @@ export class SystemActionsCharacteristic
 				Logger.info(`Deleting directory: ${sentinelNodeDir}`);
 				await fs.rm(sentinelNodeDir, { recursive: true });
 				
+				// Reset the node configuration
+				nodeManager.resetNodeConfig();
+				
 				// Resolve the promise when all operations are completed successfully
 				resolve();
 			}
