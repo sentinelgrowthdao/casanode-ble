@@ -841,7 +841,8 @@ class NodeManager
 		if(install.image === false
 			|| install.containerExists === false
 			|| install.nodeConfig === false
-			|| install.vpnConfig === false)
+			|| install.vpnConfig === false
+			|| install.certificateKey === false)
 			return 'uninstalled';
 		
 		// Detect if the node is running
