@@ -45,9 +45,9 @@ class CertificateManager
 	{
 		try
 		{
-			// If certificate files exist, return true
+			// If certificate files exist, remove it
 			if (await fs.pathExists(this.certFilePath) && await fs.pathExists(this.keyFilePath))
-				return true;
+				await this.remove();
 			
 			// Generate certificate and private key
 			const keys = forge.pki.rsa.generateKeyPair(2048);
