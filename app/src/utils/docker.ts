@@ -234,17 +234,17 @@ class DockerManager
 			};
 			
 			// Add port bindings for WireGuard or V2Ray
-			if (configNode.node_type === 'wireguard')
+			if (configNode.vpn_type === 'wireguard')
 			{
 				createOptions.HostConfig.PortBindings[`${configNode.vpn_port}/udp`] = [{ HostPort: `${configNode.vpn_port}` }];
 			}
-			else if (configNode.nodeType === 'v2ray')
+			else if (configNode.vpn_type === 'v2ray')
 			{
 				createOptions.HostConfig.PortBindings[`${configNode.vpn_port}/tcp`] = [{ HostPort: `${configNode.vpn_port}` }];
 			}
 			else
 			{
-				Logger.error(`Invalid node type or missing port.`);
+				Logger.error(`Invalid node type or missing port. Type: ${configNode.vpn_type}, Port: ${configNode.vpn_port}`);
 				return false;
 			}
 			
