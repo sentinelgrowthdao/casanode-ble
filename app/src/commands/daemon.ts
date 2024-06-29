@@ -38,6 +38,9 @@ import { NodeStatusCharacteristic } from '@/characteristics/nodeStatus';
 import { CheckInstallationCharacteristic } from '@/characteristics/checkInstallation';
 import { InstallDockerImageCharacteristic } from '@/characteristics/installDockerImage';
 import { InstallConfigsCharacteristic } from '@/characteristics/installConfigs';
+import { NodeActionsCharacteristic } from '@/characteristics/nodeActions';
+import { SystemActionsCharacteristic } from '@/characteristics/systemActions';
+import { CertificateActionsCharacteristic } from '@/characteristics/certificateActions';
 import { NodeMnemonicCharacteristic } from '@/characteristics/nodeMnemonic';
 import { WalletActionsCharacteristic } from '@/characteristics/walletActions';
 import { NodeKeyringBackendCharacteristic } from '@/characteristics/nodeKeyringBackend';
@@ -70,9 +73,12 @@ const CHAR_NODE_STATUS_UUID = '0000180d-0000-1000-8000-00805f9b3512';
 const CHAR_CHECK_INSTALL_UUID = '0000180d-0000-1000-8000-00805f9b3513';
 const CHAR_INSTALL_IMAGE_UUID = '0000180d-0000-1000-8000-00805f9b3514';
 const CHAR_INSTALL_CONFIGS_UUID = '0000180d-0000-1000-8000-00805f9b3515';
-const CHAR_MNEMONIC_UUID = '0000180d-0000-1000-8000-00805f9b351d';
-const CHAR_WALLET_ACTIONS_UUID = '0000180d-0000-1000-8000-00805f9b351e';
-const CHAR_NODE_KEYRING_BACKEND_UUID = '0000180d-0000-1000-8000-00805f9b351f';
+const CHAR_NODE_ACTIONS_UUID = '0000180d-0000-1000-8000-00805f9b3516';
+const CHAR_SYSTEM_ACTIONS_UUID = '0000180d-0000-1000-8000-00805f9b3517';
+const CHAR_CERTIFICATE_ACTIONS_UUID = '0000180d-0000-1000-8000-00805f9b3518';
+const CHAR_WALLET_MNEMONIC_UUID = '0000180d-0000-1000-8000-00805f9b3519';
+const CHAR_WALLET_ACTIONS_UUID = '0000180d-0000-1000-8000-00805f9b351a';
+const CHAR_NODE_KEYRING_BACKEND_UUID = '0000180d-0000-1000-8000-00805f9b351b';
 
 export const daemonCommand = async () =>
 {
@@ -119,7 +125,10 @@ export const daemonCommand = async () =>
 			new CheckInstallationCharacteristic(CHAR_CHECK_INSTALL_UUID).create(),
 			new InstallDockerImageCharacteristic(CHAR_INSTALL_IMAGE_UUID).create(),
 			new InstallConfigsCharacteristic(CHAR_INSTALL_CONFIGS_UUID).create(),
-			new NodeMnemonicCharacteristic(CHAR_MNEMONIC_UUID).create(),
+			new NodeActionsCharacteristic(CHAR_NODE_ACTIONS_UUID).create(),
+			new SystemActionsCharacteristic(CHAR_SYSTEM_ACTIONS_UUID).create(),
+			new CertificateActionsCharacteristic(CHAR_CERTIFICATE_ACTIONS_UUID).create(),
+			new NodeMnemonicCharacteristic(CHAR_WALLET_MNEMONIC_UUID).create(),
 			new WalletActionsCharacteristic(CHAR_WALLET_ACTIONS_UUID).create(),
 			new NodeKeyringBackendCharacteristic(CHAR_NODE_KEYRING_BACKEND_UUID).create(),
 		]
