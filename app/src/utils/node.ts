@@ -67,7 +67,7 @@ export interface NodeConfigData
 class NodeManager
 {
 	private static instance: NodeManager;
-	private nodeConfig: NodeConfigData = {
+	private defaultNodeConfig: NodeConfigData = {
 		moniker: '',
 		node_type: '',
 		chain_id: '',
@@ -106,6 +106,8 @@ class NodeManager
 		// Contains the version of the node
 		casanodeVersion: '1.0.0',
 	};
+
+	private nodeConfig: NodeConfigData = { ...this.defaultNodeConfig };
 	
 	private constructor()
 	{
@@ -132,6 +134,15 @@ class NodeManager
 	public getConfig(): NodeConfigData
 	{
 		return this.nodeConfig;
+	}
+	
+	/**
+	 * Reset the node configuration
+	 * @returns void
+	 */
+	public resetNodeConfig(): void
+	{
+		this.nodeConfig = { ...this.defaultNodeConfig };
 	}
 	
 	/**
