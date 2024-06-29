@@ -1024,6 +1024,7 @@ export const nodeConfig = (): NodeConfigData => nodeManager.getConfig();
 export const isNodeConfigFileAvailable = (): boolean => nodeManager.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'config.toml'));
 export const isWireguardConfigFileAvailable = (): boolean => nodeManager.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'wireguard.toml'));
 export const isV2RayConfigFileAvailable = (): boolean => nodeManager.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'v2ray.toml'));
+export const isCertificateKeyAvailable = (): boolean => nodeManager.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'tls.key'));
 export const createNodeConfig = (): Promise<boolean> => nodeManager.createNodeConfig();
 export const createVpnConfig = (): Promise<boolean> => nodeManager.createVpnConfig();
 export const passphraseRequired = (): boolean => nodeManager.passphraseRequired();
