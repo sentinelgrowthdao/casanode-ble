@@ -107,8 +107,6 @@ export class NodeMnemonicCharacteristic
 			this.lastTimestamp = currentTimestamp;
 			this.readIndex = 1;
 			
-			// console.log(`dataBuffer = ${this.dataBuffer} expectedLength = ${this.expectedLength}`);
-			
 			const lengthBuffer = Buffer.alloc(4);
 			lengthBuffer.writeUInt32LE(this.expectedLength, 0);
 			callback(this.Bleno.Characteristic.RESULT_SUCCESS, lengthBuffer);
@@ -123,14 +121,10 @@ export class NodeMnemonicCharacteristic
 			// Copy the chunk data from the data buffer
 			this.dataBuffer.copy(chunk, 0, 0, chunkSize);
 			
-			// console.log(`chunkSize = ${chunkSize}, readIndex = ${index}, dataBuffer = ${this.dataBuffer}, chunk = ${chunk}`);
-			
 			// Update the data buffer to remove the chunk
 			const remainingData = Buffer.alloc(this.dataBuffer.length - chunkSize);
 			this.dataBuffer.copy(remainingData, 0, chunkSize);
 			this.dataBuffer = remainingData;
-			
-			// console.log(`remainingData = ${remainingData}`);
 			
 			// Update the read index
 			this.readIndex++;
@@ -151,8 +145,6 @@ export class NodeMnemonicCharacteristic
 	 */
 	public onWriteRequest(data: Buffer, offset: number, withoutResponse: boolean, callback: (result: number) => void)
 	{
-		// console.log('data:"'+data.toString('utf-8')+'"');
-		
 		const currentTimestamp = Date.now();
 		if (this.writeIndex === 0 || (currentTimestamp - this.lastTimestamp) > 3000)
 		{
@@ -161,19 +153,13 @@ export class NodeMnemonicCharacteristic
 			this.lastTimestamp = currentTimestamp;
 			this.writeIndex = 1;
 			
-			// console.log(`expectedLength = ${this.expectedLength}`);
-			
 			callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 			return;
 		}
 		
-		console.log(`data: "${data.toString('utf-8')}" length: ${data.length}`);
-		
 		this.dataBuffer = Buffer.concat([this.dataBuffer, data]);
 		this.lastTimestamp = currentTimestamp;
 		this.writeIndex++;
-		
-		// console.log(`dataBuffer = "${this.dataBuffer}" receivedLength = ${this.dataBuffer.length}, expectedLength = ${this.expectedLength}`);
 		
 		const receivedLength = this.dataBuffer.length;
 		if (receivedLength === this.expectedLength)
@@ -185,8 +171,6 @@ export class NodeMnemonicCharacteristic
 			
 			// Generate the hash of the received mnemonic
 			const calculatedHash = crypto.createHash('sha256').update(mnemonic).digest('hex');
-			
-			console.log(`receivedStr: ${receivedStr} hash: ${hash} mnemonic: ${mnemonic} calculatedHash: ${calculatedHash}`);
 			
 			// Mnemonic regex
 			const mnemonicRegex = /^(\b\w+\b\s*){24}$/;
