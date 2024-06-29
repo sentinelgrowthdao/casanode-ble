@@ -5,6 +5,7 @@ import {
 	createNodeConfig,
 	createVpnConfig,
 } from '@utils/node';
+import { certificateGenerate } from '@utils/certificate';
 
 export class InstallConfigsCharacteristic
 {
@@ -53,22 +54,42 @@ export class InstallConfigsCharacteristic
 	 */
 	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
 	{
+		// Initialize the status
+		let status = '';
+		
 		// Create the node configuration
 		createNodeConfig().then((statusNode: boolean) =>
 		{
+			status = statusNode ? '1' : '0';
 			// Create the VPN configuration
 			createVpnConfig().then((statusVpn: boolean) =>
 			{
-				// Combine the status of the node and VPN
-				let status = statusNode ? '1' : '0';
+				// Append the VPN status to the node status
 				status += statusVpn ? '1' : '0';
-				// Return the value to the subscriber
-				callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(status));
-			}).catch((error: any) => {
+				
+				// Create certificate and private key
+				certificateGenerate().then((success: boolean) =>
+				{
+					// Append the certificate status to the node status
+					status += success ? '1' : '0';
+					
+					// Return the value to the subscriber
+					callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(status));
+				})
+				.catch((error: any) =>
+				{
+					Logger.error(`Error while creating the certificate: ${error}`);
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from(status+'0'));
+				});
+			})
+			.catch((error: any) =>
+			{
 				Logger.error(`Error while creating the VPN configuration: ${error}`);
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from((statusNode ? '1' : '0')+'0'));
+				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from(status+'0'));
 			});
-		}).catch((error: any) => {
+		})
+		.catch((error: any) =>
+		{
 			Logger.error(`Error while creating the node configuration: ${error}`);
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from('00'));
 		});
