@@ -176,8 +176,6 @@ class NodeManager
 			this.nodeConfig.chain_id = this.extractConfigValue(configFileContent, 'id');
 			this.nodeConfig.rpc_addresses = this.extractConfigValue(configFileContent, 'rpc_addresses');
 			this.nodeConfig.vpn_type = this.extractConfigValue(configFileContent, 'type');
-			this.nodeConfig.node_ip = this.extractConfigValue(configFileContent, 'remote_url').split('/')[2].split(':')[0];
-			this.nodeConfig.node_port = parseInt(this.extractConfigValue(configFileContent, 'listen_on').split(':')[1]);
 			this.nodeConfig.max_peers = parseInt(this.extractConfigValue(configFileContent, 'max_peers'));
 			this.nodeConfig.backend = this.extractConfigValue(configFileContent, 'backend');
 			this.nodeConfig.wallet_name = this.extractConfigValue(configFileContent, 'from');
@@ -187,6 +185,22 @@ class NodeManager
 			this.nodeConfig.gas_prices = this.extractConfigValue(configFileContent, 'gas_prices');
 			this.nodeConfig.gigabyte_prices = this.extractConfigValue(configFileContent, 'gigabyte_prices');
 			this.nodeConfig.hourly_prices = this.extractConfigValue(configFileContent, 'hourly_prices');
+			
+			// Extract the node IP and port
+			const remote_url = this.extractConfigValue(configFileContent, 'remote_url');
+			const listen_on = this.extractConfigValue(configFileContent, 'listen_on');
+			
+			// Extract the node IP and port
+			if (remote_url && remote_url !== "" && remote_url.includes(':'))
+				this.nodeConfig.node_ip = remote_url.split('/')[2].split(':')[0];
+			else
+				this.nodeConfig.node_ip = '';
+			
+			// Extract the node port
+			if (listen_on && listen_on !== "" && listen_on.includes(':'))
+				this.nodeConfig.node_port = parseInt(remote_url.split(':')[1]);
+			else
+				this.nodeConfig.node_port = 0;
 			
 			// Set the node type based on the prices
 			this.nodeConfig.node_type = this.nodeConfig.hourly_prices === DATACENTER_HOURLY_PRICES ? 'datacenter' : this.nodeConfig.hourly_prices ? 'residential' : '';
