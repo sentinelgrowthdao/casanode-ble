@@ -164,6 +164,23 @@ class NodeManager
 	}
 	
 	/**
+	 * Check if the wallet is available
+	 */
+	public async isWalletAvailable(): Promise<boolean>
+	{
+		try
+		{
+			const exists = await this.walletExists(this.nodeConfig.walletPassphrase);
+			return exists ?? false;
+		}
+		catch (error)
+		{
+			Logger.error(`Error checking wallet existence: ${error}`);
+			return false;
+		}
+	}
+	
+	/**
 	 * Load configuration files and extract node parameters
 	 */
 	public loadNodeConfig(): void
@@ -867,7 +884,8 @@ class NodeManager
 			|| install.containerExists === false
 			|| install.nodeConfig === false
 			|| install.vpnConfig === false
-			|| install.certificateKey === false)
+			|| install.certificateKey === false
+			|| install.wallet === false)
 			return 'uninstalled';
 		
 		// Detect if the node is running
@@ -1051,6 +1069,7 @@ export const isNodeConfigFileAvailable = (): boolean => nodeManager.isConfigFile
 export const isWireguardConfigFileAvailable = (): boolean => nodeManager.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'wireguard.toml'));
 export const isV2RayConfigFileAvailable = (): boolean => nodeManager.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'v2ray.toml'));
 export const isCertificateKeyAvailable = (): boolean => nodeManager.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'tls.key'));
+export const isWalletAvailable = (): Promise<boolean> => nodeManager.isWalletAvailable();
 export const createNodeConfig = (): Promise<boolean> => nodeManager.createNodeConfig();
 export const createVpnConfig = (): Promise<boolean> => nodeManager.createVpnConfig();
 export const passphraseRequired = (): boolean => nodeManager.passphraseRequired();

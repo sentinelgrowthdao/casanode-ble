@@ -60,6 +60,7 @@ export class CheckInstallationCharacteristic
 			result += status.nodeConfig ? '1' : '0';
 			result += status.vpnConfig ? '1' : '0';
 			result += status.certificateKey ? '1' : '0';
+			result += status.wallet ? '1' : '0';
 			
 			// Return the value to the subscriber
 			callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(result));

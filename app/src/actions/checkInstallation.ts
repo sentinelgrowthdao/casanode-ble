@@ -10,6 +10,7 @@ import {
 	isWireguardConfigFileAvailable,
 	isV2RayConfigFileAvailable,
 	isCertificateKeyAvailable,
+	isWalletAvailable,
 } from '@utils/node';
 
 export interface InstallationCheck
@@ -20,6 +21,7 @@ export interface InstallationCheck
 	nodeConfig: boolean;
 	vpnConfig: boolean;
 	certificateKey: boolean;
+	wallet: boolean;
 };
 
 export const checkInstallation = async (): Promise<InstallationCheck> =>
@@ -34,5 +36,6 @@ export const checkInstallation = async (): Promise<InstallationCheck> =>
 		nodeConfig: isNodeConfigFileAvailable(),
 		vpnConfig:  config.vpn_type === 'wireguard' ? isWireguardConfigFileAvailable() : isV2RayConfigFileAvailable(),
 		certificateKey: isCertificateKeyAvailable(),
+		wallet: await isWalletAvailable(),
 	};
 };
