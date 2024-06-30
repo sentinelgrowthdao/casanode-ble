@@ -179,7 +179,6 @@ export class NodeMnemonicCharacteristic
 			if(calculatedHash === hash && mnemonicRegex.test(mnemonic))
 			{
 				nodeManager.setMnemonic(mnemonic.split(' '));
-				console.info(`Mnemonic updated via Bluetooth to: ${mnemonic}`);
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 			}
 			else
