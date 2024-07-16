@@ -1,3 +1,4 @@
+import * as os from 'os';
 import Docker from 'dockerode';
 import { Readable, PassThrough } from 'stream';
 import config from './configuration';
@@ -18,7 +19,9 @@ class DockerManager
 	
 	private constructor()
 	{
-		const socketPath = '/run/user/1000/docker.sock';
+		const userInfo = os.userInfo();
+		const userId = userInfo.uid;
+		const socketPath = `/run/user/${userId}/docker.sock`;
 		this.docker = new Docker({ socketPath: socketPath });
 	}
 	
