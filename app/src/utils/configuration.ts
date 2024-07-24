@@ -11,6 +11,7 @@ export interface AppConfigData
 	DOCKER_IMAGE_NAME: string;
 	DOCKER_CONTAINER_NAME: string;
 	CONFIG_DIR: string;
+	LOG_DIR: string;
 	API_BALANCE: string[];
 	FOXINODES_API_CHECK_IP: string;
 	FOXINODES_API_DVPN_CONFIG: string;
@@ -41,6 +42,7 @@ class ConfigurationLoader
 		DOCKER_IMAGE_NAME: 'wajatmaka/sentinel-aarch64-alpine:v0.7.1',
 		DOCKER_CONTAINER_NAME: 'sentinel-dvpn-node',
 		CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/opt/casanode/.sentinelnode',
+		LOG_DIR: '/var/log/casanode',
 		API_BALANCE: [
 			"https://api-sentinel.busurnode.com/cosmos/bank/v1beta1/balances/",
 			"https://api.sentinel.quokkastake.io/cosmos/bank/v1beta1/balances/",
