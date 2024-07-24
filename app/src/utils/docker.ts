@@ -2,6 +2,7 @@ import * as os from 'os';
 import Docker from 'dockerode';
 import { Readable, PassThrough } from 'stream';
 import config from './configuration';
+import { getDockerDefaultSocketPath } from './configuration';
 import { Logger } from './logger';
 import { nodeConfig, type NodeConfigData } from '@utils/node';
 
@@ -19,10 +20,7 @@ class DockerManager
 	
 	private constructor()
 	{
-		const userInfo = os.userInfo();
-		const userId = userInfo.uid;
-		const socketPath = `/run/user/${userId}/docker.sock`;
-		this.docker = new Docker({ socketPath: socketPath });
+		this.docker = new Docker({ socketPath: config.DOCKER_SOCKET || getDockerDefaultSocketPath() });
 	}
 	
 	/**

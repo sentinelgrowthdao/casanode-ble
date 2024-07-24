@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import * as os from 'os';
 import axios from 'axios';
 import { Logger } from '@utils/logger';
 
@@ -12,6 +13,7 @@ export interface AppConfigData
 	DOCKER_CONTAINER_NAME: string;
 	CONFIG_DIR: string;
 	LOG_DIR: string;
+	DOCKER_SOCKET: string;
 	API_BALANCE: string[];
 	FOXINODES_API_CHECK_IP: string;
 	FOXINODES_API_DVPN_CONFIG: string;
@@ -43,6 +45,7 @@ class ConfigurationLoader
 		DOCKER_CONTAINER_NAME: 'sentinel-dvpn-node',
 		CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/opt/casanode/.sentinelnode',
 		LOG_DIR: '/var/log/casanode',
+		DOCKER_SOCKET: this.getDockerDefaultSocketPath(),
 		API_BALANCE: [
 			"https://api-sentinel.busurnode.com/cosmos/bank/v1beta1/balances/",
 			"https://api.sentinel.quokkastake.io/cosmos/bank/v1beta1/balances/",
@@ -256,6 +259,17 @@ class ConfigurationLoader
 		
 		return false;
 	}
+	
+	/**
+	 * Get the default path for the Docker socket
+	 * @returns string
+	 */
+	public getDockerDefaultSocketPath(): string
+	{
+		const userInfo = os.userInfo();
+		const userId = userInfo.uid;
+		return `/run/user/${userId}/docker.sock`;
+	}
 }
 
 
@@ -263,5 +277,6 @@ class ConfigurationLoader
 const configurationLoader = ConfigurationLoader.getInstance();
 export default configurationLoader.getConfig();
 
+export const getDockerDefaultSocketPath = (): string => configurationLoader.getDockerDefaultSocketPath();
 export const getRemoteAddress = async (): Promise<RemoteAddressData> => configurationLoader.getRemoteAddress();
 export const refreshNetworkConfiguration = async (): Promise<boolean> => configurationLoader.refreshNetworkConfiguration();
