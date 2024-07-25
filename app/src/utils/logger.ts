@@ -4,7 +4,7 @@ import config from './configuration';
 
 export class Logger 
 {
-	private static logFilePath = path.join(config.LOG_DIR, 'app-ble.log');
+	private static logFilePath = path.join(config.LOG_DIR || '/var/log/casanode/', 'app-ble.log');
 	
 	private static getFormattedDate(): string {
 		const date = new Date();
