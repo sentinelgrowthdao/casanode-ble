@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as os from 'os';
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@utils/logger';
 
 export interface AppConfigData
@@ -14,6 +15,7 @@ export interface AppConfigData
 	CONFIG_DIR: string;
 	LOG_DIR: string;
 	DOCKER_SOCKET: string;
+	BLE_UUID: string;
 	API_BALANCE: string[];
 	FOXINODES_API_CHECK_IP: string;
 	FOXINODES_API_DVPN_CONFIG: string;
@@ -46,6 +48,7 @@ class ConfigurationLoader
 		CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/opt/casanode/.sentinelnode',
 		LOG_DIR: '/var/log/casanode',
 		DOCKER_SOCKET: this.getDockerDefaultSocketPath(),
+		BLE_UUID: this.generateBluetoothUuid(),
 		API_BALANCE: [
 			"https://api-sentinel.busurnode.com/cosmos/bank/v1beta1/balances/",
 			"https://api.sentinel.quokkastake.io/cosmos/bank/v1beta1/balances/",
@@ -291,6 +294,27 @@ class ConfigurationLoader
 		const userInfo = os.userInfo();
 		const userId = userInfo.uid;
 		return `/run/user/${userId}/docker.sock`;
+	}
+	
+	/**
+	 * Generate a Bluetooth UUID
+	 * @returns string
+	 */
+	private generateBluetoothUuid(): string
+	{
+		// Generate a full UUID
+		const uuid = uuidv4();
+		// Split the UUID into its components
+		const parts = uuid.split('-');
+		
+		// Use the first three parts and replace the last part with a random 4-character hex string
+		const part1 = parts[0];
+		const part2 = parts[1];
+		const part3 = parts[2];
+		const part4 = parts[3];
+		
+		// Return the formatted UUID
+		return `${part1}-${part2}-${part3}-${part4}`;
 	}
 }
 
