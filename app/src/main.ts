@@ -7,6 +7,9 @@ import {
 	walletCommand,
 } from '@commands/index';
 
+// Global variable for the base directory
+process.env.BASE_DIR = process.cwd();
+
 // Create a new program and set program information
 const program = new Command();
 program.name('casanode-ble')
