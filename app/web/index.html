@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Casanode - Login</title>
+	<link rel="icon" type="image/png" href="/assets/favicon.png">
+	<style>
+		body
+		{
+			margin: 0;
+			font-family: Arial, sans-serif;
+			color: white;
+			background: #000610 url('/assets/background.png') no-repeat center center fixed;
+			background-size: cover;
+			text-align: center;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			min-height: 100vh;
+			padding: 1rem;
+			box-sizing: border-box;
+		}
+		.container
+		{
+			padding: 2rem 1rem;
+			border-radius: 1.5rem;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			max-width: 100%;
+			width: 100%;
+			box-sizing: border-box;
+		}
+		h1
+		{
+			margin: 0;
+			font-size: 1.8rem;
+			text-align: center;
+		}
+		.logo
+		{
+			margin: 0 auto 2rem;
+			width: 100%;
+			max-width: 10rem;
+		}
+		.logo > img
+		{
+			width: 100%;
+			height: auto;
+		}
+		.login
+		{
+			padding: 2rem 1rem;
+			max-width:16rem;
+			background-color: rgba(38, 47, 76, 0.6);
+			border-radius: 1.5rem;
+			display: inline-block;
+		}
+		.qrcode
+		{
+			margin: 0 auto 1.5rem;
+			max-width: 12rem;
+			text-align: center;
+		}
+		.qrcode > img
+		{
+			margin: 0;
+			width: 100%;
+			height: auto;
+			border-radius: 0.75rem;
+		}
+		.instructions
+		{
+			margin: 0 0 1rem;
+			padding: 1rem;
+			font-size: 1rem;
+		}
+		.store-links
+		{
+			display: flex;
+			flex-wrap: wrap;
+			gap: 1rem;
+			justify-content: center;
+		}
+		.store-links > a > img
+		{
+			width: 7rem;
+			height: auto;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="header">
+			<h1>CASANODE</h1>
+			<p class="logo"><img src="/assets/casanode.png" alt="Casanode Logo" /></p>
+		</div>
+		<div class="login">
+			<p class="qrcode"><img class="qrcode" src="QR_CODE_DATA_URL" alt="QR Code" /></p>
+			<p class="instructions">Scan the QR code with the Casanode app</p>
+			<div class="store-links">
+				<a href="https://www.apple.com/app-store/"><img src="/assets/apple-store.svg" alt="Apple Store" /></a>
+				<a href="https://play.google.com/store"><img src="/assets/google-play.svg" alt="Google Play Store" /></a>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
