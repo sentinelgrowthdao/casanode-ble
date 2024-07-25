@@ -1,16 +1,7 @@
-// import bleno from '@abandonware/bleno'; <- This import stuck the process
-// The direct ES6 import of the Bleno module causes the Node.js process to hang indefinitely,
-// even when Bleno is not explicitly used. This is likely due to internal asynchronous operations
-// or timers initialized by Bleno upon import, which keep the event loop active.
-
-// To avoid this issue, we use the CommonJS require syntax to import Bleno dynamically
-// within the function. The createRequire function from the 'module' package allows us
-// to use require in an ES6 module context.
-
-import { createRequire } from 'module';	// <- Used to import the Bleno module in the same way as require
+import { createRequire } from 'module';
 import { Logger } from '@utils/logger';
 import config from '@utils/configuration';
-
+import WebServer from '@utils/web';
 import { loadingNodeInformations, loadingSystemInformations } from '@actions/startup';
 
 import { HelloCharacteristic } from '@characteristics/hello';
@@ -158,9 +149,9 @@ export const daemonCommand = async () =>
 	 * Event listener for the advertisingStart event
 	 * @param error any
 	 */
-	bleno.on('advertisingStart', (error: any) => 
+	bleno.on('advertisingStart', (error: any) =>
 	{
-		if (!error) 
+		if (!error)
 		{
 			console.log('Advertising...');
 			Logger.info('Advertising...');
@@ -173,4 +164,8 @@ export const daemonCommand = async () =>
 			Logger.error('Advertising failed: ' + error);
 		}
 	});
+	
+	// Start the web server
+	const webServer = WebServer.getInstance();
+	webServer.start();
 };
