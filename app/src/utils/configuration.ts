@@ -48,7 +48,7 @@ class ConfigurationLoader
 		CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/opt/casanode/.sentinelnode',
 		LOG_DIR: '/var/log/casanode',
 		DOCKER_SOCKET: this.getDockerDefaultSocketPath(),
-		BLE_UUID: this.generateBluetoothUuid(),
+		BLE_UUID: '0000180d-0000-1000-8000', // this.generateBluetoothUuid(),
 		API_BALANCE: [
 			"https://api-sentinel.busurnode.com/cosmos/bank/v1beta1/balances/",
 			"https://api.sentinel.quokkastake.io/cosmos/bank/v1beta1/balances/",
