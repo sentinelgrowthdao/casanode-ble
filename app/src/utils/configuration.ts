@@ -16,6 +16,7 @@ export interface AppConfigData
 	LOG_DIR: string;
 	DOCKER_SOCKET: string;
 	BLE_UUID: string;
+	WEB_PORT: number;
 	API_BALANCE: string[];
 	FOXINODES_API_CHECK_IP: string;
 	FOXINODES_API_DVPN_CONFIG: string;
@@ -49,6 +50,7 @@ class ConfigurationLoader
 		LOG_DIR: '/var/log/casanode',
 		DOCKER_SOCKET: this.getDockerDefaultSocketPath(),
 		BLE_UUID: '0000180d-0000-1000-8000', // this.generateBluetoothUuid(),
+		WEB_PORT: 8080,
 		API_BALANCE: [
 			"https://api-sentinel.busurnode.com/cosmos/bank/v1beta1/balances/",
 			"https://api.sentinel.quokkastake.io/cosmos/bank/v1beta1/balances/",
