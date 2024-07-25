@@ -59,6 +59,7 @@ class ConfigurationLoader
 	private constructor()
 	{
 		this.config = this.loadConfig();
+		this.saveConfig();
 	}
 	
 	/**
@@ -148,6 +149,27 @@ class ConfigurationLoader
 		{
 			Logger.error(`An error occurred while loading configuration file: ${error}`);
 			return {};
+		}
+	}
+	
+	/**
+	 * Save configuration to file
+	 * @returns boolean
+	 */
+	public saveConfig(): boolean
+	{
+		try
+		{
+			const configData = Object.entries(this.config)
+				.map(([key, value]) => `${key}=${value}`)
+				.join('\n');
+			fs.writeFileSync(this.configFile, configData);
+			return true;
+		}
+		catch(error)
+		{
+			Logger.error(`An error occurred while saving configuration file: ${error}`);
+			return false;
 		}
 	}
 	
