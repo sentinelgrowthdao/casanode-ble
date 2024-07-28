@@ -136,7 +136,7 @@ export const daemonCommand = async () =>
 		if (state === 'poweredOn')
 		{
 			Logger.info('Application started successfully.');
-			bleno.startAdvertising('Casanode', [NODE_BLE_UUID]);
+			bleno.startAdvertising('Casanode', [`${config.BLE_UUID}-${NODE_BLE_UUID}`]);
 		}
 		else
 		{
