@@ -221,14 +221,10 @@ class NodeManager
 			// Extract the node IP and port
 			if (remote_url && remote_url !== "" && remote_url.includes(':'))
 				this.nodeConfig.node_ip = remote_url.split('/')[2].split(':')[0];
-			else
-				this.nodeConfig.node_ip = '';
 			
 			// Extract the node port
 			if (listen_on && listen_on !== "" && listen_on.includes(':'))
 				this.nodeConfig.node_port = parseInt(listen_on.split(':')[1]);
-			else
-				this.nodeConfig.node_port = 0;
 			
 			// Set the node type based on the prices
 			this.nodeConfig.node_type = this.nodeConfig.hourly_prices === DATACENTER_HOURLY_PRICES ? 'datacenter' : this.nodeConfig.hourly_prices ? 'residential' : '';
@@ -262,7 +258,11 @@ class NodeManager
 	public async refreshNodeLocation(): Promise<void>
 	{
 		const remoteAddress = await getRemoteAddress();
+		// Set the node location
 		this.nodeConfig.nodeLocation = remoteAddress.country ?? 'N/A';
+		// Set the node IP address only if it is not already set
+		if(this.nodeConfig.node_ip === '')
+			this.nodeConfig.node_ip = remoteAddress.ip ?? '';
 	}
 	
 	/**
