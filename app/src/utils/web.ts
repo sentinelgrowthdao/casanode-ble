@@ -10,11 +10,21 @@ class WebServer
 {
 	private static instance: WebServer;
 	private app = express();
-	private PORT = config.WEB_PORT;
+	private HOSTNAME = '0.0.0.0';
+	private PORT = 8080;
 	private baseDir = process.env.BASE_DIR || path.resolve(__dirname, '../../');
 	
 	private constructor()
 	{
+		// If the WEB_LISTEN configuration is set
+		if(config.WEB_LISTEN && config.WEB_LISTEN.includes(':'))
+		{
+			// Set the port and hostname from the configuration
+			this.HOSTNAME = config.WEB_LISTEN.split(':')[0] || '0.0.0.0';
+			this.PORT = parseInt(config.WEB_LISTEN.split(':')[1]) || 8080;
+		}
+		
+		// Setup routes
 		this.setupRoutes();
 	}
 	
@@ -88,10 +98,10 @@ class WebServer
 	 */
 	public start()
 	{
-		this.app.listen(this.PORT, () =>
+		this.app.listen(this.PORT, this.HOSTNAME, () =>
 		{
-			console.log(`Web server running at http://localhost:${this.PORT}`);
-			Logger.info(`Web server running at http://localhost:${this.PORT}`);
+			console.log(`Web server running at http://${this.HOSTNAME}:${this.PORT}`);
+			Logger.info(`Web server running at http://${this.HOSTNAME}:${this.PORT}`);
 		});
 	}
 }
