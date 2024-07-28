@@ -129,6 +129,12 @@ class ConfigurationLoader
 				for (const key in config)
 				{
 					let value = config[key];
+					
+					// Skip keys with empty values
+					if (!value.trim()) {
+						continue;
+					}
+					
 					// Check if value is an array
 					if(value.startsWith('[') && value.endsWith(']'))
 					{
