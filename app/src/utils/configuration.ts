@@ -172,7 +172,18 @@ class ConfigurationLoader
 		try
 		{
 			const configData = Object.entries(this.config)
-				.map(([key, value]) => `${key}=${value}`)
+				.map(([key, value]) =>
+				{
+					if(Array.isArray(value))
+					{
+						const arrayValues = value.join(',');
+						return `${key}=[${arrayValues}]`;
+					}
+					else
+					{
+						return `${key}=${value}`;
+					}
+				})
 				.join('\n');
 			fs.writeFileSync(this.configFile, configData);
 			return true;
@@ -183,6 +194,7 @@ class ConfigurationLoader
 			return false;
 		}
 	}
+	
 	
 	/**
 	 * Get remote address
