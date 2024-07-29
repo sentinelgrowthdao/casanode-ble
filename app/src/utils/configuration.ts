@@ -209,12 +209,16 @@ class ConfigurationLoader
 		try
 		{
 			// Attempt to get the IP and country from the primary API
-			const response = await axios.get(this.config.FOXINODES_API_CHECK_IP);
+			const response = await axios.get(this.config.FOXINODES_API_CHECK_IP, { timeout: 60000 });
 			if(response.status === 200)
 			{
 				const data = response.data;
 				nodeIP = data.ip || nodeIP;
 				nodeCountry = data.iso_code || nodeCountry;
+			}
+			else
+			{
+				Logger.error("Failed to fetch IP from primary API.");
 			}
 		}
 		catch (error)
@@ -223,11 +227,15 @@ class ConfigurationLoader
 			try
 			{
 				// Fallback to checkip.dyndns.org
-				const response = await axios.get("http://checkip.dyndns.org/");
+				const response = await axios.get("http://checkip.dyndns.org/", { timeout: 60000 });
 				if(response.status === 200)
 				{
 					const value = response.data;
 					nodeIP = value.split("Current IP Address: ")[1].split("<")[0];
+				}
+				else
+				{
+					Logger.error("Failed to fetch IP from fallback method.");
 				}
 			}
 			catch (fallbackError)
@@ -252,7 +260,7 @@ class ConfigurationLoader
 		try
 		{
 			// Fetch the configuration from the API
-			const response = await axios.get(this.config.FOXINODES_API_DVPN_CONFIG);
+			const response = await axios.get(this.config.FOXINODES_API_DVPN_CONFIG, { timeout: 60000 });
 			if(response.status === 200)
 			{
 				const data = response.data;
@@ -292,6 +300,10 @@ class ConfigurationLoader
 				{
 					Logger.error("Invalid network configuration data.");
 				}
+			}
+			else
+			{
+				Logger.error("Failed to fetch network configuration.");
 			}
 		}
 		catch (err)

@@ -839,11 +839,15 @@ class NodeManager
 			try
 			{
 				// Get wallet balance
-				const response = await axios.get(`${url}${publicAddress}`);
+				const response = await axios.get(`${url}${publicAddress}`, { timeout: 60000 });
 				if(response.data)
 				{
 					apiResponse = response.data as BalancesResponse;
 					break;
+				}
+				else
+				{
+					Logger.error(`API ${url} returned an empty response.`);
 				}
 			}
 			catch(error)
