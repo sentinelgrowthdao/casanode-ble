@@ -2,6 +2,7 @@ import { createRequire } from 'module';
 
 import { Logger } from '@utils/logger';
 import nodeManager from '@utils/node';
+import { type NodeStatus } from '@utils/node';
 
 export class BandwidthSpeedCharacteristic
 {
@@ -50,11 +51,25 @@ export class BandwidthSpeedCharacteristic
 	 */
 	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
 	{
-		const info = {
-			download: 'N/A',
-			upload: 'N/A',
+		let info = {
+			d: -1,
+			u: -1,
 		};
-		// Return the value to the subscriber
-		callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(JSON.stringify(info)));
+		
+		// Get the status of the node
+		nodeManager.getNodeStatus().then((data: NodeStatus|null) =>
+		{
+			// Set the download and upload speed
+			info.d = data?.bandwidth?.download ? data.bandwidth.download : -1;
+			info.u = data?.bandwidth?.upload ? data.bandwidth.upload : -1;
+			// Return the value to the subscriber
+			callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(JSON.stringify(info)));
+		})
+		.catch((error: any) =>
+		{
+			Logger.error(`Error while reading the node status: ${error}`);
+			callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(JSON.stringify(info)));
+		});
+		
 	}
 }
