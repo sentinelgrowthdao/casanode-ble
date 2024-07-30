@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import axios from 'axios';
+import https from 'https';
 import config from './configuration';
 import { Logger } from '@utils/logger';
 import { isPassphraseError, containerCommand } from '@utils/docker';
@@ -62,6 +63,31 @@ export interface NodeConfigData
 	systemKernel: string;
 	systemArch: string;
 	casanodeVersion: string;
+}
+
+export interface NodeStatus
+{
+	type: number;
+	version: string;
+	bandwidth:
+	{
+		download: number;
+		upload: number;
+	},
+	handshake:
+	{
+		enable: boolean;
+		peers: number;
+	},
+	location:
+	{
+		city: string;
+		country: string;
+		latitude: number;
+		longitude: number;
+	},
+	peers: number;
+	max_peers: number;
 }
 
 class NodeManager
@@ -876,6 +902,66 @@ class NodeManager
 	}
 	
 	/**
+	 * Get the node status from http://localhost:xxxxx/status
+	 * @returns Promise<NodeStatus|null>
+	 */
+	public async getNodeStatus(): Promise<NodeStatus|null>
+	{
+		try
+		{
+			// Ignore self-signed SSL certificate
+			const httpsAgent = new https.Agent({
+				rejectUnauthorized: false
+			});
+			// Node status URL
+			const statusUrl = `https://localhost:${this.nodeConfig.node_port}/status`;
+			Logger.info(`Getting node status from ${statusUrl}`);
+			// Attempt to get the node status
+			const response = await axios.get(statusUrl, { timeout: 15000, httpsAgent });
+			// If the response is valid
+			if(response.status === 200 && response.data?.success === true)
+			{
+				// Extract the node status
+				const data = response.data.result;
+				// Return the node status
+				return {
+					type: data.type || 0,
+					version: data.version || 'N/A',
+					peers: data?.peers || 0,
+					max_peers: data?.qos?.max_peers || 0,
+					bandwidth:
+					{
+						download: data?.bandwidth?.download || 0,
+						upload: data?.bandwidth?.upload || 0,
+					},
+					handshake:
+					{
+						enable: data?.handshake?.enable || false,
+						peers: data?.handshake?.peers || 0,
+					},
+					location:
+					{
+						city: data?.location?.city || 'N/A',
+						country: data?.location?.country || 'N/A',
+						latitude: data?.location?.latitude || 0,
+						longitude: data?.location?.longitude || 0,
+					},
+				};
+			}
+			else
+			{
+				Logger.error("Failed to get the node status.");
+			}
+		}
+		catch (error)
+		{
+			Logger.error(`Failed to get the node status: ${error}`);
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * Get the node status
 	 * @returns Promise<string>
 	 */
@@ -1085,3 +1171,4 @@ export const walletLoadAddresses = (passphrase: string|null = null): Promise<boo
 export const walletCreate = (passphrase: string|null = null): Promise<string[]|null|undefined> => nodeManager.walletCreate(passphrase);
 export const walletRecover = (mnemonic: string|string[], passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletRecover(mnemonic, passphrase);
 export const walletBalance = (publicAddress: string|null = null): Promise<BalanceWallet> => nodeManager.getWalletBalance(publicAddress);
+export const getNodeStatus = (): Promise<NodeStatus|null> => nodeManager.getNodeStatus();
