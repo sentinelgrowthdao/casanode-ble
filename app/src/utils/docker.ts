@@ -212,6 +212,7 @@ class DockerManager
 				return true;
 			}
 			
+			// Create options for the container
 			const createOptions =
 			{
 				name: config.DOCKER_CONTAINER_NAME,
@@ -231,6 +232,9 @@ class DockerManager
 					PortBindings: {
 						[`${configNode.node_port}/tcp`]: [{ HostPort: `${configNode.node_port}` }]
 					}
+				},
+				ExposedPorts: {
+					[`${configNode.node_port}/tcp`]: {},
 				}
 			};
 			
@@ -238,10 +242,12 @@ class DockerManager
 			if (configNode.vpn_type === 'wireguard')
 			{
 				createOptions.HostConfig.PortBindings[`${configNode.vpn_port}/udp`] = [{ HostPort: `${configNode.vpn_port}` }];
+				createOptions.ExposedPorts[`${configNode.vpn_port}/udp`] = {};
 			}
 			else if (configNode.vpn_type === 'v2ray')
 			{
 				createOptions.HostConfig.PortBindings[`${configNode.vpn_port}/tcp`] = [{ HostPort: `${configNode.vpn_port}` }];
+				createOptions.ExposedPorts[`${configNode.vpn_port}/tcp`] = {};
 			}
 			else
 			{
