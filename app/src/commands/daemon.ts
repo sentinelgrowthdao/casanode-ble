@@ -36,6 +36,7 @@ import { CertificateActionsCharacteristic } from '@/characteristics/certificateA
 import { NodeMnemonicCharacteristic } from '@/characteristics/nodeMnemonic';
 import { WalletActionsCharacteristic } from '@/characteristics/walletActions';
 import { NodeKeyringBackendCharacteristic } from '@/characteristics/nodeKeyringBackend';
+import { OnlineUsersCharacteristic } from '@/characteristics/onlineUsers';
 
 // Bluetooth UUIDs
 const NODE_BLE_UUID = '00805f9b34fb';
@@ -71,6 +72,7 @@ const CHAR_CERTIFICATE_ACTIONS_UUID = '00805f9b3518';
 const CHAR_WALLET_MNEMONIC_UUID = '00805f9b3519';
 const CHAR_WALLET_ACTIONS_UUID = '00805f9b351a';
 const CHAR_NODE_KEYRING_BACKEND_UUID = '00805f9b351b';
+const CHAR_ONLINE_USERS_UUID = '00805f9b351c';
 
 export const daemonCommand = async () =>
 {
@@ -123,6 +125,7 @@ export const daemonCommand = async () =>
 			new NodeMnemonicCharacteristic(`${config.BLE_UUID}-${CHAR_WALLET_MNEMONIC_UUID}`).create(),
 			new WalletActionsCharacteristic(`${config.BLE_UUID}-${CHAR_WALLET_ACTIONS_UUID}`).create(),
 			new NodeKeyringBackendCharacteristic(`${config.BLE_UUID}-${CHAR_NODE_KEYRING_BACKEND_UUID}`).create(),
+			new OnlineUsersCharacteristic(`${config.BLE_UUID}-${CHAR_ONLINE_USERS_UUID}`).create(),
 		]
 	});
 	
