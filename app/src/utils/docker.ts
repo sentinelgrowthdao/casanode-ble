@@ -182,7 +182,7 @@ class DockerManager
 	 * @param walletPassphrase string|null
 	 * @returns boolean
 	 */
-	public async containerStart(walletPassphrase: string | null = null): Promise<boolean>
+	public async containerStart(): Promise<boolean>
 	{
 		const configNode : NodeConfigData = nodeConfig();
 		
@@ -198,9 +198,9 @@ class DockerManager
 				
 				if (!containerRunning)
 				{
-					if (configNode.backend === 'file' && walletPassphrase)
+					if (configNode.backend === 'file' && configNode.walletPassphrase)
 					{
-						await this.startContainerWithPassphrase(config.DOCKER_CONTAINER_NAME, walletPassphrase);
+						await this.startContainerWithPassphrase(config.DOCKER_CONTAINER_NAME, configNode.walletPassphrase);
 					}
 					else
 					{
@@ -255,9 +255,9 @@ class DockerManager
 				return false;
 			}
 			
-			if (configNode.backend === 'file' && walletPassphrase)
+			if (configNode.backend === 'file' && configNode.walletPassphrase)
 			{
-				await this.startContainerWithPassphrase(config.DOCKER_CONTAINER_NAME, walletPassphrase, createOptions);
+				await this.startContainerWithPassphrase(config.DOCKER_CONTAINER_NAME, configNode.walletPassphrase, createOptions);
 			}
 			else
 			{
@@ -713,7 +713,7 @@ export const checkImageAvailability = (): Promise<boolean> => dockerManager.chec
 export const inspectDockerContainer = (): Promise<Docker.ContainerInspectInfo | null> => dockerManager.inspectDockerContainer();
 export const imagePull = (): Promise<boolean> => dockerManager.imagePull();
 export const imagesRemove = (): Promise<boolean> => dockerManager.imagesRemove();
-export const containerStart = (walletPassphrase: string | null = null): Promise<boolean> => dockerManager.containerStart(walletPassphrase);
+export const containerStart = (): Promise<boolean> => dockerManager.containerStart();
 export const containerStop = (): Promise<boolean> => dockerManager.containerStop();
 export const containerRestart = (): Promise<boolean> => dockerManager.containerRestart();
 export const containerRunning = (): Promise<boolean> => dockerManager.containerRunning();
