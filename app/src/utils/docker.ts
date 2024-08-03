@@ -565,6 +565,13 @@ class DockerManager
 	 */
 	public async containerCommand(argv: string[], stdin: string[] | null = null): Promise<string | null>
 	{
+		// Check if docker image is available
+		if(!await checkImageAvailability())
+		{
+			Logger.error(`Container command '${argv.join(' ')}' failed: Container does not exist.`);
+			return null;
+		}
+		
 		const configNode: NodeConfigData = nodeConfig();
 		const containerName = config.DOCKER_CONTAINER_NAME;
 		const configDir = config.CONFIG_DIR;
@@ -658,7 +665,6 @@ class DockerManager
 				Logger.error(`Failed to execute container command '${argv.join(' ')}': ${String(err)}`);
 			
 		}
-		
 		return null;
 	}
 	
