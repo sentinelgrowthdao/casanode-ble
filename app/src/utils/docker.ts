@@ -568,7 +568,7 @@ class DockerManager
 		// Check if docker image is available
 		if(!await checkImageAvailability())
 		{
-			Logger.error(`Container command '${argv.join(' ')}' failed: Container does not exist.`);
+			Logger.error(`Container command '${argv.join(' ')}' failed: Image does not exist.`);
 			return null;
 		}
 		
