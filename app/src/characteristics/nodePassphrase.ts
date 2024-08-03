@@ -92,7 +92,7 @@ export class NodePassphraseCharacteristic
 			// If the passphrase is invalid
 			if (!canUnlockWallet)
 			{
-				Logger.error('Invalid passphrase received via Bluetooth for "passphrase".');
+				Logger.error('Invalid passphrase received via Bluetooth for unlocking the wallet.');
 				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 				return;
 			}
