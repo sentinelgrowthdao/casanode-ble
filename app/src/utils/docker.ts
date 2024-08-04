@@ -1,4 +1,3 @@
-import * as os from 'os';
 import Docker from 'dockerode';
 import { Readable, PassThrough } from 'stream';
 import config from './configuration';
@@ -200,16 +199,17 @@ class DockerManager
 				{
 					if (configNode.backend === 'file' && configNode.walletPassphrase)
 					{
-						await this.startContainerWithPassphrase(config.DOCKER_CONTAINER_NAME, configNode.walletPassphrase);
+						// Remove container
+						await this.containerRemove();
+						Logger.info(`dVPN node container has been removed successfully.`);
 					}
 					else
 					{
 						await this.startContainerWithoutPassphrase(config.DOCKER_CONTAINER_NAME);
+						Logger.info(`dVPN node container has been started successfully.`);
+						return true;
 					}
-					
-					Logger.info(`dVPN node container has been started successfully.`);
 				}
-				return true;
 			}
 			
 			// Create options for the container
@@ -255,9 +255,13 @@ class DockerManager
 				return false;
 			}
 			
+			// Check if the container is running successfully
+			let result = false;
+			
+			// Start the container with or without passphrase
 			if (configNode.backend === 'file' && configNode.walletPassphrase)
 			{
-				await this.startContainerWithPassphrase(config.DOCKER_CONTAINER_NAME, configNode.walletPassphrase, createOptions);
+				result = await this.startContainerWithPassphrase(config.DOCKER_CONTAINER_NAME, configNode.walletPassphrase, createOptions);
 			}
 			else
 			{
@@ -266,11 +270,10 @@ class DockerManager
 					Image: config.DOCKER_CONTAINER_NAME,
 					Cmd: ['process', 'start']
 				});
-				await this.startContainerWithoutPassphrase(config.DOCKER_CONTAINER_NAME);
+				result = await this.startContainerWithoutPassphrase(config.DOCKER_CONTAINER_NAME);
 			}
 			
-			Logger.info(`dVPN node container has been started successfully.`);
-			return true;
+			return result;
 		}
 		catch (err)
 		{
@@ -287,9 +290,23 @@ class DockerManager
 	 * Start Docker container without passphrase
 	 * @returns boolean
 	 */
-	private async startContainerWithoutPassphrase(containerName: string): Promise<void>
+	private async startContainerWithoutPassphrase(containerName: string): Promise<boolean>
 	{
-		await this.docker.getContainer(containerName).start();
+		try
+		{
+			await this.docker.getContainer(containerName).start();
+			Logger.info(`dVPN node container has been started successfully.`);
+			return true;
+		}
+		catch (err)
+		{
+			if (err instanceof Error)
+				Logger.error(`Failed to start the dVPN node container: ${err.message}`);
+			else
+				Logger.error(`Failed to start the dVPN node container: ${String(err)}`);
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -297,39 +314,97 @@ class DockerManager
 	 * @param containerName string
 	 * @param walletPassphrase string
 	 * @param createOptions Docker.ContainerCreateOptions
-	 * @returns void
+	 * @returns boolean
 	 */
-	private async startContainerWithPassphrase(containerName: string, walletPassphrase: string, createOptions?: Docker.ContainerCreateOptions): Promise<void>
+	private async startContainerWithPassphrase(containerName: string, walletPassphrase: string, createOptions: Docker.ContainerCreateOptions): Promise<boolean>
 	{
-		const command = createOptions ? 'create' : 'start';
-		const options = createOptions ? createOptions : {};
-		
-		await new Promise<void>((resolve, reject) =>
+		try
 		{
-			const stream = this.docker.run(
-				containerName,
-				['bash', '-c', `echo '${walletPassphrase}' | docker ${command} -ai --detach-keys="ctrl-q" ${containerName}`],
-				process.stdout,
-				options,
-				(err: any) => {
-					if (err) return reject(err);
-					resolve();
-				}
-			);
+			// Options for the container
+			const options = {
+				name: containerName,
+				Image: config.DOCKER_CONTAINER_NAME,
+				Cmd: ['process', 'start'],
+				abortSignal: undefined,
+				AttachStdin: true,
+				AttachStdout: true,
+				AttachStderr: true,
+				OpenStdin: true,
+				StdinOnce: false,
+				Tty: true,
+				...createOptions,
+			};
 			
-			stream.on('data', (data: Buffer) => {
-				Logger.info(data.toString());
+			// Create the container if needed
+			let container: Docker.Container = await this.docker.createContainer(options);
+			//
+			const result = await new Promise<boolean>((resolve, reject) =>
+			{
+				container.attach({ stream: true, hijack: true, stdin: true, stdout: true, stderr: true }, function (err: any, stream: any)
+				{
+					// Handle the error
+					if (err)
+					{
+						if (err instanceof Error)
+						{
+							Logger.error(`Error attaching to container: ${err.message}`);
+							return reject(false);
+						}
+						else
+						{
+							Logger.error(`Error attaching to container: ${String(err)}`);
+							return reject(false);
+						}
+					}
+					
+					// Handle the output stream
+					stream.on('data', (data: Buffer) =>
+					{
+						// If the data contains an error keyword, stop the container
+						if (isPassphraseError(data.toString()))
+						{
+							// Stop the container
+							container.stop();
+							// Log the error
+							Logger.error(`Container command "process start" failed: ${data.toString()}`);
+							return reject(false);
+						}
+						else if (data.toString().includes('Querying the account'))
+						{
+							// Detach the stream
+							stream.end();
+							return resolve(false);
+						}
+					});
+					
+					// Write the passphrase to the container's stdin
+					stream.write(`${walletPassphrase}`);
+					stream.write(`\n`);
+				});
+				
+				// Start the container
+				container.start().then(() =>
+				{
+					Logger.info(`dVPN node container has been started successfully.`);
+					resolve(true);
+				}).catch((startErr) =>
+				{
+					Logger.error(`Failed to start the container: ${startErr.message}`);
+					reject(false);
+				});
 			});
 			
-			stream.on('error', (err: any) => {
-				Logger.error(`Stream error: ${err}`);
-				reject(err);
-			});
-			
-			stream.on('end', () => {
-				resolve();
-			});
-		});
+			return result;
+		}
+		catch (err)
+		{
+			if (err instanceof Error)
+				Logger.error(`Failed to start the dVPN node container: ${err.message}`);
+			else
+				Logger.error(`Failed to start the dVPN node container: ${String(err)}`);
+		}
+		
+		return false;
 	}
 	
 	/**
