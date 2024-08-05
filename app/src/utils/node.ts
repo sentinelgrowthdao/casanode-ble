@@ -4,7 +4,10 @@ import axios from 'axios';
 import https from 'https';
 import config from './configuration';
 import { Logger } from '@utils/logger';
-import { isPassphraseError, containerCommand } from '@utils/docker';
+import {
+	isPassphraseError, containerCommand,
+	containerExists, containerRunning, containerStart, containerStop, containerRemove
+} from '@utils/docker';
 import { getRemoteAddress } from '@utils/configuration';
 import { checkInstallation } from '@actions/checkInstallation';
 
@@ -342,11 +345,9 @@ class NodeManager
 			this.updateConfigValue(configFilePath, 'moniker', this.nodeConfig.moniker);
 			this.updateConfigValue(configFilePath, 'id', this.nodeConfig.chain_id);
 			this.updateConfigValue(configFilePath, 'rpc_addresses', this.nodeConfig.rpc_addresses);
-			this.updateConfigValue(configFilePath, 'type', this.nodeConfig.vpn_type);
 			this.updateConfigValue(configFilePath, 'listen_on', `0.0.0.0:${this.nodeConfig.node_port}`);
 			this.updateConfigValue(configFilePath, 'remote_url', `https://${this.nodeConfig.node_ip}:${this.nodeConfig.node_port}`);
 			this.updateConfigValue(configFilePath, 'backend', this.nodeConfig.backend);
-			this.updateConfigValueInSection(configFilePath, 'handshake', 'enable', this.nodeConfig.handshake ? 'true' : 'false');
 			this.updateConfigValue(configFilePath, 'max_peers', this.nodeConfig.max_peers);
 			this.updateConfigValue(configFilePath, 'gas', this.nodeConfig.gas);
 			this.updateConfigValue(configFilePath, 'gas_adjustment', this.nodeConfig.gas_adjustment);
@@ -355,7 +356,7 @@ class NodeManager
 			this.updateConfigValue(configFilePath, 'hourly_prices', this.nodeConfig.hourly_prices);
 			
 			// Apply VPN configuration changes
-			this.applyVpnConfigChanges();
+			this.vpnChangeType();
 			
 			Logger.info("Configuration files have been refreshed.");
 		}
@@ -367,12 +368,31 @@ class NodeManager
 	
 	/**
 	 * Apply VPN configuration changes
-	 * @returns void
+	 * @returns Promise<boolean>
 	 */
-	private applyVpnConfigChanges(): void
+	public async vpnChangeType(): Promise<boolean>
 	{
+		// Configuration file paths
+		const configFilePath = path.join(config.CONFIG_DIR, 'config.toml');
 		const wireguardConfigPath = path.join(config.CONFIG_DIR, 'wireguard.toml');
 		const v2rayConfigPath = path.join(config.CONFIG_DIR, 'v2ray.toml');
+		
+		// Get the current VPN type
+		const current_vpn_type = this.extractConfigValue(fs.readFileSync(configFilePath, 'utf8'), 'type');
+		// Get the VPN port
+		const current_vpn_port = this.nodeConfig.vpn_port;
+		
+		// If the VPN type is not changed, do nothing
+		if(current_vpn_type === this.nodeConfig.vpn_type)
+		{
+			Logger.info('VPN type has not been changed.');
+			return true;
+		}
+		
+		// Change the VPN type in the node configuration file
+		this.updateConfigValue(configFilePath, 'type', this.nodeConfig.vpn_type);
+		// Change the handshake enable in the node configuration file
+		this.updateConfigValueInSection(configFilePath, 'handshake', 'enable', this.nodeConfig.vpn_type === 'wireguard' ? 'true' : 'false');
 		
 		// Update VPN configuration files
 		if(this.nodeConfig.vpn_type === 'wireguard')
@@ -384,15 +404,19 @@ class NodeManager
 				if(this.isConfigFileAvailable(v2rayConfigPath))
 				{
 					// Remove the other configuration file
-					
+					Logger.info(`Deleting V2Ray configuration file: ${v2rayConfigPath}`);
+					await fs.rm(v2rayConfigPath, (error) => {
+						if(error)
+							Logger.error(`Failed to delete V2Ray configuration file: ${error}`);
+					});
 				}
 				
 				// Generate the configuration file
-				
+				await createVpnConfig();
 			}
 			
 			// Update the listen port
-			this.updateConfigValue(wireguardConfigPath, 'listen_port', this.nodeConfig.vpn_port);
+			this.updateConfigValue(wireguardConfigPath, 'listen_port', current_vpn_port);
 		}
 		else if(this.nodeConfig.vpn_type === 'v2ray')
 		{
@@ -403,15 +427,50 @@ class NodeManager
 				if(this.isConfigFileAvailable(wireguardConfigPath))
 				{
 					// Remove the other configuration file
-					
+					Logger.info(`Deleting WireGuard configuration file: ${wireguardConfigPath}`);
+					await fs.rm(wireguardConfigPath, (error) => {
+						if(error)
+							Logger.error(`Failed to delete WireGuard configuration file: ${error}`);
+					});
 				}
 				
 				// Generate the configuration file
-				
+				await createVpnConfig();
 			}
 			// Update the listen port
-			this.updateConfigValue(v2rayConfigPath, 'listen_port', this.nodeConfig.vpn_port);
+			this.updateConfigValue(v2rayConfigPath, 'listen_port', current_vpn_port);
 		}
+		
+		// Reload node configuration
+		await this.loadNodeConfig();
+		
+		// Check if the container exists and running
+		const exists = await containerExists();
+		const running = await containerRunning();
+		
+		// If the container exists
+		if(exists)
+		{
+			// Stop the container if running
+			if(running)
+			{
+				Logger.info('Stopping the container to apply VPN configuration changes.');
+				await containerStop();
+			}
+			
+			// Remove the container
+			Logger.info('Removing the container to apply VPN configuration changes.');
+			await containerRemove();
+			
+			// Start the container if it was running
+			if(running)
+			{
+				Logger.info('Starting the container after applying VPN configuration changes.');
+				await containerStart();
+			}
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -1174,3 +1233,4 @@ export const walletCreate = (passphrase: string|null = null): Promise<string[]|n
 export const walletRecover = (mnemonic: string|string[], passphrase: string|null = null): Promise<boolean|undefined> => nodeManager.walletRecover(mnemonic, passphrase);
 export const walletBalance = (publicAddress: string|null = null): Promise<BalanceWallet> => nodeManager.getWalletBalance(publicAddress);
 export const getNodeStatus = (): Promise<NodeStatus|null> => nodeManager.getNodeStatus();
+export const vpnChangeType = (): Promise<boolean> => nodeManager.vpnChangeType();
