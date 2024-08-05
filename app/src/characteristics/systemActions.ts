@@ -187,6 +187,37 @@ export class SystemActionsCharacteristic
 					return;
 				}
 				
+				// Remove container
+				Logger.info('Removing Casanode Docker container...');
+				const containerRemoveResult = await containerRemove();
+				if (!containerRemoveResult)
+				{
+					Logger.error('Failed to remove Casanode Docker container.');
+					reject('Failed to remove Casanode Docker container.');
+					return;
+				}
+				
+				// Get wallet passphrase
+				const passphrase = nodeManager.getConfig().walletPassphrase;
+				
+				// Check if the wallet exists
+				Logger.info('Checking if the wallet exists...');
+				const walletExistsResult = await nodeManager.walletExists(passphrase);
+				
+				// If the wallet exists
+				if (walletExistsResult)
+				{
+					// Remove Wallet
+					Logger.info('Removing the wallet...');
+					const walletRemoveResult = await nodeManager.walletRemove(passphrase);
+					if (!walletRemoveResult)
+					{
+						Logger.error('Failed to remove the wallet.');
+						reject('Failed to remove the wallet.');
+						return;
+					}
+				}
+				
 				// Remove Docker images
 				Logger.info('Removing all Docker images...');
 				const removeImagesResult = await imagesRemove();
@@ -207,6 +238,9 @@ export class SystemActionsCharacteristic
 				
 				// Reset the node configuration
 				nodeManager.resetNodeConfig();
+				
+				// Reload remote Ip and Location
+				await nodeManager.refreshNodeLocation();
 				
 				// Resolve the promise when all operations are completed successfully
 				resolve();
