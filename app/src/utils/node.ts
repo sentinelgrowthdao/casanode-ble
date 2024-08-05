@@ -258,6 +258,7 @@ class NodeManager
 			// Load WireGuard configuration file content
 			if(this.nodeConfig.vpn_type === 'wireguard')
 			{
+				Logger.info('Loading WireGuard configuration file content');
 				const wireguardConfigPath = path.join(config.CONFIG_DIR, 'wireguard.toml');
 				const wireguardConfigContent = fs.readFileSync(wireguardConfigPath, 'utf8');
 				this.nodeConfig.vpn_port = parseInt(this.extractConfigValue(wireguardConfigContent, 'listen_port'));
@@ -265,6 +266,7 @@ class NodeManager
 			// Load V2Ray configuration file content
 			else if(this.nodeConfig.vpn_type === 'v2ray')
 			{
+				Logger.info('Loading V2Ray configuration file content');
 				const v2rayConfigPath = path.join(config.CONFIG_DIR, 'v2ray.toml');
 				const v2rayConfigContent = fs.readFileSync(v2rayConfigPath, 'utf8');
 				this.nodeConfig.vpn_port = parseInt(this.extractConfigValue(v2rayConfigContent, 'listen_port'));
