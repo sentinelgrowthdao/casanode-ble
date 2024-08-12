@@ -7,6 +7,13 @@ import { Logger } from '@utils/logger';
 import { imagePull, containerStop, imagesRemove, containerRemove } from '@utils/docker';
 import nodeManager from '@utils/node';
 
+enum SystemActionStatus
+{
+	NOT_STARTED = 0,
+	IN_PROGRESS = 1,
+	COMPLETED = 2,
+	ERROR = -1
+}
 
 export class SystemActionsCharacteristic
 {
@@ -23,6 +30,12 @@ export class SystemActionsCharacteristic
 	private characteristicUuid: string = '';
 	
 	/**
+	 * System action status
+	 * @type SystemActionStatus
+	 */
+	private actionStatus: SystemActionStatus = SystemActionStatus.NOT_STARTED;
+	
+	/**
 	 * Create a new instance of Characteristic
 	 */
 	constructor(private uuid: string) 
@@ -33,18 +46,51 @@ export class SystemActionsCharacteristic
 	}
 	
 	/**
-	 * Create a new instance of NodePortCharacteristic
+	 * Create a new instance of SystemActionsCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create() 
 	{
 		if(this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
 			uuid: this.characteristicUuid,
-			properties: ['write'],
+			properties: ['read', 'write'],
+			onReadRequest: this.onReadRequest.bind(this),
 			onWriteRequest: this.onWriteRequest.bind(this),
 		});
+	}
+	
+	/**
+	 * Called when the characteristic is read
+	 * @param offset number
+	 * @param callback (result: number, data: Buffer) => void
+	 * @returns void
+	 */
+	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
+	{
+		let response;
+		switch(this.actionStatus)
+		{
+			case SystemActionStatus.NOT_STARTED:
+				response = '0'; 
+				break;
+			case SystemActionStatus.IN_PROGRESS:
+				response = '1'; 
+				break;
+			case SystemActionStatus.COMPLETED:
+				response = '2'; 
+				break;
+			case SystemActionStatus.ERROR:
+				response = '-1'; 
+				break;
+			default:
+				response = '0'; 
+				break;
+		}
+		
+		Logger.info(`System action status: ${response}`);
+		callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(response));
 	}
 	
 	/**
@@ -57,57 +103,77 @@ export class SystemActionsCharacteristic
 	 */
 	public onWriteRequest(data: Buffer, offset: number, withoutResponse: boolean, callback: (result: number) => void)
 	{
-		// Get the value from the buffer
 		const action = data.toString('utf-8').trim();
+		
+		if(this.actionStatus === SystemActionStatus.IN_PROGRESS)
+		{
+			Logger.error('System action already in progress');
+			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+			return;
+		}
+		
+		this.actionStatus = SystemActionStatus.IN_PROGRESS;
 		
 		if(action === 'update')
 		{
+			Logger.info('Starting system update...');
 			this.updateSystem().then(() =>
 			{
+				this.actionStatus = SystemActionStatus.COMPLETED;
 				Logger.info('System update completed successfully');
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 			})
 			.catch(error =>
 			{
+				this.actionStatus = SystemActionStatus.ERROR;
 				Logger.error(`Error updating system: ${error}`);
 				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			});
 		}
 		else if(action === 'reset')
 		{
+			Logger.info('Starting system reset...');
 			this.resetSystem().then(() =>
 			{
+				this.actionStatus = SystemActionStatus.COMPLETED;
 				Logger.info('System reset completed successfully.');
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 			})
 			.catch(error =>
 			{
+				this.actionStatus = SystemActionStatus.ERROR;
 				Logger.error(`Error resetting system: ${error}`);
 				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			});
 		}
 		else if(action === 'reboot')
 		{
+			Logger.info('Rebooting system...');
 			this.rebootSystem().then(() =>
 			{
+				this.actionStatus = SystemActionStatus.COMPLETED;
 				Logger.info('System is rebooting...');
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 			})
 			.catch(error =>
 			{
+				this.actionStatus = SystemActionStatus.ERROR;
 				Logger.error(`Error rebooting system: ${error}`);
 				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			});
 		}
 		else if(action === 'halt')
 		{
+			Logger.info('Shutting down system...');
 			this.shutdownSystem().then(() =>
 			{
+				this.actionStatus = SystemActionStatus.COMPLETED;
 				Logger.info('System is shutting down...');
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 			})
 			.catch(error =>
 			{
+				this.actionStatus = SystemActionStatus.ERROR;
 				Logger.error(`Error shutting down system: ${error}`);
 				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			});
@@ -115,6 +181,7 @@ export class SystemActionsCharacteristic
 		else
 		{
 			Logger.info(`System action "${action}" received is unknown.`);
+			this.actionStatus = SystemActionStatus.ERROR;
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 		}
 	}
