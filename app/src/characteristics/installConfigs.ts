@@ -7,6 +7,13 @@ import {
 } from '@utils/node';
 import { certificateGenerate } from '@utils/certificate';
 
+enum ConfigStatus {
+	NOT_STARTED = 0,
+	IN_PROGRESS = 1,
+	COMPLETED = 2,
+	ERROR = -1
+}
+
 export class InstallConfigsCharacteristic
 {
 	/**
@@ -22,6 +29,18 @@ export class InstallConfigsCharacteristic
 	private characteristicUuid: string = '';
 	
 	/**
+	 * Configuration installation status
+	 * @type ConfigStatus
+	 */
+	private configStatus: ConfigStatus = ConfigStatus.NOT_STARTED;
+	
+	/**
+	 * Status summary of node, VPN, and certificate generation
+	 * @type string
+	 */
+	private statusSummary: string = '000'; // Default: Node(0), VPN(0), Cert(0)
+	
+	/**
 	 * Create a new instance of Characteristic
 	 */
 	constructor(uuid: string) 
@@ -34,15 +53,16 @@ export class InstallConfigsCharacteristic
 	/**
 	 * Create a new instance of InstallConfigsCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create() 
 	{
 		if(this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
 			uuid: this.characteristicUuid,
-			properties: ['read'],
+			properties: ['read', 'write'],
 			onReadRequest: this.onReadRequest.bind(this),
+			onWriteRequest: this.onWriteRequest.bind(this),
 		});
 	}
 	
@@ -52,46 +72,76 @@ export class InstallConfigsCharacteristic
 	 * @param callback (result: number, data: Buffer) => void
 	 * @returns void
 	 */
-	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
+	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
-		// Initialize the status
-		let status = '';
+		let response;
+		switch(this.configStatus)
+		{
+			case ConfigStatus.NOT_STARTED:
+				response = '0'; 
+				break;
+			case ConfigStatus.IN_PROGRESS:
+				response = '1'; 
+				break;
+			case ConfigStatus.ERROR:
+				response = '-1'; 
+				break;
+			case ConfigStatus.COMPLETED:
+				response = this.statusSummary;
+				break;
+		}
 		
-		// Create the node configuration
+		Logger.info(`Configuration status: ${response}`);
+		callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(response));
+	}
+	
+	/**
+	 * Called when the characteristic is written to start the configuration installation process
+	 * @param data Buffer
+	 * @param offset number
+	 * @param withoutResponse boolean
+	 * @param callback (result: number) => void
+	 * @returns void
+	 */
+	public onWriteRequest(data: Buffer, offset: number, withoutResponse: boolean, callback: (result: number) => void) 
+	{
+		if(this.configStatus === ConfigStatus.IN_PROGRESS)
+		{
+			Logger.error('Configuration installation already in progress');
+			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+			return;
+		}
+		
+		this.configStatus = ConfigStatus.IN_PROGRESS;
+		callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+		
+		Logger.info('Starting configuration installation process');
+		
+		// Start creating the node configuration
 		createNodeConfig().then((statusNode: boolean) =>
 		{
-			status = statusNode ? '1' : '0';
-			// Create the VPN configuration
-			createVpnConfig().then((statusVpn: boolean) =>
-			{
-				// Append the VPN status to the node status
-				status += statusVpn ? '1' : '0';
-				
-				// Create certificate and private key
-				certificateGenerate().then((success: boolean) =>
-				{
-					// Append the certificate status to the node status
-					status += success ? '1' : '0';
-					
-					// Return the value to the subscriber
-					callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(status));
-				})
-				.catch((error: any) =>
-				{
-					Logger.error(`Error while creating the certificate: ${error}`);
-					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from(status+'0'));
-				});
-			})
-			.catch((error: any) =>
-			{
-				Logger.error(`Error while creating the VPN configuration: ${error}`);
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from(status+'0'));
-			});
+			this.statusSummary = statusNode ? '1' : '0';
+			
+			// Start creating the VPN configuration
+			return createVpnConfig();
+		})
+		.then((statusVpn: boolean) =>
+		{
+			this.statusSummary += statusVpn ? '1' : '0';
+			
+			// Start generating the certificate
+			return certificateGenerate();
+		})
+		.then((certSuccess: boolean) =>
+		{
+			this.statusSummary += certSuccess ? '1' : '0';
+			this.configStatus = ConfigStatus.COMPLETED;
+			Logger.info(`Configuration installation completed with status: ${this.statusSummary}`);
 		})
 		.catch((error: any) =>
 		{
-			Logger.error(`Error while creating the node configuration: ${error}`);
-			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from('00'));
+			this.configStatus = ConfigStatus.ERROR;
+			Logger.error(`Error during configuration installation: ${error}`);
 		});
 	}
 }
