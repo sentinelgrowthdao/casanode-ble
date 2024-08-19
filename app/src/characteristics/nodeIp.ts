@@ -2,7 +2,7 @@ import { createRequire } from 'module';
 
 import { Logger } from '@utils/logger';
 import nodeManager from '@utils/node';
-import { isValidIP } from '@utils/validators';
+import { isValidIP, isValidDns } from '@utils/validators';
 
 export class NodeIpCharacteristic
 {
@@ -71,19 +71,42 @@ export class NodeIpCharacteristic
 		// Get the value from the buffer
 		const value = data.toString('utf-8').trim();
 		
-		// Check if the value is valid
-		if (isValidIP(value) === false)
+		// Check if the value is a valid IP
+		if (isValidIP(value))
 		{
-			Logger.error('Invalid value received via Bluetooth for "node_ip".');
-			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			return;
+			// Set the value in the configuration immediately
+			nodeManager.setNodeIp(value);
+			
+			// Notify the subscriber of success
+			callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+			Logger.info(`Parameter "node_ip" updated via Bluetooth to: ${value}`);
 		}
-		
-		// Set the value in the configuration
-		nodeManager.setNodeIp(value);
-		
-		// Notify the subscriber if the value is set
-		callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-		Logger.info(`Parameter "node_ip" updated via Bluetooth to: ${value}`);
+		else
+		{
+			// Check if the value is a valid DNS asynchronously
+			isValidDns(value).then(isValid => 
+			{
+				if (isValid)
+				{
+					// If valid DNS, set the value in the configuration
+					nodeManager.setNodeIp(value);
+					
+					// Notify the subscriber of success
+					callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+					Logger.info(`Parameter "node_ip" updated via Bluetooth to: ${value}`);
+				}
+				else
+				{
+					// If invalid, return an error
+					Logger.error('Invalid value received via Bluetooth for "node_ip".');
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+				}
+			}).catch(err => 
+			{
+				// Handle any errors that occur during DNS resolution
+				Logger.error('Error while resolving DNS:', err);
+				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+			});
+		}
 	}
 }
