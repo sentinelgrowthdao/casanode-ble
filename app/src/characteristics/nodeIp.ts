@@ -101,10 +101,10 @@ export class NodeIpCharacteristic
 					Logger.error('Invalid value received via Bluetooth for "node_ip".');
 					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 				}
-			}).catch(err => 
+			}).catch((error: any) => 
 			{
 				// Handle any errors that occur during DNS resolution
-				Logger.error('Error while resolving DNS:', err);
+				Logger.error(`Error while resolving DNS: ${error}`);
 				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			});
 		}
