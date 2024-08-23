@@ -148,12 +148,13 @@ export class SystemActionsCharacteristic
 		}
 		else if(action === 'reboot')
 		{
+			// Send callback before rebooting the system
+			callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 			Logger.info('Rebooting system...');
 			this.rebootSystem().then(() =>
 			{
 				this.actionStatus = SystemActionStatus.COMPLETED;
 				Logger.info('System is rebooting...');
-				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 			})
 			.catch(error =>
 			{
@@ -164,12 +165,13 @@ export class SystemActionsCharacteristic
 		}
 		else if(action === 'halt')
 		{
+			// Send callback before shutting down the system
+			callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 			Logger.info('Shutting down system...');
 			this.shutdownSystem().then(() =>
 			{
 				this.actionStatus = SystemActionStatus.COMPLETED;
 				Logger.info('System is shutting down...');
-				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 			})
 			.catch(error =>
 			{
