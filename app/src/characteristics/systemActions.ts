@@ -300,7 +300,7 @@ export class SystemActionsCharacteristic
 				// Determine user's home directory
 				const userHomeDir = os.homedir();
 				
-				// Delete specific directory: /home/raspberry/.sentinelnode/
+				// Delete specific directory: /opt/casanode/.sentinelnode/
 				const sentinelNodeDir = `${userHomeDir}/.sentinelnode`;
 				Logger.info(`Deleting directory: ${sentinelNodeDir}`);
 				await fs.rm(sentinelNodeDir, { recursive: true });
