@@ -139,6 +139,10 @@ export class SystemActionsCharacteristic
 				this.actionStatus = SystemActionStatus.COMPLETED;
 				Logger.info('System reset completed successfully.');
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+				// Shutdown the application (Restart performed by systemd) in 1 second
+				setTimeout(() => {
+					process.exit(0);
+				}, 1000);
 			})
 			.catch(error =>
 			{
