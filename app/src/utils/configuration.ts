@@ -90,6 +90,16 @@ class ConfigurationLoader
 	}
 	
 	/**
+	 * Reset the node configuration
+	 * @returns void
+	 */
+	public resetNodeConfig(): void
+	{
+		this.config = { ...this.defaultConfig };
+		this.saveConfig();
+	}
+	
+	/**
 	 * Load configuration from file and merge it with default configuration
 	 */
 	private loadConfig(): AppConfigData
@@ -358,3 +368,4 @@ export default configurationLoader.getConfig();
 export const getDockerDefaultSocketPath = (): string => configurationLoader.getDockerDefaultSocketPath();
 export const getRemoteAddress = async (): Promise<RemoteAddressData> => configurationLoader.getRemoteAddress();
 export const refreshNetworkConfiguration = async (): Promise<boolean> => configurationLoader.refreshNetworkConfiguration();
+export const resetNodeConfig = (): void => configurationLoader.resetNodeConfig();
