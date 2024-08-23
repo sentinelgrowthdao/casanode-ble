@@ -6,6 +6,7 @@ import * as fs from 'fs/promises';
 import { Logger } from '@utils/logger';
 import { imagePull, containerStop, imagesRemove, containerRemove } from '@utils/docker';
 import nodeManager from '@utils/node';
+import { resetNodeConfig } from '@utils/configuration';
 
 enum SystemActionStatus
 {
@@ -310,6 +311,9 @@ export class SystemActionsCharacteristic
 				
 				// Reload remote Ip and Location
 				await nodeManager.refreshNodeLocation();
+				
+				// Reset configuration
+				resetNodeConfig();
 				
 				// Resolve the promise when all operations are completed successfully
 				resolve();
