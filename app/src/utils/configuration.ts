@@ -278,15 +278,15 @@ class ConfigurationLoader
 				if(data && data.error === false)
 				{
 					// Extract the configuration data
-					const chainId = data.chain_id;
-					const rpcAddresses = data.rpc_addresses;
-					const gas = data.gas;
-					const gasAdjustment = data.gas_adjustment;
-					const gasPrice = data.gas_price;
-					const datacenterGigabytePrices = data.datacenter.gigabyte_prices;
-					const datacenterHourlyPrices = data.datacenter.hourly_prices;
-					const residentialGigabytePrices = data.residential.gigabyte_prices;
-					const residentialHourlyPrices = data.residential.hourly_prices;
+					const chainId = data.chain_id || this.config.CHAIN_ID;
+					const rpcAddresses = data.rpc_addresses || this.config.RPC_ADDRESSES;
+					const gas = data.gas || this.config.GAS;
+					const gasAdjustment = data.gas_adjustment || this.config.GAS_ADJUSTMENT;
+					const gasPrice = data.gas_price || this.config.GAS_PRICE;
+					const datacenterGigabytePrices = data.datacenter.gigabyte_prices || this.config.DATACENTER_GIGABYTE_PRICES;
+					const datacenterHourlyPrices = data.datacenter.hourly_prices || this.config.DATACENTER_HOURLY_PRICES;
+					const residentialGigabytePrices = data.residential.gigabyte_prices || this.config.RESIDENTIAL_GIGABYTE_PRICES;
+					const residentialHourlyPrices = data.residential.hourly_prices || this.config.RESIDENTIAL_HOURLY_PRICES;
 					
 					// Update the configuration
 					this.config = {
