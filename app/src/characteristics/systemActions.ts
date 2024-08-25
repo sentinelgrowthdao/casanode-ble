@@ -115,7 +115,7 @@ export class SystemActionsCharacteristic
 		
 		this.actionStatus = SystemActionStatus.IN_PROGRESS;
 		
-		if(action === 'update')
+		if(action === 'update-system')
 		{
 			Logger.info('Starting system update...');
 			this.updateSystem().then(() =>
