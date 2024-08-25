@@ -6,7 +6,7 @@ import * as fs from 'fs/promises';
 import { Logger } from '@utils/logger';
 import { imagePull, containerStop, imagesRemove, containerRemove } from '@utils/docker';
 import nodeManager from '@utils/node';
-import { resetConfiguration } from '@utils/configuration';
+import { resetConfiguration, refreshNetworkConfiguration } from '@utils/configuration';
 
 enum SystemActionStatus
 {
@@ -131,6 +131,23 @@ export class SystemActionsCharacteristic
 				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 			});
 		}
+		else if(action === 'update-sentinel')
+		{
+			Logger.info('Starting Sentinel update...');
+			// Update Sentinel
+			refreshNetworkConfiguration().then(() =>
+			{
+				this.actionStatus = SystemActionStatus.COMPLETED;
+				Logger.info('Sentinel update completed successfully');
+				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+			})
+			.catch(error =>
+			{
+				this.actionStatus = SystemActionStatus.ERROR;
+				Logger.error(`Error updating Sentinel: ${error}`);
+				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+			});
+		}
 		else if(action === 'reset')
 		{
 			Logger.info('Starting system reset...');
@@ -236,6 +253,40 @@ export class SystemActionsCharacteristic
 			catch (error)
 			{
 				Logger.error(`Error updating system: ${error}`);
+				reject(error);
+			}
+		});
+	}
+
+	/**
+	 * Promise-based function to update Sentinel
+	 * @returns Promise<void>
+	 */
+	private updateSentinel(): Promise<void>
+	{
+		return new Promise(async (resolve, reject) =>
+		{
+			try
+			{
+				refreshNetworkConfiguration();
+				// Execute Sentinel update commands here
+				exec('sudo apt update && sudo apt upgrade -y', (error, stdout, stderr) =>
+				{
+					if (error)
+					{
+						Logger.error(`Error updating Sentinel: ${error}`);
+						reject(error);
+					}
+					else
+					{
+						Logger.info('Sentinel update command executed successfully');
+						resolve();
+					}
+				});
+			}
+			catch (error)
+			{
+				Logger.error(`Error updating Sentinel: ${error}`);
 				reject(error);
 			}
 		});
