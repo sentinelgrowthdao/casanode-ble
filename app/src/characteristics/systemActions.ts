@@ -6,7 +6,7 @@ import * as fs from 'fs/promises';
 import { Logger } from '@utils/logger';
 import { imagePull, containerStop, imagesRemove, containerRemove } from '@utils/docker';
 import nodeManager from '@utils/node';
-import { resetNodeConfig } from '@utils/configuration';
+import { resetConfiguration } from '@utils/configuration';
 
 enum SystemActionStatus
 {
@@ -317,7 +317,7 @@ export class SystemActionsCharacteristic
 				await nodeManager.refreshNodeLocation();
 				
 				// Reset configuration
-				resetNodeConfig();
+				resetConfiguration();
 				
 				// Resolve the promise when all operations are completed successfully
 				resolve();

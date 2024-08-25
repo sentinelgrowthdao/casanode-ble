@@ -93,7 +93,7 @@ class ConfigurationLoader
 	 * Reset the node configuration
 	 * @returns void
 	 */
-	public resetNodeConfig(): void
+	public resetConfiguration(): void
 	{
 		this.config = { ...this.defaultConfig };
 		this.saveConfig();
@@ -368,4 +368,4 @@ export default configurationLoader.getConfig();
 export const getDockerDefaultSocketPath = (): string => configurationLoader.getDockerDefaultSocketPath();
 export const getRemoteAddress = async (): Promise<RemoteAddressData> => configurationLoader.getRemoteAddress();
 export const refreshNetworkConfiguration = async (): Promise<boolean> => configurationLoader.refreshNetworkConfiguration();
-export const resetNodeConfig = (): void => configurationLoader.resetNodeConfig();
+export const resetConfiguration = (): void => configurationLoader.resetConfiguration();
