@@ -38,6 +38,7 @@ import { WalletActionsCharacteristic } from '@/characteristics/walletActions';
 import { NodeKeyringBackendCharacteristic } from '@/characteristics/nodeKeyringBackend';
 import { OnlineUsersCharacteristic } from '@/characteristics/onlineUsers';
 import { VpnChangeTypeCharacteristic } from '@/characteristics/vpnChangeConfig';
+import { CheckPortCharacteristic } from '@/characteristics/checkPort';
 
 // Bluetooth UUIDs
 const NODE_BLE_UUID = '00805f9b34fb';
@@ -75,6 +76,7 @@ const CHAR_WALLET_ACTIONS_UUID = '00805f9b351a';
 const CHAR_NODE_KEYRING_BACKEND_UUID = '00805f9b351b';
 const CHAR_ONLINE_USERS_UUID = '00805f9b351c';
 const CHAR_CHANGE_VPN_TYPE_UUID = '00805f9b351d';
+const CHAR_CHECK_PORT_UUID = '00805f9b351e';
 
 export const daemonCommand = async () =>
 {
@@ -129,6 +131,7 @@ export const daemonCommand = async () =>
 			new NodeKeyringBackendCharacteristic(`${config.BLE_UUID}-${CHAR_NODE_KEYRING_BACKEND_UUID}`).create(),
 			new OnlineUsersCharacteristic(`${config.BLE_UUID}-${CHAR_ONLINE_USERS_UUID}`).create(),
 			new VpnChangeTypeCharacteristic(`${config.BLE_UUID}-${CHAR_CHANGE_VPN_TYPE_UUID}`).create(),
+			new CheckPortCharacteristic(`${config.BLE_UUID}-${CHAR_CHECK_PORT_UUID}`).create(),
 		]
 	});
 	
