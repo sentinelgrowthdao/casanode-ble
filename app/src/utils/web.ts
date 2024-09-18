@@ -2,6 +2,7 @@ import express from 'express';
 import QRCode from 'qrcode';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import { Logger } from '@utils/logger';
 import nodeManager from '@utils/node';
 import config from '@utils/configuration';
@@ -58,6 +59,8 @@ class WebServer
 		{
 			// Get node configuration
 			const nodeConfig = nodeManager.getConfig();
+			// Get local IP address
+			const localIPAddress = this.getLocalIPAddress();
 			
 			// QR code data
 			const qrData = {
@@ -65,7 +68,10 @@ class WebServer
 				os: nodeConfig.systemOs,
 				kernel: nodeConfig.systemKernel,
 				architecture: nodeConfig.systemArch,
-				bluetooth: config.BLE_UUID
+				bluetooth: config.BLE_UUID,
+				ip: localIPAddress,
+				port: this.PORT,
+				auth: config.WEB_AUTH,
 			};
 			
 			// Generate QR code data URL
@@ -90,6 +96,35 @@ class WebServer
 				res.send(modifiedHtml);
 			});
 		});
+	}
+	
+	/**
+	 * Get the local IP address
+	 * @returns string | null
+	 */
+	private getLocalIPAddress(): string | null
+	{
+		// Get the network interfaces
+		const networkInterfaces = os.networkInterfaces();
+		// Iterate over the network interfaces
+		for(const interfaceName in networkInterfaces)
+		{
+			// Get the network info for the interface
+			const networkInfo = networkInterfaces[interfaceName];
+			// if network info is available
+			if(networkInfo)
+			{
+				// Iterate over the network info
+				for(const info of networkInfo)
+				{
+					// If the info is an IPv4 address and not internal
+					if(info.family === 'IPv4' && !info.internal)
+						return info.address;
+				}
+			}
+		}
+		
+		return null;
 	}
 	
 	/**
