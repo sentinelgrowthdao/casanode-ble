@@ -17,6 +17,8 @@
 			"@commands/*": ["./src/commands/*"],
 			"@types/*": ["./src/types/*"],
 			"@utils/*": ["./src/utils/*"],
+			"@web/*": ["./src/web/*"],
+			"@api/*": ["./src/api/*"],
 		},
 		"typeRoots": [
 			"./node_modules/@types",
