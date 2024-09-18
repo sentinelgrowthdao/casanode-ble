@@ -17,6 +17,7 @@ export interface AppConfigData
 	DOCKER_SOCKET: string;
 	BLE_UUID: string;
 	WEB_LISTEN: string;
+	WEB_AUTH: string;
 	API_BALANCE: string[];
 	FOXINODES_API_CHECK_IP: string;
 	FOXINODES_API_DVPN_CONFIG: string;
@@ -51,6 +52,7 @@ class ConfigurationLoader
 		DOCKER_SOCKET: this.getDockerDefaultSocketPath(),
 		BLE_UUID: this.generateBluetoothUuid(),
 		WEB_LISTEN: '0.0.0.0:8080',
+		WEB_AUTH: this.generateAuthToken(),
 		API_BALANCE: [
 			"https://api-sentinel.busurnode.com/cosmos/bank/v1beta1/balances/",
 			"https://api.sentinel.quokkastake.io/cosmos/bank/v1beta1/balances/",
@@ -357,6 +359,15 @@ class ConfigurationLoader
 		
 		// Return the formatted UUID
 		return `${part1}-${part2}-${part3}-${part4}`;
+	}
+	
+	/**
+	 * Generate an authentication token
+	 * @returns string
+	 */
+	private generateAuthToken(): string
+	{
+		return uuidv4();
 	}
 }
 
