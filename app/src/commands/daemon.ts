@@ -1,4 +1,5 @@
 import { createRequire } from 'module';
+import { exec } from 'child_process';
 import { Logger } from '@utils/logger';
 import config from '@utils/configuration';
 import WebServer from '@utils/web';
@@ -78,22 +79,57 @@ const CHAR_ONLINE_USERS_UUID = '00805f9b351c';
 const CHAR_CHANGE_VPN_TYPE_UUID = '00805f9b351d';
 const CHAR_CHECK_PORT_UUID = '00805f9b351e';
 
+/**
+ * Check if Bluetooth is available
+ * @returns Promise<boolean>
+ */
+export const isBluetoothAvailable = (): Promise<boolean> =>
+{
+	// Return a promise to check if the Bluetooth controller is available
+	return new Promise((resolve, reject) =>
+	{
+		// Execute the hciconfig command to check for Bluetooth controller
+		exec('hciconfig', (error, stdout, stderr) =>
+		{
+			// Check if there is an error or no Bluetooth controller is found
+			if (error || stderr || !stdout.includes('hci'))
+				resolve(false);
+			else
+				resolve(true);
+		});
+	});
+};
+
 export const daemonCommand = async () =>
 {
 	console.log('Daemon process started');
 	Logger.info('Daemon process started.');
 	
-	// Load the system information
+	// Load system information
 	await loadingSystemInformations();
 	
-	// Load the node information
+	// Load node information
 	await loadingNodeInformations();
+	
+	// Start the web server regardless of Bluetooth availability
+	const webServer = WebServer.getInstance();
+	webServer.start();
+	
+	// Check if Bluetooth is available
+	const bluetoothAvailable = await isBluetoothAvailable();
+	// If Bluetooth is not available, log a info and exit the initialization
+	if (!bluetoothAvailable)
+	{
+		console.warn('No Bluetooth controller found. Continuing without Bluetooth support.');
+		Logger.info('No Bluetooth controller found. Continuing without Bluetooth support.');
+		return; // Exit the Bluetooth initialization if no antenna is found
+	}
 	
 	// Dynamically import the Bleno module using CommonJS require
 	const require = createRequire(import.meta.url);
 	const bleno = require('bleno');
-	
-	// Create the primary service with the specified UUID and characteristics
+
+	// Create a new primary service with the UUID and characteristics
 	const service = new bleno.PrimaryService({
 		uuid: `${config.BLE_UUID}-${NODE_BLE_UUID}`,
 		characteristics: [
@@ -144,12 +180,12 @@ export const daemonCommand = async () =>
 		// If the state is powered on, start advertising the service
 		if (state === 'poweredOn')
 		{
-			Logger.info('Application started successfully.');
+			Logger.info('Bluetooth powered on. Application started successfully.');
 			bleno.startAdvertising('Casanode', [`${config.BLE_UUID}-${NODE_BLE_UUID}`]);
 		}
 		else
 		{
-			Logger.info('Application stopped.');
+			Logger.info('Bluetooth powered off. Stopping advertising.');
 			bleno.stopAdvertising();
 		}
 	});
@@ -173,8 +209,4 @@ export const daemonCommand = async () =>
 			Logger.error('Advertising failed: ' + error);
 		}
 	});
-	
-	// Start the web server
-	const webServer = WebServer.getInstance();
-	webServer.start();
 };
