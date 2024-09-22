@@ -2,10 +2,10 @@ import express, { Router, Request, Response } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
-import os from 'os'; // Import the 'os' module
 import QRCode from 'qrcode';
 import config from '@utils/configuration';
 import nodeManager from '@utils/node';
+import { getLocalIPAddress } from '@utils/network';
 import { Logger } from '@utils/logger';
 
 // Create __dirname equivalent in ESM
@@ -69,35 +69,5 @@ webRouter.get('/', async(req: Request, res: Response) =>
 		res.send(modifiedHtml);
 	});
 });
-
-/**
- * Get the local IP address
- * @returns string | null
- */
-function getLocalIPAddress(): string | null
-{
-	// Get the network interfaces
-	const networkInterfaces = os.networkInterfaces();
-	// Iterate over the network interfaces
-	for(const interfaceName in networkInterfaces)
-	{
-		// Get the network information
-		const networkInfo = networkInterfaces[interfaceName];
-		// Check if the network information is valid
-		if(networkInfo)
-		{
-			// Iterate over the network information
-			for(const info of networkInfo)
-			{
-				// Check if the network information is an IPv4 address and not internal
-				if(info.family === 'IPv4' && !info.internal)
-					return info.address;
-			}
-		}
-	}
-
-	// Return null if no valid IP address is found
-	return null;
-}
 
 export default webRouter;
