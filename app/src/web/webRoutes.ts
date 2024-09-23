@@ -40,7 +40,11 @@ webRouter.get('/', async(req: Request, res: Response) =>
 		os: nodeConfig.systemOs,
 		kernel: nodeConfig.systemKernel,
 		architecture: nodeConfig.systemArch,
-		bluetooth: config.BLE_UUID,
+		bluetooth: {
+			uuid: config.BLE_UUID,
+			discovery: config.BLE_DISCOVERY_UUID,
+			seed: config.BLE_CHARACTERISTIC_SEED,
+		},
 		ip: localIPAddress,
 		port: config.WEB_PORT || 8080,
 		auth: config.WEB_AUTH,

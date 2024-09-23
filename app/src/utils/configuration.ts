@@ -16,6 +16,8 @@ export interface AppConfigData
 	LOG_DIR: string;
 	DOCKER_SOCKET: string;
 	BLE_UUID: string;
+	BLE_DISCOVERY_UUID: string;
+	BLE_CHARACTERISTIC_SEED: string;
 	WEB_LISTEN: string;
 	WEB_AUTH: string;
 	API_BALANCE: string[];
@@ -50,7 +52,9 @@ class ConfigurationLoader
 		CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/opt/casanode/.sentinelnode',
 		LOG_DIR: '/var/log/casanode',
 		DOCKER_SOCKET: this.getDockerDefaultSocketPath(),
-		BLE_UUID: this.generateBluetoothUuid(),
+		BLE_UUID: '00001820-0000-1000-8000-00805f9b34fb',
+		BLE_DISCOVERY_UUID: '0000a2d4-0000-1000-8000-00805f9b34fb',
+		BLE_CHARACTERISTIC_SEED: uuidv4(),
 		WEB_LISTEN: '0.0.0.0:8080',
 		WEB_AUTH: this.generateAuthToken(),
 		API_BALANCE: [
@@ -338,27 +342,6 @@ class ConfigurationLoader
 		const userInfo = os.userInfo();
 		const userId = userInfo.uid;
 		return `/run/user/${userId}/docker.sock`;
-	}
-	
-	/**
-	 * Generate a Bluetooth UUID
-	 * @returns string
-	 */
-	private generateBluetoothUuid(): string
-	{
-		// Generate a full UUID
-		const uuid = uuidv4();
-		// Split the UUID into its components
-		const parts = uuid.split('-');
-		
-		// Use the first three parts and replace the last part with a random 4-character hex string
-		const part1 = parts[0];
-		const part2 = parts[1];
-		const part3 = parts[2];
-		const part4 = parts[3];
-		
-		// Return the formatted UUID
-		return `${part1}-${part2}-${part3}-${part4}`;
 	}
 	
 	/**

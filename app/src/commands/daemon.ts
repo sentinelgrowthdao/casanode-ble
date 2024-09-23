@@ -3,9 +3,10 @@ import { exec } from 'child_process';
 import { Logger } from '@utils/logger';
 import config from '@utils/configuration';
 import WebServer from '@utils/web';
+import { v5 as uuidv5 } from 'uuid';
 import { loadingNodeInformations, loadingSystemInformations } from '@actions/startup';
 
-import { HelloCharacteristic } from '@characteristics/hello';
+import { DiscoveryCharacteristic } from '@characteristics/discovery';
 import { MonikerCharacteristic } from '@characteristics/moniker';
 import { NodeTypeCharacteristic } from '@characteristics/nodeType';
 import { NodeIpCharacteristic } from '@/characteristics/nodeIp';
@@ -41,43 +42,6 @@ import { OnlineUsersCharacteristic } from '@/characteristics/onlineUsers';
 import { VpnChangeTypeCharacteristic } from '@/characteristics/vpnChangeConfig';
 import { CheckPortCharacteristic } from '@/characteristics/checkPort';
 
-// Bluetooth UUIDs
-const NODE_BLE_UUID = '00805f9b34fb';
-const CHAR_HELLO_UUID = '00805f9b34fc';
-const CHAR_MONIKER_UUID = '00805f9b34fd';
-const CHAR_NODE_TYPE_UUID = '00805f9b34fe';
-const CHAR_NODE_IP_UUID = '00805f9b34ff';
-const CHAR_NODE_PORT_UUID = '00805f9b3500';
-const CHAR_VPN_TYPE_UUID = '00805f9b3501';
-const CHAR_VPN_PORT_UUID = '00805f9b3502';
-const CHAR_MAX_PEERS_UUID = '00805f9b3503';
-const CHAR_NODE_CONFIG_UUID = '00805f9b3504';
-const CHAR_NODE_LOCATION_UUID = '00805f9b3505';
-const CHAR_CERT_EXPIRITY_UUID = '00805f9b3506';
-const CHAR_BANDWIDTH_SPEED_UUID = '00805f9b3507';
-const CHAR_SYSTEM_UPTIME_UUID = '00805f9b3508';
-const CHAR_CASANODE_VERSION_UUID = '00805f9b3509';
-const CHAR_DOCKER_IMAGE_UUID = '00805f9b350a';
-const CHAR_SYSTEM_OS_UUID = '00805f9b350b';
-const CHAR_SYSTEM_ARCH_UUID = '00805f9b350c';
-const CHAR_SYSTEM_KERNEL_UUID = '00805f9b350d';
-const CHAR_NODE_PASSPHRASE_UUID = '00805f9b350e';
-const CHAR_PUBLIC_ADDRESS_UUID = '00805f9b350f';
-const CHAR_ADDRESS_NODE_UUID = '00805f9b3510';
-const CHAR_NODE_BALANCE_UUID = '00805f9b3511';
-const CHAR_NODE_STATUS_UUID = '00805f9b3512';
-const CHAR_CHECK_INSTALL_UUID = '00805f9b3513';
-const CHAR_INSTALL_IMAGE_UUID = '00805f9b3514';
-const CHAR_INSTALL_CONFIGS_UUID = '00805f9b3515';
-const CHAR_NODE_ACTIONS_UUID = '00805f9b3516';
-const CHAR_SYSTEM_ACTIONS_UUID = '00805f9b3517';
-const CHAR_CERTIFICATE_ACTIONS_UUID = '00805f9b3518';
-const CHAR_WALLET_MNEMONIC_UUID = '00805f9b3519';
-const CHAR_WALLET_ACTIONS_UUID = '00805f9b351a';
-const CHAR_NODE_KEYRING_BACKEND_UUID = '00805f9b351b';
-const CHAR_ONLINE_USERS_UUID = '00805f9b351c';
-const CHAR_CHANGE_VPN_TYPE_UUID = '00805f9b351d';
-const CHAR_CHECK_PORT_UUID = '00805f9b351e';
 
 /**
  * Check if Bluetooth is available
@@ -100,6 +64,20 @@ export const isBluetoothAvailable = (): Promise<boolean> =>
 	});
 };
 
+/**
+ * Generate a UUID from a seed and a characteristic ID
+ * @param characteristicId string
+ * @returns string
+ */
+function generateUUIDFromSeed(characteristicId: string) : string
+{
+	return uuidv5(`${config.BLE_CHARACTERISTIC_SEED}+${characteristicId}`, uuidv5.URL);
+}
+
+/**
+ * Daemon command
+ * @returns void
+ */
 export const daemonCommand = async () =>
 {
 	console.log('Daemon process started');
@@ -128,46 +106,46 @@ export const daemonCommand = async () =>
 	// Dynamically import the Bleno module using CommonJS require
 	const require = createRequire(import.meta.url);
 	const bleno = require('bleno');
-
+	
 	// Create a new primary service with the UUID and characteristics
 	const service = new bleno.PrimaryService({
-		uuid: `${config.BLE_UUID}-${NODE_BLE_UUID}`,
+		uuid: `${config.BLE_UUID}`,
 		characteristics: [
-			HelloCharacteristic.create(`${config.BLE_UUID}-${CHAR_HELLO_UUID}`),
-			new MonikerCharacteristic(`${config.BLE_UUID}-${CHAR_MONIKER_UUID}`).create(),
-			new NodeTypeCharacteristic(`${config.BLE_UUID}-${CHAR_NODE_TYPE_UUID}`).create(),
-			new NodeIpCharacteristic(`${config.BLE_UUID}-${CHAR_NODE_IP_UUID}`).create(),
-			new NodePortCharacteristic(`${config.BLE_UUID}-${CHAR_NODE_PORT_UUID}`).create(),
-			new VpnTypeCharacteristic(`${config.BLE_UUID}-${CHAR_VPN_TYPE_UUID}`).create(),
-			new VpnPortCharacteristic(`${config.BLE_UUID}-${CHAR_VPN_PORT_UUID}`).create(),
-			new MaxPeersCharacteristic(`${config.BLE_UUID}-${CHAR_MAX_PEERS_UUID}`).create(),
-			new NodeConfigCharacteristic(`${config.BLE_UUID}-${CHAR_NODE_CONFIG_UUID}`).create(),
-			new NodeLocationCharacteristic(`${config.BLE_UUID}-${CHAR_NODE_LOCATION_UUID}`).create(),
-			new CertExpirityCharacteristic(`${config.BLE_UUID}-${CHAR_CERT_EXPIRITY_UUID}`).create(),
-			new BandwidthSpeedCharacteristic(`${config.BLE_UUID}-${CHAR_BANDWIDTH_SPEED_UUID}`).create(),
-			new SystemUptimeCharacteristic(`${config.BLE_UUID}-${CHAR_SYSTEM_UPTIME_UUID}`).create(),
-			new CasanodeVersionCharacteristic(`${config.BLE_UUID}-${CHAR_CASANODE_VERSION_UUID}`).create(),
-			new DockerImageCharacteristic(`${config.BLE_UUID}-${CHAR_DOCKER_IMAGE_UUID}`).create(),
-			new SystemArchCharacteristic(`${config.BLE_UUID}-${CHAR_SYSTEM_ARCH_UUID}`).create(),
-			new SystemOsCharacteristic(`${config.BLE_UUID}-${CHAR_SYSTEM_OS_UUID}`).create(),
-			new SystemKernelCharacteristic(`${config.BLE_UUID}-${CHAR_SYSTEM_KERNEL_UUID}`).create(),
-			new NodePassphraseCharacteristic(`${config.BLE_UUID}-${CHAR_NODE_PASSPHRASE_UUID}`).create(),
-			new PublicAddressCharacteristic(`${config.BLE_UUID}-${CHAR_PUBLIC_ADDRESS_UUID}`).create(),
-			new NodeAddressCharacteristic(`${config.BLE_UUID}-${CHAR_ADDRESS_NODE_UUID}`).create(),
-			new NodeBalanceCharacteristic(`${config.BLE_UUID}-${CHAR_NODE_BALANCE_UUID}`).create(),
-			new NodeStatusCharacteristic(`${config.BLE_UUID}-${CHAR_NODE_STATUS_UUID}`).create(),
-			new CheckInstallationCharacteristic(`${config.BLE_UUID}-${CHAR_CHECK_INSTALL_UUID}`).create(),
-			new InstallDockerImageCharacteristic(`${config.BLE_UUID}-${CHAR_INSTALL_IMAGE_UUID}`).create(),
-			new InstallConfigsCharacteristic(`${config.BLE_UUID}-${CHAR_INSTALL_CONFIGS_UUID}`).create(),
-			new NodeActionsCharacteristic(`${config.BLE_UUID}-${CHAR_NODE_ACTIONS_UUID}`).create(),
-			new SystemActionsCharacteristic(`${config.BLE_UUID}-${CHAR_SYSTEM_ACTIONS_UUID}`).create(),
-			new CertificateActionsCharacteristic(`${config.BLE_UUID}-${CHAR_CERTIFICATE_ACTIONS_UUID}`).create(),
-			new NodeMnemonicCharacteristic(`${config.BLE_UUID}-${CHAR_WALLET_MNEMONIC_UUID}`).create(),
-			new WalletActionsCharacteristic(`${config.BLE_UUID}-${CHAR_WALLET_ACTIONS_UUID}`).create(),
-			new NodeKeyringBackendCharacteristic(`${config.BLE_UUID}-${CHAR_NODE_KEYRING_BACKEND_UUID}`).create(),
-			new OnlineUsersCharacteristic(`${config.BLE_UUID}-${CHAR_ONLINE_USERS_UUID}`).create(),
-			new VpnChangeTypeCharacteristic(`${config.BLE_UUID}-${CHAR_CHANGE_VPN_TYPE_UUID}`).create(),
-			new CheckPortCharacteristic(`${config.BLE_UUID}-${CHAR_CHECK_PORT_UUID}`).create(),
+			new DiscoveryCharacteristic(`${config.BLE_DISCOVERY_UUID}`).create(),
+			new MonikerCharacteristic(generateUUIDFromSeed('moniker')).create(),
+			new NodeTypeCharacteristic(generateUUIDFromSeed('node-type')).create(),
+			new NodeIpCharacteristic(generateUUIDFromSeed('node-ip')).create(),
+			new NodePortCharacteristic(generateUUIDFromSeed('node-port')).create(),
+			new VpnTypeCharacteristic(generateUUIDFromSeed('vpn-type')).create(),
+			new VpnPortCharacteristic(generateUUIDFromSeed('vpn-port')).create(),
+			new MaxPeersCharacteristic(generateUUIDFromSeed('max-peers')).create(),
+			new NodeConfigCharacteristic(generateUUIDFromSeed('node-config')).create(),
+			new NodeLocationCharacteristic(generateUUIDFromSeed('node-location')).create(),
+			new CertExpirityCharacteristic(generateUUIDFromSeed('cert-expirity')).create(),
+			new BandwidthSpeedCharacteristic(generateUUIDFromSeed('bandwidth-speed')).create(),
+			new SystemUptimeCharacteristic(generateUUIDFromSeed('system-uptime')).create(),
+			new CasanodeVersionCharacteristic(generateUUIDFromSeed('casanode-version')).create(),
+			new DockerImageCharacteristic(generateUUIDFromSeed('docker-image')).create(),
+			new SystemArchCharacteristic(generateUUIDFromSeed('system-arch')).create(),
+			new SystemOsCharacteristic(generateUUIDFromSeed('system-os')).create(),
+			new SystemKernelCharacteristic(generateUUIDFromSeed('system-kernel')).create(),
+			new NodePassphraseCharacteristic(generateUUIDFromSeed('node-passphrase')).create(),
+			new PublicAddressCharacteristic(generateUUIDFromSeed('public-address')).create(),
+			new NodeAddressCharacteristic(generateUUIDFromSeed('node-address')).create(),
+			new NodeBalanceCharacteristic(generateUUIDFromSeed('node-balance')).create(),
+			new NodeStatusCharacteristic(generateUUIDFromSeed('node-status')).create(),
+			new CheckInstallationCharacteristic(generateUUIDFromSeed('check-installation')).create(),
+			new InstallDockerImageCharacteristic(generateUUIDFromSeed('install-docker-image')).create(),
+			new InstallConfigsCharacteristic(generateUUIDFromSeed('install-configs')).create(),
+			new NodeActionsCharacteristic(generateUUIDFromSeed('node-actions')).create(),
+			new SystemActionsCharacteristic(generateUUIDFromSeed('system-actions')).create(),
+			new CertificateActionsCharacteristic(generateUUIDFromSeed('certificate-actions')).create(),
+			new NodeMnemonicCharacteristic(generateUUIDFromSeed('node-mnemonic')).create(),
+			new WalletActionsCharacteristic(generateUUIDFromSeed('wallet-actions')).create(),
+			new NodeKeyringBackendCharacteristic(generateUUIDFromSeed('node-keyring-backend')).create(),
+			new OnlineUsersCharacteristic(generateUUIDFromSeed('online-users')).create(),
+			new VpnChangeTypeCharacteristic(generateUUIDFromSeed('vpn-change-type')).create(),
+			new CheckPortCharacteristic(generateUUIDFromSeed('check-port')).create(),
 		]
 	});
 	
@@ -181,7 +159,7 @@ export const daemonCommand = async () =>
 		if (state === 'poweredOn')
 		{
 			Logger.info('Bluetooth powered on. Application started successfully.');
-			bleno.startAdvertising('Casanode', [`${config.BLE_UUID}-${NODE_BLE_UUID}`]);
+			bleno.startAdvertising('Casanode', [`${config.BLE_UUID}`]);
 		}
 		else
 		{
