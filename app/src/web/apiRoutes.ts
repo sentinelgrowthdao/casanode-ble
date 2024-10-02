@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from './authMiddleware';
-import { getStatus } from '@api/getStatus';
+import { getStatus } from '@api/status';
 
 // Create a new router
 const apiRouter = Router();
