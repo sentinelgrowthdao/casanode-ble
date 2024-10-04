@@ -9,6 +9,7 @@ import {
 import {
 	nodeConfiguration,
 	nodeStart,
+	nodeStop,
 	nodeRestart,
 } from '@/api/node';
 import {
