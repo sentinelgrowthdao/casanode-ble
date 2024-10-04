@@ -7,6 +7,7 @@ import {
 	containerStop,
 	containerRestart,
 } from '@utils/docker';
+import { walletLoadAddresses } from '@utils/node';
 
 /**
  * Get the node configuration
