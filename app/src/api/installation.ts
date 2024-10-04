@@ -6,6 +6,7 @@ import {
 	createVpnConfig,
 } from '@utils/node';
 import { certificateGenerate } from '@utils/certificate';
+import { imagePull } from '@utils/docker';
 
 /**
  * Install the configuration
@@ -47,6 +48,38 @@ export async function installConfiguration(req: Request, res: Response): Promise
 			error: true,
 			message: 'Configuration installation failed',
 			...statusSummary,
+		});
+	}
+}
+
+/**
+ * Install the docker image
+ * @param req Request
+ * @param res Response
+ */
+export async function dockerImage(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		Logger.info('Starting Docker image installation');
+
+		// Start the image pull process
+		const pullStatus = await imagePull();
+
+		Logger.info(`Docker image installation completed successfully`);
+		// Return the status summary in a well-structured JSON response
+		res.json({
+			imagePull: pullStatus,
+		});
+	}
+	catch(error)
+	{
+		// Return a structured error response
+		Logger.error(`Error while installing Docker image: ${error}`);
+		res.status(500).json({
+			error: true,
+			message: 'Docker image installation failed',
+			imagePull: false,
 		});
 	}
 }

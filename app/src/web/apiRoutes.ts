@@ -11,6 +11,7 @@ import {
 } from '@/api/node';
 import {
 	installConfiguration,
+	dockerImage,
 } from '@/api/installation';
 
 // Create a new router
@@ -33,6 +34,8 @@ apiRouter.get('/node/configuration', authenticateToken, nodeConfiguration);
 
 // POST /api/v1/install/configuration
 apiRouter.post('/install/configuration', authenticateToken, installConfiguration);
+// POST /api/v1/install/docker-image
+apiRouter.post('/install/docker-image', authenticateToken, dockerImage);
 
 
 export default apiRouter;
