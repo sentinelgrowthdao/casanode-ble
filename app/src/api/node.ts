@@ -37,6 +37,38 @@ export async function nodeConfiguration(req: Request, res: Response): Promise<vo
 }
 
 /**
+ * Apply the node configuration in the file
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function nodeConfigurationApply(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		// Refresh the configuration files with the new values
+		Logger.info('Starting node configuration update process');
+		nodeManager.refreshConfigFiles();
+		
+		// Return the node configuration
+		Logger.info('Node configuration updated successfully');
+		res.json({
+			success: true,
+		});
+	}
+	catch(error: any)
+	{
+		// Return a structured error response
+		Logger.error(`Error during node configuration update: ${error}`);
+		res.status(500).json({
+			error: true,
+			message: 'Node configuration update failed',
+			success: false,
+		});
+	}
+}
+
+/**
  * Start the node
  * @param req Request
  * @param res Response
