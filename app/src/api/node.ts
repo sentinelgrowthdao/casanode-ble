@@ -5,6 +5,7 @@ import nodeManager from '@utils/node';
 import {
 	containerStart,
 	containerStop,
+	containerRestart,
 } from '@utils/docker';
 
 /**
@@ -92,6 +93,38 @@ export async function nodeStop(req: Request, res: Response): Promise<void>
 			error: true,
 			message: 'Node stop failed',
 			stop: false,
+		});
+	}
+}
+
+/**
+ * Restart the node
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function nodeRestart(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		// Restart the node
+		Logger.info('Starting node restart process');
+		const nodeRestart = await containerRestart();
+		
+		// Return the node restart status
+		Logger.info(`Node restart completed successfully`);
+		res.json({
+			restart: nodeRestart,
+		});
+	}
+	catch(error: any)
+	{
+		// Return a structured error response
+		Logger.error(`Error during node restart: ${error}`);
+		res.status(500).json({
+			error: true,
+			message: 'Node restart failed',
+			restart: false,
 		});
 	}
 }
