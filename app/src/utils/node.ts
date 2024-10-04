@@ -966,8 +966,33 @@ class NodeManager
 	 * Get the node status from http://localhost:xxxxx/status
 	 * @returns Promise<NodeStatus|null>
 	 */
-	public async getNodeStatus(): Promise<NodeStatus|null>
+	public async getNodeStatus(): Promise<NodeStatus>
 	{
+		let results: NodeStatus =
+		{
+			type: 0,
+			version: 'N/A',
+			peers: 0,
+			max_peers: 0,
+			bandwidth:
+			{
+				download: 0,
+				upload: 0,
+			},
+			handshake:
+			{
+				enable: false,
+				peers: 0,
+			},
+			location:
+			{
+				city: 'N/A',
+				country: 'N/A',
+				latitude: 0,
+				longitude: 0,
+			},
+		};
+		
 		try
 		{
 			// Ignore self-signed SSL certificate
@@ -984,8 +1009,9 @@ class NodeManager
 			{
 				// Extract the node status
 				const data = response.data.result;
-				// Return the node status
-				return {
+				// Update the results
+				results =
+				{
 					type: data.type || 0,
 					version: data.version || 'N/A',
 					peers: data?.peers || 0,
@@ -1019,7 +1045,7 @@ class NodeManager
 			Logger.error(`Failed to get the node status: ${error}`);
 		}
 		
-		return null;
+		return results;
 	}
 	
 	/**
