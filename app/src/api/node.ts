@@ -128,3 +128,54 @@ export async function nodeRestart(req: Request, res: Response): Promise<void>
 		});
 	}
 }
+
+/**
+ * Get the node address (sentnode...)
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function nodeAddress(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		Logger.info('Starting wallet address retrieval process');
+		
+		// Get node configuration
+		const nodeConfig = nodeManager.getConfig();
+		
+		// Get the value from the configuration
+		const address = nodeConfig.walletNodeAddress;
+		// If address is empty
+		if (address === '')
+		{
+			console.log('Address is empty');
+			console.log(`Passphrase available: ${nodeManager.passphraseAvailable()}`);
+			// If the passphrase is unavailable
+			if (!nodeManager.passphraseAvailable())
+				throw new Error('Passphrase unavailable');
+			
+			// Get the wallet passphrase stored in the configuration
+			const passphrase = nodeConfig.walletPassphrase;
+			
+			// Load wallet information
+			await walletLoadAddresses(passphrase);
+		}
+		
+		// Return the value to the subscriber
+		Logger.info('Wallet address retrieval completed successfully');
+		res.json({
+			address: nodeConfig.walletNodeAddress,
+		});
+	}
+	catch(error: any)
+	{
+		// Return a structured error response
+		Logger.error(`Error while loading the wallet address: ${error}`);
+		res.status(500).json({
+			error: true,
+			message: 'Wallet address retrieval failed',
+			address: '',
+		});
+	}
+}
