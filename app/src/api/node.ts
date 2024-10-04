@@ -133,6 +133,38 @@ export async function nodeRestart(req: Request, res: Response): Promise<void>
 }
 
 /**
+ * Remove the node
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function nodeRemove(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		// Remove the node
+		Logger.info('Starting node removal process');
+		const nodeRemove = await containerRemove();
+		
+		// Return the node removal status
+		Logger.info(`Node removal completed successfully`);
+		res.json({
+			remove: nodeRemove,
+		});
+	}
+	catch(error: any)
+	{
+		// Return a structured error response
+		Logger.error(`Error during node removal: ${error}`);
+		res.status(500).json({
+			error: true,
+			message: 'Node removal failed',
+			remove: false,
+		});
+	}
+}
+
+/**
  * Get the node address (sentnode...)
  * @param req Request
  * @param res Response

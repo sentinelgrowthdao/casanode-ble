@@ -11,6 +11,7 @@ import {
 	nodeStart,
 	nodeStop,
 	nodeRestart,
+	nodeRemove,
 	nodeAddress,
 	nodeBalance,
 	nodePassphrase,
@@ -43,6 +44,8 @@ apiRouter.put('/node/start', authenticateToken, nodeStart);
 apiRouter.put('/node/stop', authenticateToken, nodeStop);
 // POST /api/v1/node/restart
 apiRouter.put('/node/restart', authenticateToken, nodeRestart);
+// DELETE /api/v1/node/remove
+apiRouter.delete('/node/remove', authenticateToken, nodeRemove);
 // GET /api/v1/node/address
 apiRouter.get('/node/address', authenticateToken, nodeAddress);
 // GET /api/v1/node/balance
