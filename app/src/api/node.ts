@@ -8,6 +8,7 @@ import {
 	containerRestart,
 } from '@utils/docker';
 import { walletLoadAddresses } from '@utils/node';
+import { walletBalance } from '@utils/node';
 
 /**
  * Get the node configuration
@@ -175,6 +176,50 @@ export async function nodeAddress(req: Request, res: Response): Promise<void>
 			error: true,
 			message: 'Wallet address retrieval failed',
 			address: '',
+		});
+	}
+}
+
+/**
+ * Get the wallet node balance
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function nodeBalance(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		Logger.info('Starting wallet balance retrieval process');
+		
+		// Get the wallet public address from the node configuration
+		const publicAddress = nodeManager.getConfig().walletPublicAddress;
+		
+		// Check if the public address is empty
+		if(publicAddress === '')
+		{
+			Logger.error('Public address is missing');
+			throw new Error('Public address is missing');
+		}
+		
+		// Retrieve the wallet balance
+		const balance = await walletBalance(publicAddress);
+		
+		// Return the wallet balance as a JSON response
+		Logger.info(`Wallet balance retrieved successfully: ${balance.amount} ${balance.denom}`);
+		res.json({
+			balance: `${balance.amount} ${balance.denom}`
+		});
+		
+	}
+	catch (error: any)
+	{
+		// Handle errors and send an appropriate response
+		Logger.error(`Error while retrieving wallet balance: ${error.message || error}`);
+		res.status(500).json({
+			error: true,
+			message: 'Wallet balance retrieval failed',
+			balance: '0 DVPN' // Returning 0 DVPN in case of failure
 		});
 	}
 }

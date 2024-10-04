@@ -12,6 +12,7 @@ import {
 	nodeStop,
 	nodeRestart,
 	nodeAddress,
+	nodeBalance,
 } from '@/api/node';
 import {
 	installConfiguration,
@@ -43,6 +44,8 @@ apiRouter.put('/node/stop', authenticateToken, nodeStop);
 apiRouter.put('/node/restart', authenticateToken, nodeRestart);
 // GET /api/v1/node/address
 apiRouter.get('/node/address', authenticateToken, nodeAddress);
+// GET /api/v1/node/balance
+apiRouter.get('/node/balance', authenticateToken, nodeBalance);
 
 // POST /api/v1/install/configuration
 apiRouter.post('/install/configuration', authenticateToken, installConfiguration);
