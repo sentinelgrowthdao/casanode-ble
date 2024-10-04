@@ -4,6 +4,7 @@ import config from '@utils/configuration';
 import nodeManager from '@utils/node';
 import {
 	containerStart,
+	containerStop,
 } from '@utils/docker';
 
 /**
@@ -59,6 +60,38 @@ export async function nodeStart(req: Request, res: Response): Promise<void>
 			error: true,
 			message: 'Node start failed',
 			start: false,
+		});
+	}
+}
+
+/**
+ * Stop the node
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function nodeStop(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		// Stop the node
+		Logger.info('Starting node stop process');
+		const nodeStop = await containerStop();
+		
+		// Return the node stop status
+		Logger.info(`Node stop completed successfully`);
+		res.json({
+			stop: nodeStop,
+		});
+	}
+	catch(error: any)
+	{
+		// Return a structured error response
+		Logger.error(`Error during node stop: ${error}`);
+		res.status(500).json({
+			error: true,
+			message: 'Node stop failed',
+			stop: false,
 		});
 	}
 }

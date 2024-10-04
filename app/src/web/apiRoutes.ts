@@ -34,6 +34,8 @@ apiRouter.delete('/certificate/remove', authenticateToken, certificateRemove);
 apiRouter.get('/node/configuration', authenticateToken, nodeConfiguration);
 // POST /api/v1/node/start
 apiRouter.put('/node/start', authenticateToken, nodeStart);
+// POST /api/v1/node/stop
+apiRouter.put('/node/stop', authenticateToken, nodeStop);
 
 // POST /api/v1/install/configuration
 apiRouter.post('/install/configuration', authenticateToken, installConfiguration);
