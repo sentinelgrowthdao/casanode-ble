@@ -9,6 +9,9 @@ import {
 import {
 	nodeConfiguration,
 } from '@/api/node';
+import {
+	installConfiguration,
+} from '@/api/installation';
 
 // Create a new router
 const apiRouter = Router();
@@ -27,6 +30,9 @@ apiRouter.delete('/certificate/remove', authenticateToken, certificateRemove);
 
 // GET /api/v1/node/configuration
 apiRouter.get('/node/configuration', authenticateToken, nodeConfiguration);
+
+// POST /api/v1/install/configuration
+apiRouter.post('/install/configuration', authenticateToken, installConfiguration);
 
 
 export default apiRouter;
