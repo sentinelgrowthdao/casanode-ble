@@ -150,8 +150,6 @@ export async function nodeAddress(req: Request, res: Response): Promise<void>
 		// If address is empty
 		if (address === '')
 		{
-			console.log('Address is empty');
-			console.log(`Passphrase available: ${nodeManager.passphraseAvailable()}`);
 			// If the passphrase is unavailable
 			if (!nodeManager.passphraseAvailable())
 				throw new Error('Passphrase unavailable');
