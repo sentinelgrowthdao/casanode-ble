@@ -8,6 +8,7 @@ import {
 } from '@/api/certificate';
 import {
 	nodeConfiguration,
+	nodeStart,
 } from '@/api/node';
 import {
 	installConfiguration,
@@ -31,6 +32,8 @@ apiRouter.delete('/certificate/remove', authenticateToken, certificateRemove);
 
 // GET /api/v1/node/configuration
 apiRouter.get('/node/configuration', authenticateToken, nodeConfiguration);
+// POST /api/v1/node/start
+apiRouter.put('/node/start', authenticateToken, nodeStart);
 
 // POST /api/v1/install/configuration
 apiRouter.post('/install/configuration', authenticateToken, installConfiguration);
