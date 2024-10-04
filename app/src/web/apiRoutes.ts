@@ -6,6 +6,9 @@ import {
 	certificateRenew,
 	certificateRemove
 } from '@/api/certificate';
+import {
+	nodeConfiguration,
+} from '@/api/node';
 
 // Create a new router
 const apiRouter = Router();
@@ -21,6 +24,9 @@ apiRouter.get('/check/port/:port', authenticateToken, checkPort);
 apiRouter.post('/certificate/renew', authenticateToken, certificateRenew);
 // DELETE /api/v1/certificate/remove
 apiRouter.delete('/certificate/remove', authenticateToken, certificateRemove);
+
+// GET /api/v1/node/configuration
+apiRouter.get('/node/configuration', authenticateToken, nodeConfiguration);
 
 
 export default apiRouter;
