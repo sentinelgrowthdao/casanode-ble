@@ -9,6 +9,7 @@ import {
 } from '@utils/docker';
 import { walletLoadAddresses } from '@utils/node';
 import { walletBalance } from '@utils/node';
+import { walletUnlock } from '@utils/node';
 
 /**
  * Get the node configuration
@@ -220,6 +221,80 @@ export async function nodeBalance(req: Request, res: Response): Promise<void>
 			error: true,
 			message: 'Wallet balance retrieval failed',
 			balance: '0 DVPN' // Returning 0 DVPN in case of failure
+		});
+	}
+}
+
+/**
+ * Set the wallet passphrase
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function nodePassphrase(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		// Check if passphrase is required
+		if (nodeManager.passphraseRequired() === false)
+		{
+			Logger.error('Passphrase is not required, but it was sent via API.');
+			res.status(400).json({
+				error: true,
+				invalide: false,
+				message: 'Passphrase is not required for this node.'
+			});
+			return ;
+		}
+		
+		// Get the passphrase value from the request body
+		const { passphrase } = req.body;
+		
+		// Check if the passphrase is valid (not empty)
+		if (!passphrase || passphrase.trim().length === 0)
+		{
+			Logger.error('Invalid passphrase received via API.');
+			res.status(400).json({
+				error: true,
+				invalide: true,
+				message: 'Invalid or empty passphrase.'
+			});
+			return ;
+		}
+		
+		// Try to unlock the wallet with the given passphrase
+		const canUnlockWallet = await walletUnlock(passphrase);
+		
+		// If the passphrase is invalid
+		if (!canUnlockWallet)
+		{
+			Logger.error('Invalid passphrase received via API for unlocking the wallet.');
+			res.status(401).json({
+				error: true,
+				invalide: true,
+				message: 'Invalid passphrase. Unable to unlock wallet.'
+			});
+			return ;
+		}
+		
+		// Set the passphrase in the configuration
+		nodeManager.setPassphrase(passphrase);
+		Logger.info('Passphrase updated successfully via API.');
+		
+		// Return a success response
+		res.json({
+			success: true,
+			message: 'Passphrase updated successfully.'
+		});
+	}
+	catch (error: any)
+	{
+		// Handle any errors and return a structured response
+		Logger.error(`Error while setting passphrase: ${error.message || error}`);
+		res.status(500).json({
+			error: true,
+			invalide: false,
+			message: 'Failed to set passphrase due to a server error.'
 		});
 	}
 }

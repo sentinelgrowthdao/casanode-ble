@@ -13,6 +13,7 @@ import {
 	nodeRestart,
 	nodeAddress,
 	nodeBalance,
+	nodePassphrase,
 } from '@/api/node';
 import {
 	installConfiguration,
@@ -46,6 +47,8 @@ apiRouter.put('/node/restart', authenticateToken, nodeRestart);
 apiRouter.get('/node/address', authenticateToken, nodeAddress);
 // GET /api/v1/node/balance
 apiRouter.get('/node/balance', authenticateToken, nodeBalance);
+// POST /api/v1/node/passphrase
+apiRouter.post('/node/passphrase', authenticateToken, nodePassphrase);
 
 // POST /api/v1/install/configuration
 apiRouter.post('/install/configuration', authenticateToken, installConfiguration);
