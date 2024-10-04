@@ -3,14 +3,7 @@ import { Logger } from '@utils/logger';
 import axios from 'axios';
 import config from '@utils/configuration';
 import { nodeConfig } from '@utils/node';
-
-enum PortCheckStatus {
-	NOT_STARTED = 0,
-	IN_PROGRESS = 1,
-	OPEN = 2,
-	CLOSED = 3,
-	ERROR = -1
-}
+import { PortCheckStatus } from '@constants/portCheckStatus';
 
 export class CheckPortCharacteristic
 {
