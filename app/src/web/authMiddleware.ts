@@ -16,7 +16,7 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
 	}
 	
 	// Check against the token in the configuration
-	if(token !== config.WEB_AUTH)
+	if(token !== config.API_AUTH)
 	{
 		return res.status(403).json({ error: 'Invalid token' });
 	}

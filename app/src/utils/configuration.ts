@@ -19,7 +19,8 @@ export interface AppConfigData
 	BLE_DISCOVERY_UUID: string;
 	BLE_CHARACTERISTIC_SEED: string;
 	WEB_LISTEN: string;
-	WEB_AUTH: string;
+	API_LISTEN: string;
+	API_AUTH: string;
 	API_BALANCE: string[];
 	FOXINODES_API_CHECK_IP: string;
 	FOXINODES_API_DVPN_CONFIG: string;
@@ -56,7 +57,8 @@ class ConfigurationLoader
 		BLE_DISCOVERY_UUID: '0000a2d4-0000-1000-8000-00805f9b34fb',
 		BLE_CHARACTERISTIC_SEED: uuidv4(),
 		WEB_LISTEN: '0.0.0.0:8080',
-		WEB_AUTH: this.generateAuthToken(),
+		API_LISTEN: '0.0.0.0:8081',
+		API_AUTH: this.generateAuthToken(),
 		API_BALANCE: [
 			"https://api-sentinel.busurnode.com/cosmos/bank/v1beta1/balances/",
 			"https://api.sentinel.quokkastake.io/cosmos/bank/v1beta1/balances/",

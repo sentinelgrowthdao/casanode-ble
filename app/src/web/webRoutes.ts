@@ -46,8 +46,9 @@ webRouter.get('/', async(req: Request, res: Response) =>
 			seed: config.BLE_CHARACTERISTIC_SEED,
 		},
 		ip: localIPAddress,
-		port: config.WEB_PORT || 8080,
-		auth: config.WEB_AUTH,
+		webPort: config.WEB_LISTEN.split(':')[1] || 8080,
+		apiPort: config.API_LISTEN.split(':')[1] || 8081,
+		auth: config.API_AUTH,
 	};
 	
 	// Generate QR code data URL
