@@ -32,6 +32,7 @@ import {
 import {
 	walletAddress,
 	walletCreate,
+	walletRestore,
 } from '@api/wallet';
 
 // Create a new router
@@ -90,6 +91,8 @@ apiRouter.post('/system/reset', authenticateToken, systemReset);
 apiRouter.get('/wallet/address', authenticateToken, walletAddress);
 // POST /api/v1/wallet/create
 apiRouter.post('/wallet/create', authenticateToken, walletCreate);
+// POST /api/v1/wallet/restore
+apiRouter.post('/wallet/restore', authenticateToken, walletRestore);
 
 
 export default apiRouter;

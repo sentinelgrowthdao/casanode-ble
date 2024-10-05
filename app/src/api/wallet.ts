@@ -5,6 +5,7 @@ import { walletLoadAddresses } from '@utils/node';
 import {
 	walletExists,
 	walletCreate as walletCreateUtil,
+	walletRecover as walletRecoverUtil,
 } from '@utils/node';
 
 /**
@@ -120,6 +121,67 @@ export async function walletCreate(req: Request, res: Response): Promise<void>
 		res.status(500).json({
 			error: true,
 			message: 'Error creating wallet',
+			success: false,
+		});
+	}
+}
+
+/**
+ * Restore a wallet
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function walletRestore(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		Logger.info('Recovering wallet');
+		
+		// Get node configuration
+		const nodeConfig = nodeManager.getConfig();
+		
+		// Get the wallet passphrase stored in the configuration
+		const passphrase = nodeConfig.walletPassphrase;
+		
+		// Check if the wallet already exists
+		const exists = await walletExists(passphrase);
+		
+		// Skip if wallet already exists
+		if(exists)
+		{
+			Logger.error('Wallet already exists');
+			res.status(400).json({
+				error: true,
+				message: 'Wallet already exists',
+				success: false,
+			});
+			return;
+		}
+		
+		// Get the mnemonic from the request body
+		const mnemonic = req.body.mnemonic;
+		
+		// Restore the wallet
+		const success = await walletRecoverUtil(passphrase, mnemonic);
+		
+		// If an error occurred while recovering the wallet
+		if(!success)
+			throw new Error('Error recovering wallet');
+		
+		// Return the wallet address
+		Logger.info('Wallet recovered successfully');
+		res.json({
+			success: true,
+		});
+	}
+	catch(error: any)
+	{
+		// Return a structured error response
+		Logger.error(`Error recovering wallet: ${error}`);
+		res.status(500).json({
+			error: true,
+			message: 'Error recovering wallet',
 			success: false,
 		});
 	}
