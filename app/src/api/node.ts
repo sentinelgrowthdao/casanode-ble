@@ -6,6 +6,7 @@ import {
 	walletLoadAddresses,
 	walletBalance,
 	walletUnlock,
+	vpnChangeType,
 } from '@utils/node';
 import {
 	containerStart,
@@ -55,6 +56,8 @@ export async function nodeConfigurationSetValues(req: Request, res: Response): P
 	{
 		// Get the node configuration
 		const nodeConfig = nodeManager.getConfig();
+		// Indicate if vpnType was changed
+		let vpnTypeChanged = false;
 		
 		// Validate and set 'moniker'
 		if(req.body.moniker)
@@ -168,6 +171,8 @@ export async function nodeConfigurationSetValues(req: Request, res: Response): P
 			}
 			// Set the value in the configuration
 			nodeManager.setVpnType(vpnType);
+			// Indicate that vpnType was changed
+			vpnTypeChanged = true;
 		}
 		
 		// Validate and set 'vpnPort'
@@ -211,6 +216,13 @@ export async function nodeConfigurationSetValues(req: Request, res: Response): P
 		// Refresh the configuration files with the new values
 		Logger.info('Starting node configuration update process');
 		nodeManager.refreshConfigFiles();
+		
+		// If vpnType was changed, execute vpnChangeType
+		if (vpnTypeChanged)
+		{
+			Logger.info('VpnType changed, executing vpnChangeType');
+			await vpnChangeType();
+		}
 		
 		// Return the node configuration
 		Logger.info('Node configuration updated successfully');
