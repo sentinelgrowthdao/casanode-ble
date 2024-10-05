@@ -362,3 +362,17 @@ export async function nodePassphrase(req: Request, res: Response): Promise<void>
 		});
 	}
 }
+
+/**
+ * Check if the passphrase is available
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function nodePassphraseAvailable(req: Request, res: Response): Promise<void>
+{
+	// Return the passphrase availability
+	res.json({
+		available: nodeManager.passphraseAvailable(),
+	});
+}

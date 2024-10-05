@@ -16,6 +16,7 @@ import {
 	nodeAddress,
 	nodeBalance,
 	nodePassphrase,
+	nodePassphraseAvailable,
 } from '@/api/node';
 import {
 	installConfiguration,
@@ -55,6 +56,8 @@ apiRouter.get('/node/address', authenticateToken, nodeAddress);
 apiRouter.get('/node/balance', authenticateToken, nodeBalance);
 // POST /api/v1/node/passphrase
 apiRouter.post('/node/passphrase', authenticateToken, nodePassphrase);
+// GET /api/v1/node/passphrase
+apiRouter.get('/node/passphrase', authenticateToken, nodePassphraseAvailable);
 
 // POST /api/v1/install/configuration
 apiRouter.post('/install/configuration', authenticateToken, installConfiguration);
