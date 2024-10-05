@@ -26,6 +26,7 @@ import {
 import {
 	systemUpdate,
 	systemReboot,
+	systemShutdown,
 } from '@api/system';
 
 // Create a new router
@@ -75,6 +76,8 @@ apiRouter.post('/install/docker-image', authenticateToken, dockerImage);
 apiRouter.post('/system/update', authenticateToken, systemUpdate);
 // POST /api/v1/system/reboot
 apiRouter.post('/system/reboot', authenticateToken, systemReboot);
+// POST /api/v1/system/shutdown
+apiRouter.post('/system/shutdown', authenticateToken, systemShutdown);
 
 
 export default apiRouter;

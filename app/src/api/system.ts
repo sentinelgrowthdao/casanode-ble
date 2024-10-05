@@ -4,6 +4,7 @@ import { refreshNetworkConfiguration } from '@utils/configuration';
 import {
 	updateSystem,
 	rebootSystem,
+	shutdownSystem,
 } from '@utils/system';
 
 /**
@@ -92,6 +93,38 @@ export async function systemReboot(req: Request, res: Response): Promise<void>
 		res.status(500).json({
 			error: true,
 			message: 'Node reboot failed',
+			success: false,
+		});
+	}
+}
+
+/**
+ * Shutdown the system
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function systemShutdown(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		// Shutdown the system
+		Logger.info('Shutting down the system');
+		await shutdownSystem();
+		
+		// Return the shutdown status
+		Logger.info('System shutdown successfully');
+		res.json({
+			success: true,
+		});
+	}
+	catch(error: any)
+	{
+		// Return a structured error response
+		Logger.error(`Error during node shutdown: ${error}`);
+		res.status(500).json({
+			error: true,
+			message: 'Node shutdown failed',
 			success: false,
 		});
 	}
