@@ -106,13 +106,11 @@ export async function walletCreate(req: Request, res: Response): Promise<void>
 			return;
 		}
 		
-		// Set the mnemonic in the configuration
-		nodeManager.setMnemonic(mnemonic);
-		
-		// Return the wallet address
+		// Return the mnemonic as part of the response
 		Logger.info('Wallet created successfully');
 		res.json({
 			success: true,
+			mnemonic: mnemonic,
 		});
 	}
 	catch(error: any)
@@ -123,6 +121,7 @@ export async function walletCreate(req: Request, res: Response): Promise<void>
 			error: true,
 			message: 'Error creating wallet',
 			success: false,
+			mnemonic: null,
 		});
 	}
 }
