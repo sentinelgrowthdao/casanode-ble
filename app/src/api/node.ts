@@ -3,15 +3,20 @@ import { Logger } from '@utils/logger';
 import config from '@utils/configuration';
 import nodeManager from '@utils/node';
 import {
+	walletLoadAddresses,
+	walletBalance,
+	walletUnlock,
+} from '@utils/node';
+import {
 	containerStart,
 	containerStop,
 	containerRestart,
 	containerRemove,
 } from '@utils/docker';
-import { walletLoadAddresses } from '@utils/node';
-import { walletBalance } from '@utils/node';
-import { walletUnlock } from '@utils/node';
-import { isValidIP, isValidDns } from '@utils/validators';
+import {
+	isValidIP,
+	isValidDns,
+} from '@utils/validators';
 
 /**
  * Get the node configuration
