@@ -33,6 +33,7 @@ import {
 	walletAddress,
 	walletCreate,
 	walletRestore,
+	walletRemove,
 } from '@api/wallet';
 
 // Create a new router
@@ -93,6 +94,8 @@ apiRouter.get('/wallet/address', authenticateToken, walletAddress);
 apiRouter.post('/wallet/create', authenticateToken, walletCreate);
 // POST /api/v1/wallet/restore
 apiRouter.post('/wallet/restore', authenticateToken, walletRestore);
+// DELETE /api/v1/wallet/remove
+apiRouter.delete('/wallet/remove', authenticateToken, walletRemove);
 
 
 export default apiRouter;
