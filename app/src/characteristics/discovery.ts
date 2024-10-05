@@ -55,11 +55,11 @@ export class DiscoveryCharacteristic
 		// Get local IP address
 		const localIPAddress = getLocalIPAddress();
 		// Get the port from the configuration
-		const localPort = config.WEB_PORT || 8080;
+		const localWebPort = config.WEB_LISTEN.split(':')[1] || 8080;
 		// Log the request
-		Logger.info(`Request for discovery: Sending local IP address and port to client: ${localIPAddress}:${localPort}`);
+		Logger.info(`Request for discovery: Sending local IP address and port to client: ${localIPAddress}:${localWebPort}`);
 		// Return the value to the subscriber
-		callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(`${localIPAddress}:${localPort}`));
+		callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(`${localIPAddress}:${localWebPort}`));
 	}
 	
 }
