@@ -3,6 +3,7 @@ import { Logger } from '@utils/logger';
 import { refreshNetworkConfiguration } from '@utils/configuration';
 import {
 	updateSystem,
+	rebootSystem,
 } from '@utils/system';
 
 /**
@@ -59,6 +60,38 @@ export async function systemUpdate(req: Request, res: Response): Promise<void>
 		res.status(500).json({
 			error: true,
 			message: 'Node update failed',
+			success: false,
+		});
+	}
+}
+
+/**
+ * Reboot the system
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function systemReboot(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		// Reboot the system
+		Logger.info('Rebooting the system');
+		await rebootSystem();
+		
+		// Return the reboot status
+		Logger.info('System rebooted successfully');
+		res.json({
+			success: true,
+		});
+	}
+	catch(error: any)
+	{
+		// Return a structured error response
+		Logger.error(`Error during node reboot: ${error}`);
+		res.status(500).json({
+			error: true,
+			message: 'Node reboot failed',
 			success: false,
 		});
 	}
