@@ -44,6 +44,9 @@ class WebServer
 	 */
 	private setupRoutes()
 	{
+		// Add the JSON parsing middleware
+		this.app.use(express.json());
+		
 		// Add the web routes
 		this.app.use('/', webRouter);
 		
