@@ -7,6 +7,7 @@ import {
 	certificateRemove
 } from '@/api/certificate';
 import {
+	nodeStatus,
 	nodeConfiguration,
 	nodeConfigurationApply,
 	nodeStart,
@@ -38,6 +39,8 @@ apiRouter.post('/certificate/renew', authenticateToken, certificateRenew);
 // DELETE /api/v1/certificate/remove
 apiRouter.delete('/certificate/remove', authenticateToken, certificateRemove);
 
+// GET /api/v1/node/status
+apiRouter.get('/node/status', authenticateToken, nodeStatus);
 // GET /api/v1/node/configuration
 apiRouter.get('/node/configuration', authenticateToken, nodeConfiguration);
 // PUT /api/v1/node/configuration/apply

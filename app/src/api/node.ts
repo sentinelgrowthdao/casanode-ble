@@ -377,3 +377,17 @@ export async function nodePassphraseAvailable(req: Request, res: Response): Prom
 		available: nodeManager.passphraseAvailable(),
 	});
 }
+
+/**
+ * Get the node status
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function nodeStatus(req: Request, res: Response): Promise<void>
+{
+	// Return the status of the node
+	res.json({
+		status: await nodeManager.getStatus(),
+	});
+}
