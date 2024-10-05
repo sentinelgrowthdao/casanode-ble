@@ -23,6 +23,9 @@ import {
 	installConfiguration,
 	dockerImage,
 } from '@api/installation';
+import {
+	systemUpdate,
+} from '@api/system';
 
 // Create a new router
 const apiRouter = Router();
@@ -66,6 +69,9 @@ apiRouter.get('/node/passphrase', authenticateToken, nodePassphraseAvailable);
 apiRouter.post('/install/configuration', authenticateToken, installConfiguration);
 // POST /api/v1/install/docker-image
 apiRouter.post('/install/docker-image', authenticateToken, dockerImage);
+
+// POST /api/v1/system/update
+apiRouter.post('/system/update', authenticateToken, systemUpdate);
 
 
 export default apiRouter;
