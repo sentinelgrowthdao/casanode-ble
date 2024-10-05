@@ -6,6 +6,7 @@ import {
 	containerStart,
 	containerStop,
 	containerRestart,
+	containerRemove,
 } from '@utils/docker';
 import { walletLoadAddresses } from '@utils/node';
 import { walletBalance } from '@utils/node';
