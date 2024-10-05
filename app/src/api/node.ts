@@ -11,6 +11,7 @@ import {
 import { walletLoadAddresses } from '@utils/node';
 import { walletBalance } from '@utils/node';
 import { walletUnlock } from '@utils/node';
+import { isValidIP, isValidDns } from '@utils/validators';
 
 /**
  * Get the node configuration
@@ -18,7 +19,7 @@ import { walletUnlock } from '@utils/node';
  * @param res Response
  * @returns Promise<void>
  */
-export async function nodeConfiguration(req: Request, res: Response): Promise<void>
+export async function nodeConfigurationGetValues(req: Request, res: Response): Promise<void>
 {
 	// Get node configuration
 	const nodeConfig = nodeManager.getConfig();
@@ -35,6 +36,193 @@ export async function nodeConfiguration(req: Request, res: Response): Promise<vo
 		maximumPeers: nodeConfig.max_peers || null,
 		dockerImage: config.DOCKER_IMAGE_NAME || null,
 	});
+}
+
+/**
+ * Set node configuration values
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function nodeConfigurationSetValues(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		// Get the node configuration
+		const nodeConfig = nodeManager.getConfig();
+		
+		// Validate and set 'moniker'
+		if(req.body.moniker)
+		{
+			// Get the value from the request
+			const moniker = req.body.moniker.trim();
+			// Check if the value is at least 8 characters long
+			if(moniker.length < 8)
+			{
+				res.status(400).json({
+					error: true,
+					message: 'Moniker must be at least 8 characters long.',
+					success: false,
+				});
+				return ;
+			}
+			// Set the value in the configuration
+			nodeManager.setMoniker(moniker);
+		}
+		
+		// Validate and set 'backend'
+		if(req.body.backend)
+		{
+			// Get the value from the request
+			const backend = req.body.backend.trim().toLowerCase();
+			// Check if the value is either 'test' or 'file'
+			if(backend !== 'test' && backend !== 'file')
+			{
+				res.status(400).json({
+					error: true,
+					message: 'Backend must be either "test" or "file".',
+					success: false,
+				});
+				return ;
+			}
+			// Set the value in the configuration
+			nodeManager.setBackend(backend);
+		}
+		
+		// Validate and set 'nodeType'
+		if(req.body.nodeType)
+		{
+			// Get the value from the request
+			const nodeType = req.body.nodeType.trim().toLowerCase();
+			// Check if the value is either 'residential' or 'datacenter'
+			if(nodeType !== 'residential' && nodeType !== 'datacenter')
+			{
+				res.status(400).json({
+					error: true,
+					message: 'NodeType must be either "residential" or "datacenter".',
+					success: false,
+				});
+				return ;
+			}
+			// Set the value in the configuration
+			nodeManager.setNodeType(nodeType);
+		}
+		
+		// Validate and set 'nodeIp'
+		if(req.body.nodeIp)
+		{
+			// Get the value from the request
+			const nodeIp = req.body.nodeIp.trim();
+			// Check if the value is a valid IP or DNS
+			if(!isValidIP(nodeIp) && !isValidDns(nodeIp))
+			{
+				res.status(400).json({
+					error: true,
+					message: 'Invalid node IP or DNS.',
+					success: false,
+				});
+				return ;
+			}
+			// Set the value in the configuration
+			nodeManager.setNodeIp(nodeIp);
+		}
+		
+		// Validate and set 'nodePort'
+		if(req.body.nodePort)
+		{
+			// Get the value from the request
+			const nodePort = parseInt(req.body.nodePort, 10);
+			// Check if the value is a valid port number
+			if(isNaN(nodePort) || nodePort < 1 || nodePort > 65535)
+			{
+				res.status(400).json({
+					error: true,
+					message: 'NodePort must be a valid integer between 1 and 65535.',
+					success: false,
+				});
+				return ;
+			}
+			// Set the value in the configuration
+			nodeManager.setNodePort(nodePort);
+		}
+		
+		// Validate and set 'vpnType'
+		if(req.body.vpnType)
+		{
+			// Get the value from the request
+			const vpnType = req.body.vpnType.trim().toLowerCase();
+			// Check if the value is either 'wireguard' or 'v2ray'
+			if(vpnType !== 'wireguard' && vpnType !== 'v2ray')
+			{
+				res.status(400).json({
+					error: true,
+					message: 'VpnType must be either "wireguard" or "v2ray".',
+					success: false,
+				});
+				return ;
+			}
+			// Set the value in the configuration
+			nodeManager.setVpnType(vpnType);
+		}
+		
+		// Validate and set 'vpnPort'
+		if(req.body.vpnPort)
+		{
+			// Get the value from the request
+			const vpnPort = parseInt(req.body.vpnPort, 10);
+			// Check if the value is a valid port number
+			if(isNaN(vpnPort) || vpnPort < 1 || vpnPort > 65535)
+			{
+				res.status(400).json({
+					error: true,
+					message: 'VpnPort must be a valid integer between 1 and 65535.',
+					success: false,
+				});
+				return ;
+			}
+			// Set the value in the configuration
+			nodeManager.setVpnPort(vpnPort);
+		}
+		
+		// Validate and set 'maximumPeers'
+		if(req.body.maximumPeers)
+		{
+			// Get the value from the request
+			const maximumPeers = parseInt(req.body.maximumPeers, 10);
+			// Check if the value is a valid integer
+			if(isNaN(maximumPeers) || maximumPeers < 1 || maximumPeers > 99999)
+			{
+				res.status(400).json({
+					error: true,
+					message: 'MaximumPeers must be a valid integer between 1 and 99999.',
+					success: false,
+				});
+				return ;
+			}
+			// Set the value in the configuration
+			nodeManager.setMaxPeers(maximumPeers);
+		}
+		
+		// Refresh the configuration files with the new values
+		Logger.info('Starting node configuration update process');
+		nodeManager.refreshConfigFiles();
+		
+		// Return the node configuration
+		Logger.info('Node configuration updated successfully');
+		res.json({
+			success: true,
+		});
+	}
+	catch (error: any)
+	{
+		// Handle any errors during the update process
+		Logger.error(`Error updating node configuration: ${error.message}`);
+		res.status(500).json({
+			error: true,
+			message: 'Error updating node configuration',
+			success: false,
+		});
+	}
 }
 
 /**

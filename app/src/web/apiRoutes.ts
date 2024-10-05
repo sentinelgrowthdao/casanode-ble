@@ -8,8 +8,8 @@ import {
 } from '@api/certificate';
 import {
 	nodeStatus,
-	nodeConfiguration,
-	nodeConfigurationApply,
+	nodeConfigurationGetValues,
+	nodeConfigurationSetValues,
 	nodeStart,
 	nodeStop,
 	nodeRestart,
@@ -54,9 +54,9 @@ apiRouter.delete('/certificate/remove', authenticateToken, certificateRemove);
 // GET /api/v1/node/status
 apiRouter.get('/node/status', authenticateToken, nodeStatus);
 // GET /api/v1/node/configuration
-apiRouter.get('/node/configuration', authenticateToken, nodeConfiguration);
-// PUT /api/v1/node/configuration/apply
-apiRouter.put('/node/configuration/apply', authenticateToken, nodeConfigurationApply);
+apiRouter.get('/node/configuration', authenticateToken, nodeConfigurationGetValues);
+// PUT /api/v1/node/configuration
+apiRouter.put('/node/configuration', authenticateToken, nodeConfigurationSetValues);
 // POST /api/v1/node/start
 apiRouter.put('/node/start', authenticateToken, nodeStart);
 // POST /api/v1/node/stop
