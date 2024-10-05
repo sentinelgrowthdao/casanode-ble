@@ -2,6 +2,10 @@ import { Request, Response } from 'express';
 import { Logger } from '@utils/logger';
 import nodeManager from '@utils/node';
 import { walletLoadAddresses } from '@utils/node';
+import {
+	walletExists,
+	walletCreate as walletCreateUtil,
+} from '@utils/node';
 
 /**
  * Get the wallet address
@@ -48,6 +52,75 @@ export async function walletAddress(req: Request, res: Response): Promise<void>
 			error: true,
 			message: 'Error getting wallet address',
 			address: null,
+		});
+	}
+}
+
+/**
+ * Create a new wallet
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function walletCreate(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		Logger.info('Creating wallet');
+		
+		// Get node configuration
+		const nodeConfig = nodeManager.getConfig();
+		
+		// Get the wallet passphrase stored in the configuration
+		const passphrase = nodeConfig.walletPassphrase;
+		
+		// Check if the wallet already exists
+		const exists = await walletExists(passphrase);
+		
+		// Skip if wallet already exists
+		if(exists)
+		{
+			Logger.error('Wallet already exists');
+			res.status(400).json({
+				error: true,
+				message: 'Wallet already exists',
+				success: false,
+			});
+			return;
+		}
+		
+		// Create the wallet and get the mnemonic
+		const mnemonic : string[]|null|undefined = await walletCreateUtil(passphrase);
+		
+		// If an error occurred while creating the wallet
+		if(typeof mnemonic === 'undefined' || mnemonic === null)
+		{
+			Logger.error('Error creating wallet');
+			res.status(500).json({
+				error: true,
+				message: 'Error creating wallet',
+				success: false,
+			});
+			return;
+		}
+		
+		// Set the mnemonic in the configuration
+		nodeManager.setMnemonic(mnemonic);
+		
+		// Return the wallet address
+		Logger.info('Wallet created successfully');
+		res.json({
+			success: true,
+		});
+	}
+	catch(error: any)
+	{
+		// Return a structured error response
+		Logger.error(`Error creating wallet: ${error}`);
+		res.status(500).json({
+			error: true,
+			message: 'Error creating wallet',
+			success: false,
 		});
 	}
 }
