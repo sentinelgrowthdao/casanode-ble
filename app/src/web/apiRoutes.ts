@@ -29,6 +29,9 @@ import {
 	systemShutdown,
 	systemReset,
 } from '@api/system';
+import {
+	walletAddress,
+} from '@api/wallet';
 
 // Create a new router
 const apiRouter = Router();
@@ -81,6 +84,9 @@ apiRouter.post('/system/reboot', authenticateToken, systemReboot);
 apiRouter.post('/system/shutdown', authenticateToken, systemShutdown);
 // POST /api/v1/system/reset
 apiRouter.post('/system/reset', authenticateToken, systemReset);
+
+// GET /api/v1/wallet/address
+apiRouter.get('/wallet/address', authenticateToken, walletAddress);
 
 
 export default apiRouter;
