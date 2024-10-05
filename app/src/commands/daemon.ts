@@ -89,8 +89,11 @@ export const daemonCommand = async () =>
 	// Load node information
 	await loadingNodeInformations();
 	
-	// Start the web server regardless of Bluetooth availability
+	// Get the web server instance
 	const webServer = WebServer.getInstance();
+	// Initialize SSL and routes
+	await webServer.init();
+	// Start the web server
 	webServer.start();
 	
 	// Check if Bluetooth is available
