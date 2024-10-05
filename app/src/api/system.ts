@@ -5,6 +5,7 @@ import {
 	updateSystem,
 	rebootSystem,
 	shutdownSystem,
+	resetSystem,
 } from '@utils/system';
 
 /**
@@ -125,6 +126,43 @@ export async function systemShutdown(req: Request, res: Response): Promise<void>
 		res.status(500).json({
 			error: true,
 			message: 'Node shutdown failed',
+			success: false,
+		});
+	}
+}
+
+/**
+ * Reset the system
+ * @param req Request
+ * @param res Response
+ * @returns Promise<void>
+ */
+export async function systemReset(req: Request, res: Response): Promise<void>
+{
+	try
+	{
+		// Reset the system
+		Logger.info('Resetting the system');
+		await resetSystem();
+		
+		// Shutdown the application (Restart performed by systemd) in 1 second
+		setTimeout(() => {
+			process.exit(0);
+		}, 1000);
+		
+		// Return the reset status
+		Logger.info('System reset successfully');
+		res.json({
+			success: true,
+		});
+	}
+	catch(error: any)
+	{
+		// Return a structured error response
+		Logger.error(`Error during node reset: ${error}`);
+		res.status(500).json({
+			error: true,
+			message: 'Node reset failed',
 			success: false,
 		});
 	}

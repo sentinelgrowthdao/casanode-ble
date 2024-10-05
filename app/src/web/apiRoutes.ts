@@ -27,6 +27,7 @@ import {
 	systemUpdate,
 	systemReboot,
 	systemShutdown,
+	systemReset,
 } from '@api/system';
 
 // Create a new router
@@ -78,6 +79,8 @@ apiRouter.post('/system/update', authenticateToken, systemUpdate);
 apiRouter.post('/system/reboot', authenticateToken, systemReboot);
 // POST /api/v1/system/shutdown
 apiRouter.post('/system/shutdown', authenticateToken, systemShutdown);
+// POST /api/v1/system/reset
+apiRouter.post('/system/reset', authenticateToken, systemReset);
 
 
 export default apiRouter;
