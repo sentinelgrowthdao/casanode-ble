@@ -16,13 +16,12 @@ class CertificateManager
 {
 	private static instance: CertificateManager;
 	
-	private certFilePath : string = path.join(config.CONFIG_DIR, 'tls.crt');
-	private keyFilePath : string = path.join(config.CONFIG_DIR, 'tls.key');
-	private nodeCountry : string = 'NA';
+	// Default paths for certificate and key files
+	private certFilePath: string = path.join(config.CONFIG_DIR, 'tls.crt');
+	private keyFilePath: string = path.join(config.CONFIG_DIR, 'tls.key');
+	private nodeCountry: string = 'NA';
 	
-	private constructor()
-	{
-	}
+	private constructor() {}
 	
 	/**
 	 * Get instance of CertificateManager
@@ -38,27 +37,36 @@ class CertificateManager
 	}
 	
 	/**
-	 * Generate certificate
-	 * @returns boolean
+	 * Generate a new certificate
+	 * @param validityYears - Certificate validity in years (default is 1)
+	 * @param certPath - Optional path for the certificate file
+	 * @param keyPath - Optional path for the key file
+	 * @returns boolean - True if the generation succeeds, false otherwise
 	 */
-	public async generate(): Promise<boolean>
+	public async generate(validityYears: number = 1, certPath?: string, keyPath?: string): Promise<boolean>
 	{
 		try
 		{
-			// If certificate files exist, remove it
-			if (await fs.pathExists(this.certFilePath) && await fs.pathExists(this.keyFilePath))
-				await this.remove();
+			// Use custom paths if provided, otherwise default paths
+			const certFilePath = certPath || this.certFilePath;
+			const keyFilePath = keyPath || this.keyFilePath;
 			
-			// Generate certificate and private key
+			// If certificate and key files exist, remove them
+			if (await fs.pathExists(certFilePath) && await fs.pathExists(keyFilePath))
+			{
+				await this.remove(certFilePath, keyFilePath);
+			}
+			
+			// Generate key pair and create the certificate and private key
 			const keys = forge.pki.rsa.generateKeyPair(2048);
 			const cert = forge.pki.createCertificate();
 			cert.publicKey = keys.publicKey;
 			cert.serialNumber = '01';
 			cert.validity.notBefore = new Date();
 			cert.validity.notAfter = new Date();
-			cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1);
+			cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + validityYears);
 			
-			// Set certificate attributes
+			// Define certificate attributes
 			const attrs =
 			[
 				{ name: 'countryName', value: this.nodeCountry },
@@ -76,9 +84,9 @@ class CertificateManager
 			const pemCert = forge.pki.certificateToPem(cert);
 			const pemKey = forge.pki.privateKeyToPem(keys.privateKey);
 			
-			// Write certificate files
-			await fs.writeFile(this.certFilePath, pemCert);
-			await fs.writeFile(this.keyFilePath, pemKey);
+			// Write the certificate and key files
+			await fs.writeFile(certFilePath, pemCert);
+			await fs.writeFile(keyFilePath, pemKey);
 			
 			// Change ownership of certificate files to root
 			// await fs.chown(this.certFilePath, 0, 0);
@@ -100,21 +108,24 @@ class CertificateManager
 	
 	/**
 	 * Get certificate information
+	 * @param certPath - Optional path for the certificate file
 	 * @returns CertificateInfo | null
 	 */
-	public info(): CertificateInfo | null
+	public info(certPath?: string): CertificateInfo | null
 	{
 		try
 		{
-			// If certificate files do not exist
-			if (!fs.pathExistsSync(this.certFilePath) || !fs.pathExistsSync(this.keyFilePath))
+			const certFilePath = certPath || this.certFilePath;
+			
+			// Check if the certificate file do not exists
+			if (!fs.pathExistsSync(certFilePath))
 			{
 				Logger.info("Certificate or key file not found.");
 				return null;
 			}
 			
-			// Read certificate file
-			const pemCert = fs.readFileSync(this.certFilePath, 'utf-8');
+			// Read the certificate file
+			const pemCert = fs.readFileSync(certFilePath, 'utf-8');
 			const cert = forge.pki.certificateFromPem(pemCert);
 			
 			// Return certificate information
@@ -137,20 +148,25 @@ class CertificateManager
 	}
 	
 	/**
-	 * Remove certificate files
-	 * @returns boolean
+	 * Remove certificate and key files
+	 * @param certPath - Optional path for the certificate file
+	 * @param keyPath - Optional path for the key file
+	 * @returns boolean - True if files were successfully removed, false otherwise
 	 */
-	public async remove(): Promise<boolean>
+	public async remove(certPath?: string, keyPath?: string): Promise<boolean>
 	{
 		try
 		{
+			const certFilePath = certPath || this.certFilePath;
+			const keyFilePath = keyPath || this.keyFilePath;
+			
 			// If certificate files do not exist, return true
-			if (!await fs.pathExists(this.certFilePath) && !await fs.pathExists(this.keyFilePath))
+			if (!await fs.pathExists(certFilePath) && !await fs.pathExists(keyFilePath))
 				return true;
 			
-			// Remove certificate files
-			await fs.remove(this.certFilePath);
-			await fs.remove(this.keyFilePath);
+			// Remove the certificate and key files
+			await fs.remove(certFilePath);
+			await fs.remove(keyFilePath);
 			
 			Logger.info("Certificate files have been removed.");
 			return true;
@@ -171,6 +187,6 @@ class CertificateManager
 const certificateManager = CertificateManager.getInstance();
 export default certificateManager;
 
-export const certificateGenerate = (): Promise<boolean> => certificateManager.generate();
-export const certificateInfo = (): CertificateInfo | null => certificateManager.info();
-export const certificateRemove = (): Promise<boolean> => certificateManager.remove();
+export const certificateGenerate = (validityYears = 1, certPath?: string, keyPath?: string): Promise<boolean> => certificateManager.generate(validityYears, certPath, keyPath);
+export const certificateInfo = (certPath?: string): CertificateInfo | null => certificateManager.info(certPath);
+export const certificateRemove = (certPath?: string, keyPath?: string): Promise<boolean> => certificateManager.remove(certPath, keyPath);
