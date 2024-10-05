@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { authenticateToken } from './authMiddleware';
 import { getStatus } from '@api/status';
-import { checkInstallation, checkPort } from '@/api/check';
+import { checkInstallation, checkPort } from '@api/check';
 import {
 	certificateRenew,
 	certificateRemove
-} from '@/api/certificate';
+} from '@api/certificate';
 import {
 	nodeStatus,
 	nodeConfiguration,
@@ -18,11 +18,11 @@ import {
 	nodeBalance,
 	nodePassphrase,
 	nodePassphraseAvailable,
-} from '@/api/node';
+} from '@api/node';
 import {
 	installConfiguration,
 	dockerImage,
-} from '@/api/installation';
+} from '@api/installation';
 
 // Create a new router
 const apiRouter = Router();
