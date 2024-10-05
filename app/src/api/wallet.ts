@@ -161,10 +161,9 @@ export async function walletRestore(req: Request, res: Response): Promise<void>
 		}
 		
 		// Get the mnemonic from the request body
-		const mnemonic = req.body.mnemonic;
-		
+		const { mnemonic } = req.body;
 		// Restore the wallet
-		const success = await walletRecoverUtil(passphrase, mnemonic);
+		const success = await walletRecoverUtil(mnemonic, passphrase);
 		
 		// If an error occurred while recovering the wallet
 		if(!success)
