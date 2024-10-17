@@ -66,8 +66,6 @@ export async function checkPort(req: Request, res: Response): Promise<void>
 		});
 		return;
 	}
-
-	portToCheck = 80;
 	
 	// If port is not set, return an error
 	if(portToCheck === 0)
