@@ -57,6 +57,10 @@ class CertificateManager
 				await this.remove(certFilePath, keyFilePath);
 			}
 			
+			// Create directory if it does not exist
+			await fs.ensureDir(path.dirname(keyFilePath));
+			await fs.ensureDir(path.dirname(certFilePath));
+			
 			// Generate key pair and create the certificate and private key
 			const keys = forge.pki.rsa.generateKeyPair(2048);
 			const cert = forge.pki.createCertificate();
