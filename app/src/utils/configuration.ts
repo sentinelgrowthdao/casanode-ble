@@ -53,6 +53,7 @@ class ConfigurationLoader
 		CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/opt/casanode/.sentinelnode',
 		LOG_DIR: '/var/log/casanode',
 		DOCKER_SOCKET: this.getDockerDefaultSocketPath(),
+		BLE_ENABLED: true,
 		BLE_UUID: '00001820-0000-1000-8000-00805f9b34fb',
 		BLE_DISCOVERY_UUID: '0000a2d4-0000-1000-8000-00805f9b34fb',
 		BLE_CHARACTERISTIC_SEED: uuidv4(),

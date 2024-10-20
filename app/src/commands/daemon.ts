@@ -82,7 +82,17 @@ export const daemonCommand = async () =>
 	{
 		console.warn('No Bluetooth controller found. Continuing without Bluetooth support.');
 		Logger.info('No Bluetooth controller found. Continuing without Bluetooth support.');
-		return; // Exit the Bluetooth initialization if no antenna is found
+		// Exit the Bluetooth initialization if no antenna is found
+		return;
+	}
+	
+	// Check if the Bluetooth is disabled
+	if(config.BLE_ENABLED === 'false')
+	{
+		console.log('Bluetooth is disabled. Exiting Bluetooth initialization.');
+		Logger.info('Bluetooth is disabled. Exiting Bluetooth initialization.');
+		// Exit the Bluetooth initialization if it is disabled
+		return;
 	}
 	
 	// Dynamically import the Bleno module using CommonJS require

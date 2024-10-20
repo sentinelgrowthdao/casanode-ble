@@ -6,6 +6,7 @@ import QRCode from 'qrcode';
 import config from '@utils/configuration';
 import nodeManager from '@utils/node';
 import { getLocalIPAddress } from '@utils/network';
+import { isBluetoothAvailable } from '@utils/bluetooth';
 import { Logger } from '@utils/logger';
 
 // Create __dirname equivalent in ESM
@@ -35,21 +36,26 @@ webRouter.get('/', async(req: Request, res: Response) =>
 	const localIPAddress = getLocalIPAddress();
 	
 	// QR code data
-	const qrData = {
+	const qrData: QRData = {
 		device: 'casanode',
 		os: nodeConfig.systemOs,
 		kernel: nodeConfig.systemKernel,
 		architecture: nodeConfig.systemArch,
-		bluetooth: {
-			uuid: config.BLE_UUID,
-			discovery: config.BLE_DISCOVERY_UUID,
-			seed: config.BLE_CHARACTERISTIC_SEED,
-		},
 		ip: localIPAddress,
 		webPort: config.WEB_LISTEN.split(':')[1] || 8080,
 		apiPort: config.API_LISTEN.split(':')[1] || 8081,
 		auth: config.API_AUTH,
 	};
+	
+	// If bluetooth is available and enabled
+	if(await isBluetoothAvailable() && config.BLE_ENABLED !== 'false')
+	{
+		qrData.bluetooth = {
+			uuid: config.BLE_UUID,
+			discovery: config.BLE_DISCOVERY_UUID,
+			seed: config.BLE_CHARACTERISTIC_SEED,
+		};
+	}
 	
 	// Generate QR code data URL
 	const qrCodeDataURL = await QRCode.toDataURL(JSON.stringify(qrData));
@@ -74,5 +80,21 @@ webRouter.get('/', async(req: Request, res: Response) =>
 		res.send(modifiedHtml);
 	});
 });
+
+interface QRData {
+	device: string;
+	os: string;
+	kernel: string;
+	architecture: string;
+	ip: string | null;
+	webPort: string | number;
+	apiPort: string | number;
+	auth: string;
+	bluetooth?: {
+		uuid: string;
+		discovery: string;
+		seed: string;
+	};
+}
 
 export default webRouter;
