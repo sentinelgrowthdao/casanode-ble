@@ -44,7 +44,7 @@ webRouter.get('/', async(req: Request, res: Response) =>
 		ip: localIPAddress,
 		webPort: config.WEB_LISTEN.split(':')[1] || 8080,
 		apiPort: config.API_LISTEN.split(':')[1] || 8081,
-		auth: config.API_AUTH,
+		authToken: config.API_AUTH,
 	};
 	
 	// If bluetooth is available and enabled
@@ -89,7 +89,7 @@ interface QRData {
 	ip: string | null;
 	webPort: string | number;
 	apiPort: string | number;
-	auth: string;
+	authToken: string;
 	bluetooth?: {
 		uuid: string;
 		discovery: string;
