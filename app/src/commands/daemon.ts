@@ -1,10 +1,10 @@
 import { createRequire } from 'module';
-import { exec } from 'child_process';
 import { Logger } from '@utils/logger';
 import config from '@utils/configuration';
 import WebServer from '@utils/web';
 import { v5 as uuidv5 } from 'uuid';
 import { loadingNodeInformations, loadingSystemInformations } from '@actions/startup';
+import { isBluetoothAvailable } from '@utils/bluetooth';
 
 import { DiscoveryCharacteristic } from '@characteristics/discovery';
 import { MonikerCharacteristic } from '@characteristics/moniker';
@@ -42,27 +42,6 @@ import { OnlineUsersCharacteristic } from '@/characteristics/onlineUsers';
 import { VpnChangeTypeCharacteristic } from '@/characteristics/vpnChangeConfig';
 import { CheckPortCharacteristic } from '@/characteristics/checkPort';
 
-
-/**
- * Check if Bluetooth is available
- * @returns Promise<boolean>
- */
-export const isBluetoothAvailable = (): Promise<boolean> =>
-{
-	// Return a promise to check if the Bluetooth controller is available
-	return new Promise((resolve, reject) =>
-	{
-		// Execute the hciconfig command to check for Bluetooth controller
-		exec('hciconfig', (error, stdout, stderr) =>
-		{
-			// Check if there is an error or no Bluetooth controller is found
-			if (error || stderr || !stdout.includes('hci'))
-				resolve(false);
-			else
-				resolve(true);
-		});
-	});
-};
 
 /**
  * Generate a UUID from a seed and a characteristic ID
