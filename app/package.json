@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsc && tsc-alias",
+    "build": "tsc && tsc-alias && npm run copy-certs",
+    "copy-certs": "cp -r ./src/certs/ ./dist/certs/",
     "lint": "eslint 'src/**/*.{ts,js}' --fix",
     "start": "node ./dist/main.js",
     "dev": "npx tsx src/main.ts"
@@ -12,6 +13,7 @@
     "axios": "^1.7.2",
     "bleno": "npm:@abandonware/bleno@^0.6.1",
     "commander": "^12.1.0",
+    "cors": "^2.8.5",
     "dockerode": "^4.0.2",
     "dotenv": "^16.4.5",
     "eslint": "^9.8.0",
