@@ -1,4 +1,6 @@
 import { Command } from 'commander';
+import { fileURLToPath } from 'url';
+import path from 'path';
 import {
 	daemonCommand,
 	checkInstallationCommand,
@@ -9,6 +11,10 @@ import {
 
 // Global variable for the base directory
 process.env.BASE_DIR = process.cwd();
+
+// Get the directory of the current file
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Create a new program and set program information
 const program = new Command();
@@ -69,3 +75,13 @@ program.action(() => { daemonCommand(); });
 
 // Parse command line arguments
 program.parse(process.argv);
+
+
+/**
+ * Get the directory for the certificates
+ * @returns string
+ */
+export function getCertsDir(): string
+{
+	return path.resolve(__dirname, 'certs');
+}
