@@ -10,6 +10,7 @@ import apiRouter from '@web/apiRoutes';
 import webRouter from '@web/webRoutes';
 import { redirectToHTTPS } from '@web/redirectMiddleware';
 import { certificateGenerate } from '@utils/certificate';
+import { getCertsDir } from '@/main';
 
 class WebServer
 {
@@ -72,8 +73,12 @@ class WebServer
 	{
 		try
 		{
+			// Paths for the CA certificate and key
+			const caCertPath = path.resolve(getCertsDir(), 'ca.crt');
+			const caKeyPath = path.resolve(getCertsDir(), 'ca.key');
+			
 			// Generate certificate if it does not exist
-			const success = await certificateGenerate(5, this.certFilePath, this.keyFilePath);
+			const success = await certificateGenerate(5, this.certFilePath, this.keyFilePath, caCertPath, caKeyPath);
 			if (success)
 				Logger.info('SSL certificate for API server generated successfully.');
 			else
