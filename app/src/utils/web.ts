@@ -1,6 +1,7 @@
 import express from 'express';
 import https from 'https';
 import http from 'http';
+import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import { Logger } from '@utils/logger';
@@ -91,6 +92,14 @@ class WebServer
 	 */
 	private setupRoutes()
 	{
+		// Enable CORS for all routes
+		this.app.use(cors({
+			origin: '*',
+			methods: 'GET,HEAD,PUT,POST,DELETE',
+			allowedHeaders: 'Content-Type, Authorization',
+			credentials: false,
+		}));
+		
 		// Use the redirect middleware for API requests
 		this.app.use(redirectToHTTPS);
 		
