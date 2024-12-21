@@ -4,8 +4,16 @@ import config from './configuration';
 
 export class Logger 
 {
+	/**
+	 * The path to the log file
+	 * @type {string}
+	 */
 	private static logFilePath = path.join(config?.LOG_DIR || '/var/log/casanode/', 'app-ble.log');
 	
+	/**
+	 * Get a formatted date string
+	 * @returns string
+	 */
 	private static getFormattedDate(): string {
 		const date = new Date();
 		const year = date.getFullYear();
@@ -17,6 +25,11 @@ export class Logger
 		return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 	}
 	
+	/**
+	 * Log an informational message
+	 * @param message - The message to log
+	 * @returns void
+	 */
 	public static info(message: string): void 
 	{
 		const timestamp = this.getFormattedDate();
@@ -24,6 +37,10 @@ export class Logger
 		this.writeToLog(logMessage);
 	}
 	
+	/**
+	 * Log an error message
+	 * @param message - The message to log
+	 */
 	public static error(message: string): void 
 	{
 		const timestamp = this.getFormattedDate();
@@ -31,6 +48,11 @@ export class Logger
 		this.writeToLog(logMessage);
 	}
 	
+	/**
+	 * Write a message to the log file
+	 * @param message - The message to write to the log file
+	 * @returns void
+	 */
 	private static writeToLog(message: string): void 
 	{
 		try 
