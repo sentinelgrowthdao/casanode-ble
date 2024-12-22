@@ -128,7 +128,6 @@ class WebServer
 		// Start the HTTP server (for the main route / on webPort)
 		http.createServer(this.app).listen(this.webPort, this.webHostname, () =>
 		{
-			console.log(`Web server running at http://${this.webHostname}:${this.webPort}`);
 			Logger.info(`Web server running at http://${this.webHostname}:${this.webPort}`);
 		});
 		
@@ -141,7 +140,6 @@ class WebServer
 		// Start the HTTPS server (for API and / on apiPort)
 		https.createServer(sslOptions, this.app).listen(this.apiPort, this.apiHostname, () =>
 		{
-			console.log(`API server running securely at https://${this.apiHostname}:${this.apiPort}`);
 			Logger.info(`API server running securely at https://${this.apiHostname}:${this.apiPort}`);
 		});
 	}
