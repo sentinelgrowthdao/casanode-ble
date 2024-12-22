@@ -10,6 +10,7 @@
     "dev": "npx tsx src/main.ts"
   },
   "dependencies": {
+    "@sentry/node": "^8.47.0",
     "axios": "^1.7.2",
     "bleno": "npm:@abandonware/bleno@^0.6.1",
     "commander": "^12.1.0",
