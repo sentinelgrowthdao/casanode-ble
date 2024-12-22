@@ -23,7 +23,6 @@ export class DiscoveryCharacteristic
 	 */
 	constructor(uuid: string) 
 	{
-		console.log('DiscoveryCharacteristic created');
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
 		this.characteristicUuid = uuid;
