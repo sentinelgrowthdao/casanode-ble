@@ -14,7 +14,6 @@ const execPromise = promisify(exec);
  */
 export const loadingNodeInformations = async (): Promise<boolean> =>
 {
-	console.log('Loading node informations.');
 	Logger.info('Loading node informations.');
 	
 	// Load the node location
@@ -23,7 +22,7 @@ export const loadingNodeInformations = async (): Promise<boolean> =>
 	// If the passphrase is unavailable
 	if(!nodeManager.passphraseAvailable())
 	{
-		console.log('Passphrase required to load wallet informations.');
+		Logger.info('Passphrase required to load wallet informations.');
 		return true;
 	}
 	
@@ -42,7 +41,6 @@ export const loadingNodeInformations = async (): Promise<boolean> =>
  */
 export const loadingSystemInformations = async (): Promise<boolean> =>
 {
-	console.log('Loading system informations.');
 	Logger.info('Loading system informations.');
 	
 	// Initialize the node uptime
