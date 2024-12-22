@@ -15,6 +15,15 @@ process.env.BASE_DIR = process.cwd();
 // Get the directory of the current file
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+// Finish the transaction on exit
+process.on('exit', () => {
+	Logger.info('Application exiting...');
+});
+// Handle uncaught exceptions
+process.on('SIGINT', () => {
+	Logger.info('Application exiting... (SIGINT)');
+	process.exit(0);
+});
 
 // Create a new program and set program information
 const program = new Command();
