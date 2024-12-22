@@ -25,6 +25,7 @@ export interface AppConfigData
 	FOXINODES_API_CHECK_IP: string;
 	FOXINODES_API_DVPN_CONFIG: string;
 	FOXINODES_API_CHECK_PORT: string;
+	SENTRY_DSN?: string;
 }
 
 export interface ConfigFileData
@@ -68,6 +69,7 @@ class ConfigurationLoader
 		FOXINODES_API_CHECK_IP: "https://wapi.foxinodes.net/api/v1/sentinel/check-ip",
 		FOXINODES_API_DVPN_CONFIG: "https://wapi.foxinodes.net/api/v1/sentinel/dvpn-node/configuration",
 		FOXINODES_API_CHECK_PORT: "https://wapi.foxinodes.net/api/v1/sentinel/dvpn-node/check-port/",
+		SENTRY_DSN: '',
 	};
 	
 	private constructor()
