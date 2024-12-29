@@ -8,7 +8,7 @@
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"noUnusedLocals": false,
+		"noUnusedLocals": true,
 		"noUnusedParameters": false,
 		"rootDir": "./src",
 		"outDir": "./dist",
