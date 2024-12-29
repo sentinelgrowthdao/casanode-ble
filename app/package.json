@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc && tsc-alias && npm run copy-certs",
     "copy-certs": "cp -r ./src/certs/ ./dist/certs/",
-    "lint": "npx eslint 'src/**/*.{ts,js}' --fix --config .eslintrc.js",
+    "eslint": "npx eslint .",
     "start": "node ./dist/main.js",
     "dev": "npx tsx src/main.ts"
   },
