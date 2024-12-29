@@ -43,9 +43,9 @@ export class InstallDockerImageCharacteristic
 	/**
 	 * Create a new instance of InstallDockerImageCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -65,7 +65,7 @@ export class InstallDockerImageCharacteristic
 	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		let response;
-		switch(this.installStatus)
+		switch (this.installStatus)
 		{
 			case InstallStatus.NOT_STARTED: response = '0'; break;
 			case InstallStatus.IN_PROGRESS: response = '1'; break;
@@ -80,7 +80,7 @@ export class InstallDockerImageCharacteristic
 	// Start the installation process with a write request
 	public onWriteRequest(data: Buffer, offset: number, withoutResponse: boolean, callback: (result: number) => void)
 	{
-		if(this.installStatus === InstallStatus.IN_PROGRESS)
+		if (this.installStatus === InstallStatus.IN_PROGRESS)
 		{
 			Logger.error('Installation already in progress');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
@@ -95,15 +95,17 @@ export class InstallDockerImageCharacteristic
 		Logger.info('Starting Docker image installation');
 		// Start the installation process
 		imagePull()
-		.then((status: boolean) =>
-		{
-			Logger.info(`Docker installation status: ${status}`);
-			this.installStatus = status ? InstallStatus.COMPLETED : InstallStatus.ERROR;
-		})
-		.catch((error: any) =>
-		{
-			Logger.error(`Error while installing Docker image: ${error}`);
-			this.installStatus = InstallStatus.ERROR;
-		});
+			.then((status: boolean) =>
+			{
+				Logger.info(`Docker installation status: ${status}`);
+				this.installStatus = status ? InstallStatus.COMPLETED : InstallStatus.ERROR;
+				return null;
+			})
+			.catch ((error: any) =>
+			{
+				Logger.error(`Error while installing Docker image: ${error}`);
+				this.installStatus = InstallStatus.ERROR;
+				return null;
+			});
 	}
 }

@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { Logger } from '@utils/logger';
 import nodeManager from '@utils/node';
 import { getNodeStatus, type NodeStatus } from '@utils/node';
 import { certificateInfo, type CertificateInfo } from '@utils/certificate';

@@ -46,7 +46,7 @@ export async function walletAddress(req: Request, res: Response): Promise<void>
 			address: nodeConfig.walletPublicAddress,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error getting wallet address: ${error}`);
@@ -80,7 +80,7 @@ export async function walletCreate(req: Request, res: Response): Promise<void>
 		const exists = await walletExists(passphrase);
 		
 		// Skip if wallet already exists
-		if(exists)
+		if (exists)
 		{
 			Logger.error('Wallet already exists');
 			res.status(400).json({
@@ -95,7 +95,7 @@ export async function walletCreate(req: Request, res: Response): Promise<void>
 		const mnemonic : string[]|null|undefined = await walletCreateUtil(passphrase);
 		
 		// If an error occurred while creating the wallet
-		if(typeof mnemonic === 'undefined' || mnemonic === null)
+		if (typeof mnemonic === 'undefined' || mnemonic === null)
 		{
 			Logger.error('Error creating wallet');
 			res.status(500).json({
@@ -113,7 +113,7 @@ export async function walletCreate(req: Request, res: Response): Promise<void>
 			mnemonic: mnemonic,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error creating wallet: ${error}`);
@@ -148,7 +148,7 @@ export async function walletRestore(req: Request, res: Response): Promise<void>
 		const exists = await walletExists(passphrase);
 		
 		// Skip if wallet already exists
-		if(exists)
+		if (exists)
 		{
 			Logger.error('Wallet already exists');
 			res.status(400).json({
@@ -165,7 +165,7 @@ export async function walletRestore(req: Request, res: Response): Promise<void>
 		const success = await walletRecoverUtil(mnemonic, passphrase);
 		
 		// If an error occurred while recovering the wallet
-		if(!success)
+		if (!success)
 			throw new Error('Error recovering wallet');
 		
 		// Return the wallet address
@@ -174,7 +174,7 @@ export async function walletRestore(req: Request, res: Response): Promise<void>
 			success: true,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error recovering wallet: ${error}`);
@@ -208,7 +208,7 @@ export async function walletRemove(req: Request, res: Response): Promise<void>
 		const exists = await walletExists(passphrase);
 		
 		// If wallet does not exist
-		if(!exists)
+		if (!exists)
 		{
 			Logger.error('Wallet does not exist');
 			res.status(400).json({
@@ -223,7 +223,7 @@ export async function walletRemove(req: Request, res: Response): Promise<void>
 		const success = await walletRemoveUtil(passphrase);
 		
 		// If an error occurred while removing the wallet
-		if(!success)
+		if (!success)
 			throw new Error('Error removing wallet');
 		
 		// Return the wallet address
@@ -232,7 +232,7 @@ export async function walletRemove(req: Request, res: Response): Promise<void>
 			success: true,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error removing wallet: ${error}`);

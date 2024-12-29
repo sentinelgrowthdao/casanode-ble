@@ -21,7 +21,7 @@ export async function systemUpdate(req: Request, res: Response): Promise<void>
 	
 	try
 	{
-		if(target === 'system')
+		if (target === 'system')
 		{
 			// Update the system
 			Logger.info('Updating the system');
@@ -33,7 +33,7 @@ export async function systemUpdate(req: Request, res: Response): Promise<void>
 				success: true,
 			});
 		}
-		else if(target === 'sentinel')
+		else if (target === 'sentinel')
 		{
 			// Update Sentinel
 			Logger.info('Updating Sentinel');
@@ -55,7 +55,7 @@ export async function systemUpdate(req: Request, res: Response): Promise<void>
 			});
 		}
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error during node update: ${error}`);
@@ -87,7 +87,7 @@ export async function systemReboot(req: Request, res: Response): Promise<void>
 			success: true,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error during node reboot: ${error}`);
@@ -119,7 +119,7 @@ export async function systemShutdown(req: Request, res: Response): Promise<void>
 			success: true,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error during node shutdown: ${error}`);
@@ -146,7 +146,8 @@ export async function systemReset(req: Request, res: Response): Promise<void>
 		await resetSystem();
 		
 		// Shutdown the application (Restart performed by systemd) in 1 second
-		setTimeout(() => {
+		setTimeout(() =>
+		{
 			process.exit(0);
 		}, 1000);
 		
@@ -156,7 +157,7 @@ export async function systemReset(req: Request, res: Response): Promise<void>
 			success: true,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error during node reset: ${error}`);

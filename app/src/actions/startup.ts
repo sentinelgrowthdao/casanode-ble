@@ -20,7 +20,7 @@ export const loadingNodeInformations = async (): Promise<boolean> =>
 	await nodeManager.refreshNodeLocation();
 	
 	// If the passphrase is unavailable
-	if(!nodeManager.passphraseAvailable())
+	if (!nodeManager.passphraseAvailable())
 	{
 		Logger.info('Passphrase required to load wallet informations.');
 		return true;
@@ -61,6 +61,6 @@ export const loadingSystemInformations = async (): Promise<boolean> =>
  */
 async function runCommand(command: string): Promise<string>
 {
-	const { stdout, stderr } = await execPromise(command);
+	const { stdout, _stderr } = await execPromise(command);
 	return stdout.trim() || '';
 }

@@ -1,7 +1,6 @@
 import { createRequire } from 'module';
 
 import { Logger } from '@utils/logger';
-import nodeManager from '@utils/node';
 import { checkInstallation, type InstallationCheck } from '@actions/index';
 
 export class CheckInstallationCharacteristic
@@ -21,7 +20,7 @@ export class CheckInstallationCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(private uuid: string) 
+	constructor(private uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -31,9 +30,9 @@ export class CheckInstallationCharacteristic
 	/**
 	 * Create a new instance of CheckInstallationCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -49,7 +48,7 @@ export class CheckInstallationCharacteristic
 	 * @param callback (result: number, data: Buffer) => void
 	 * @returns void
 	 */
-	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
+	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		
 		checkInstallation().then((status: InstallationCheck) =>
@@ -64,9 +63,12 @@ export class CheckInstallationCharacteristic
 			
 			// Return the value to the subscriber
 			callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(result));
-		}).catch((error: any) => {
+			return null;
+		}).catch ((error: any) =>
+		{
 			Logger.error(`Error while reading the installation status: ${error}`);
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from('unknown'));
+			return null;
 		});
 	}
 }

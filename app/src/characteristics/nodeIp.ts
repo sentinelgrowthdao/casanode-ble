@@ -21,7 +21,7 @@ export class NodeIpCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(private uuid: string) 
+	constructor(private uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -31,9 +31,9 @@ export class NodeIpCharacteristic
 	/**
 	 * Create a new instance of NodeIpCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -50,7 +50,7 @@ export class NodeIpCharacteristic
 	 * @param callback (result: number, data: Buffer) => void
 	 * @returns void
 	 */
-	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
+	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		// Get the value from the configuration
 		const value = nodeManager.getConfig().node_ip;
@@ -84,7 +84,7 @@ export class NodeIpCharacteristic
 		else
 		{
 			// Check if the value is a valid DNS asynchronously
-			isValidDns(value).then(isValid => 
+			isValidDns(value).then((isValid) =>
 			{
 				if (isValid)
 				{
@@ -94,19 +94,22 @@ export class NodeIpCharacteristic
 					// Notify the subscriber of success
 					callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 					Logger.info(`Parameter "node_ip" updated via Bluetooth to: ${value}`);
+					return null;
 				}
 				else
 				{
 					// If invalid, return an error
 					Logger.error('Invalid value received via Bluetooth for "node_ip".');
 					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+					return null;
 				}
-			}).catch((error: any) => 
-			{
-				// Handle any errors that occur during DNS resolution
-				Logger.error(`Error while resolving DNS: ${error}`);
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			});
+			})
+				.catch ((error: any) =>
+				{
+					// Handle any errors that occur during DNS resolution
+					Logger.error(`Error while resolving DNS: ${error}`);
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+				});
 		}
 	}
 }

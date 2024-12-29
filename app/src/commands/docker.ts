@@ -80,7 +80,7 @@ export const dockerCommand = async (options: any) =>
 	else if (options.logs)
 	{
 		const logs = await containerLogs();
-		if(logs)
+		if (logs)
 			console.log(logs);
 		else
 			console.log('Failed to get the logs of the Casanode Docker container');

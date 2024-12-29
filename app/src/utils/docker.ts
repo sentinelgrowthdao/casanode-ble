@@ -1,9 +1,9 @@
 import Docker from 'dockerode';
 import { Readable, PassThrough } from 'stream';
+import { nodeConfig, type NodeConfigData } from '@utils/node';
 import config from './configuration';
 import { getDockerDefaultSocketPath } from './configuration';
 import { Logger } from './logger';
-import { nodeConfig, type NodeConfigData } from '@utils/node';
 
 class DockerManager
 {
@@ -28,7 +28,7 @@ class DockerManager
 	 */
 	public static getInstance(): DockerManager
 	{
-		if(!DockerManager.instance)
+		if (!DockerManager.instance)
 			DockerManager.instance = new DockerManager();
 		
 		return DockerManager.instance;
@@ -44,7 +44,7 @@ class DockerManager
 		{
 			const imageName = config.DOCKER_IMAGE_NAME;
 			const images = await this.docker.listImages();
-			const imageExists = images.some(image => image.RepoTags && image.RepoTags.includes(imageName));
+			const imageExists = images.some((image) => image.RepoTags && image.RepoTags.includes(imageName));
 			return imageExists;
 		}
 		catch (err)
@@ -57,7 +57,6 @@ class DockerManager
 	
 	/**
 	 * Inspect the Docker container
-	 * 
 	 * @returns Docker.ContainerInspectInfo | null
 	 */
 	public async inspectDockerContainer(): Promise<Docker.ContainerInspectInfo | null>
@@ -96,7 +95,7 @@ class DockerManager
 					if (err)
 						return reject(err);
 					// Follow progress of pulling image
-					this.docker.modem.followProgress(stream, (err, res) =>
+					this.docker.modem.followProgress(stream, (err, _res) =>
 					{
 						if (err)
 							return reject(err);
@@ -188,12 +187,12 @@ class DockerManager
 		try
 		{
 			const containerList = await this.docker.listContainers({ all: true });
-			const containerExists = containerList.some(container => container.Names.includes(`/${config.DOCKER_CONTAINER_NAME}`));
+			const containerExists = containerList.some((container) => container.Names.includes(`/${config.DOCKER_CONTAINER_NAME}`));
 			
 			if (containerExists)
 			{
 				const runningContainers = await this.docker.listContainers();
-				const containerRunning = runningContainers.some(container => container.Names.includes(`/${config.DOCKER_CONTAINER_NAME}`));
+				const containerRunning = runningContainers.some((container) => container.Names.includes(`/${config.DOCKER_CONTAINER_NAME}`));
 				
 				if (!containerRunning)
 				{
@@ -201,12 +200,12 @@ class DockerManager
 					{
 						// Remove container
 						await this.containerRemove();
-						Logger.info(`dVPN node container has been removed successfully.`);
+						Logger.info('dVPN node container has been removed successfully.');
 					}
 					else
 					{
 						await this.startContainerWithoutPassphrase(config.DOCKER_CONTAINER_NAME);
-						Logger.info(`dVPN node container has been started successfully.`);
+						Logger.info('dVPN node container has been started successfully.');
 						return true;
 					}
 				}
@@ -295,7 +294,7 @@ class DockerManager
 		try
 		{
 			await this.docker.getContainer(containerName).start();
-			Logger.info(`dVPN node container has been started successfully.`);
+			Logger.info('dVPN node container has been started successfully.');
 			return true;
 		}
 		catch (err)
@@ -340,7 +339,14 @@ class DockerManager
 			//
 			const result = await new Promise<boolean>((resolve, reject) =>
 			{
-				container.attach({ stream: true, hijack: true, stdin: true, stdout: true, stderr: true }, function (err: any, stream: any)
+				container.attach({
+					stream: true,
+					hijack: true,
+					stdin: true,
+					stdout: true,
+					stderr: true
+				},
+				function(err: any, stream: any)
 				{
 					// Handle the error
 					if (err)
@@ -379,19 +385,22 @@ class DockerManager
 					
 					// Write the passphrase to the container's stdin
 					stream.write(`${walletPassphrase}`);
-					stream.write(`\n`);
+					stream.write('\n');
 				});
 				
 				// Start the container
 				container.start().then(() =>
 				{
-					Logger.info(`dVPN node container has been started successfully.`);
+					Logger.info('dVPN node container has been started successfully.');
 					resolve(true);
-				}).catch((startErr) =>
-				{
-					Logger.error(`Failed to start the container: ${startErr.message}`);
-					reject(false);
-				});
+					return true;
+				})
+					.catch ((startErr) =>
+					{
+						Logger.error(`Failed to start the container: ${startErr.message}`);
+						reject(false);
+						return false;
+					});
 			});
 			
 			return result;
@@ -417,17 +426,17 @@ class DockerManager
 		const isRunning = await containerRunning();
 		if (!isRunning)
 		{
-			Logger.info(`dVPN node container is already stopped.`);
+			Logger.info('dVPN node container is already stopped.');
 			return true;
 		}
 		
 		try
 		{
 			await this.docker.getContainer(config.DOCKER_CONTAINER_NAME).stop();
-			Logger.info(`dVPN node container has been stopped successfully.`);
+			Logger.info('dVPN node container has been stopped successfully.');
 			return true;
 		}
-		catch(err)
+		catch (err)
 		{
 			if (err instanceof Error)
 				Logger.error(`Failed to stop the dVPN node container: ${err.message}`);
@@ -447,7 +456,7 @@ class DockerManager
 		try
 		{
 			const isRunning = await containerRunning();
-			if(isRunning)
+			if (isRunning)
 			{
 				const stopSuccess = await containerStop();
 				if (!stopSuccess)
@@ -458,7 +467,7 @@ class DockerManager
 			if (!startSuccess)
 				return false;
 			
-			Logger.info(`dVPN node container has been restarted successfully.`);
+			Logger.info('dVPN node container has been restarted successfully.');
 			return true;
 		}
 		catch (err)
@@ -481,7 +490,7 @@ class DockerManager
 		try
 		{
 			const runningContainers = await this.docker.listContainers();
-			const isRunning = runningContainers.some(container => container.Names.includes(`/${config.DOCKER_CONTAINER_NAME}`));
+			const isRunning = runningContainers.some((container) => container.Names.includes(`/${config.DOCKER_CONTAINER_NAME}`));
 			return isRunning;
 		}
 		catch (err)
@@ -504,7 +513,7 @@ class DockerManager
 		try
 		{
 			const containers = await this.docker.listContainers({ all: true });
-			const containerExists = containers.some(container => container.Names.includes(`/${config.DOCKER_CONTAINER_NAME}`));
+			const containerExists = containers.some((container) => container.Names.includes(`/${config.DOCKER_CONTAINER_NAME}`));
 			return containerExists;
 		}
 		catch (err)
@@ -533,7 +542,7 @@ class DockerManager
 			
 			// Remove the container
 			await this.docker.getContainer(config.DOCKER_CONTAINER_NAME).remove({ force: true });
-			Logger.info(`dVPN node container has been removed successfully.`);
+			Logger.info('dVPN node container has been removed successfully.');
 			return true;
 		}
 		catch (err)
@@ -561,7 +570,7 @@ class DockerManager
 	
 	/**
 	 * Convert stream to string
-	 * @param stream 
+	 * @param stream Readable
 	 * @returns string
 	 */
 	private async streamToString(stream: Readable): Promise<string>
@@ -583,10 +592,10 @@ class DockerManager
 	{
 		// Check if the container exists
 		const exists = await containerExists();
-		if(exists)
+		if (exists)
 		{
 			const isRunning = await containerRunning();
-			if(isRunning)
+			if (isRunning)
 				return 'running';
 			else
 				return 'stopped';
@@ -617,7 +626,7 @@ class DockerManager
 			// Convert stream to string
 			const logs = await this.streamToString(logStream as Readable);
 			
-			Logger.info(`Docker logs retrieved successfully.`);
+			Logger.info('Docker logs retrieved successfully.');
 			return logs;
 		}
 		catch (err)
@@ -641,13 +650,12 @@ class DockerManager
 	public async containerCommand(argv: string[], stdin: string[] | null = null): Promise<string | null>
 	{
 		// Check if docker image is available
-		if(!await checkImageAvailability())
+		if (!await checkImageAvailability())
 		{
 			Logger.error(`Container command '${argv.join(' ')}' failed: Image does not exist.`);
 			return null;
 		}
 		
-		const configNode: NodeConfigData = nodeConfig();
 		const containerName = config.DOCKER_CONTAINER_NAME;
 		const configDir = config.CONFIG_DIR;
 		
@@ -677,7 +685,7 @@ class DockerManager
 			{
 				if (err instanceof Error)
 					Logger.error(`Error executing container command '${argv.join(' ')}': ${err.message}`);
-				else if(err)
+				else if (err)
 					Logger.error(`Error executing container command '${argv.join(' ')}': ${String(err)}`);
 				else
 				{
@@ -686,46 +694,53 @@ class DockerManager
 					Logger.info(`Error executing container command '${argv.join(' ')}': ${output}`);
 				}
 			})
-			// Attach to the container
-			.on('container', function (container)
-			{
-				// Attach to the container to interact with it
-				container.attach({stream: true, hijack: true, stdin: true, stdout: true, stderr: true}, function (err: any, stream: any)
+				// Attach to the container
+				.on('container', function(container)
 				{
-					if (err)
+					// Attach to the container to interact with it
+					container.attach({
+						stream: true,
+						hijack: true,
+						stdin: true,
+						stdout: true,
+						stderr: true
+					},
+					function(err: any, stream: any)
 					{
-						if (err instanceof Error)
-							Logger.error(`Error attaching to container: ${err.message}`);
-						else
-							Logger.error(`Error attaching to container: ${String(err)}`);
-						
-						// Leave the function
-						return;
-					}
-					
-					// Handle the output stream
-					stream.on('data', (data: Buffer) =>
-					{
-						// If the data contains an error keyword, stop the container
-						if(isPassphraseError(data.toString()))
+						if (err)
 						{
-							Logger.error(`Container command '${argv.join(' ')}' failed: ${data.toString()}`);
-							// Stop the container
-							container.stop();
+							if (err instanceof Error)
+								Logger.error(`Error attaching to container: ${err.message}`);
+							else
+								Logger.error(`Error attaching to container: ${String(err)}`);
+							
+							// Leave the function
+							return;
 						}
-					});
-					
-					// If stdin data is provided, write it to the container's stdin
-					if(stdin !== null)
-					{
-						stdin.forEach((line) =>
+						
+						// Handle the output stream
+						stream.on('data', (data: Buffer) =>
+						{
+							// If the data contains an error keyword, stop the container
+							if (isPassphraseError(data.toString()))
+							{
+								Logger.error(`Container command '${argv.join(' ')}' failed: ${data.toString()}`);
+								// Stop the container
+								container.stop();
+							}
+						});
+						
+						// If stdin data is provided, write it to the container's stdin
+						if (stdin !== null)
+						{
+							stdin.forEach((line) =>
 							{
 								stream.write(line);
-								stream.write(`\n`);
+								stream.write('\n');
 							});
-					}
+						}
+					});
 				});
-			});
 			
 			// Convert buffer to stream
 			const logs = await this.passThroughToString(outputStream);
@@ -774,7 +789,7 @@ class DockerManager
 	 */
 	public isPassphraseError(output: string): boolean
 	{
-		return DockerManager.passphraseErrors.some(keyword => output.toLowerCase().includes(keyword));
+		return DockerManager.passphraseErrors.some((keyword) => output.toLowerCase().includes(keyword));
 	}
 }
 

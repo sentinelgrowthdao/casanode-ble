@@ -7,7 +7,7 @@ import { exec } from 'child_process';
 export const isBluetoothAvailable = (): Promise<boolean> =>
 {
 	// Return a promise to check if the Bluetooth controller is available
-	return new Promise((resolve, reject) =>
+	return new Promise((resolve, _reject) =>
 	{
 		// Execute the hciconfig command to check for Bluetooth controller
 		exec('hciconfig', (error, stdout, stderr) =>

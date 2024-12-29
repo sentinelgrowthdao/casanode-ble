@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import axios from 'axios';
 import https from 'https';
-import config from './configuration';
 import { Logger } from '@utils/logger';
 import {
 	isPassphraseError, containerCommand,
@@ -10,12 +9,13 @@ import {
 } from '@utils/docker';
 import { getRemoteAddress } from '@utils/configuration';
 import { checkInstallation } from '@actions/checkInstallation';
+import config from './configuration';
 
 // Defaults values for node configuration
-const DATACENTER_GIGABYTE_PRICES="52573ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,9204ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1180852ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,122740ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,15342624udvpn";
-const DATACENTER_HOURLY_PRICES="18480ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,770ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1871892ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,18897ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,4160000udvpn";
-const RESIDENTIAL_GIGABYTE_PRICES="52573ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,9204ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1180852ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,122740ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,15342624udvpn";
-const RESIDENTIAL_HOURLY_PRICES="18480ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,770ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1871892ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,18897ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,10000000udvpn";
+const DATACENTER_GIGABYTE_PRICES = '52573ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,9204ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1180852ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,122740ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,15342624udvpn';
+const DATACENTER_HOURLY_PRICES = '18480ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,770ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1871892ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,18897ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,4160000udvpn';
+const RESIDENTIAL_GIGABYTE_PRICES = '52573ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,9204ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1180852ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,122740ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,15342624udvpn';
+const RESIDENTIAL_HOURLY_PRICES = '18480ibc/31FEE1A2A9F9C01113F90BD0BBCCE8FD6BBB8585FAF109A2101827DD1D5B95B8,770ibc/A8C2D23A1E6F95DA4E48BA349667E322BD7A6C996D8A4AAE8BA72E190F3D1477,1871892ibc/B1C0DDB14F25279A2026BC8794E12B259F8BDA546A3C5132CCAEE4431CE36783,18897ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518,10000000udvpn';
 
 // Balance
 export interface BalanceWallet
@@ -219,7 +219,7 @@ class NodeManager
 		// If the configuration files do not exist, do nothing
 		if (!this.isConfigFileAvailable(configFilePath))
 		{
-			Logger.info("Configuration files do not exist.");
+			Logger.info('Configuration files do not exist.');
 			return ;
 		}
 		
@@ -248,18 +248,18 @@ class NodeManager
 			const listen_on = this.extractConfigValue(configFileContent, 'listen_on');
 			
 			// Extract the node IP and port
-			if (remote_url && remote_url !== "" && remote_url.includes(':'))
+			if (remote_url && remote_url !== '' && remote_url.includes(':'))
 				this.nodeConfig.node_ip = remote_url.split('/')[2].split(':')[0];
 			
 			// Extract the node port
-			if (listen_on && listen_on !== "" && listen_on.includes(':'))
+			if (listen_on && listen_on !== '' && listen_on.includes(':'))
 				this.nodeConfig.node_port = parseInt(listen_on.split(':')[1]);
 			
 			// Set the node type based on the prices
 			this.nodeConfig.node_type = this.nodeConfig.hourly_prices === DATACENTER_HOURLY_PRICES ? 'datacenter' : this.nodeConfig.hourly_prices ? 'residential' : '';
 			
 			// Load WireGuard configuration file content
-			if(this.nodeConfig.vpn_type === 'wireguard')
+			if (this.nodeConfig.vpn_type === 'wireguard')
 			{
 				Logger.info('Loading WireGuard configuration file content');
 				const wireguardConfigPath = path.join(config.CONFIG_DIR, 'wireguard.toml');
@@ -267,7 +267,7 @@ class NodeManager
 				this.nodeConfig.vpn_port = parseInt(this.extractConfigValue(wireguardConfigContent, 'listen_port'));
 			}
 			// Load V2Ray configuration file content
-			else if(this.nodeConfig.vpn_type === 'v2ray')
+			else if (this.nodeConfig.vpn_type === 'v2ray')
 			{
 				Logger.info('Loading V2Ray configuration file content');
 				const v2rayConfigPath = path.join(config.CONFIG_DIR, 'v2ray.toml');
@@ -292,7 +292,7 @@ class NodeManager
 		// Set the node location
 		this.nodeConfig.nodeLocation = remoteAddress.country ?? 'N/A';
 		// Set the node IP address only if it is not already set
-		if(this.nodeConfig.node_ip === '')
+		if (this.nodeConfig.node_ip === '')
 			this.nodeConfig.node_ip = remoteAddress.ip ?? '';
 	}
 	
@@ -323,7 +323,7 @@ class NodeManager
 		const sectionRegex = new RegExp(`\\[${section}\\]([\\s\\S]*?)\\[`, 'm');
 		const sectionMatch = content.match(sectionRegex);
 		// If the section is found, extract the key value
-		if(sectionMatch)
+		if (sectionMatch)
 		{
 			// Create a regex to match the key
 			const keyRegex = new RegExp(`^${key}\\s*=\\s*"?([^"\\r\\n]*)"?`, 'm');
@@ -358,7 +358,7 @@ class NodeManager
 			// Apply VPN configuration changes
 			this.vpnChangeType();
 			
-			Logger.info("Configuration files have been refreshed.");
+			Logger.info('Configuration files have been refreshed.');
 		}
 		catch (error)
 		{
@@ -383,7 +383,7 @@ class NodeManager
 		const current_vpn_port = this.nodeConfig.vpn_port;
 		
 		// If the VPN type is not changed, do nothing
-		if(current_vpn_type === this.nodeConfig.vpn_type)
+		if (current_vpn_type === this.nodeConfig.vpn_type)
 		{
 			Logger.info('VPN type has not been changed.');
 			return true;
@@ -395,18 +395,19 @@ class NodeManager
 		this.updateConfigValueInSection(configFilePath, 'handshake', 'enable', this.nodeConfig.vpn_type === 'wireguard' ? 'true' : 'false');
 		
 		// Update VPN configuration files
-		if(this.nodeConfig.vpn_type === 'wireguard')
+		if (this.nodeConfig.vpn_type === 'wireguard')
 		{
 			// If file does not exist, create it
-			if(!this.isConfigFileAvailable(wireguardConfigPath))
+			if (!this.isConfigFileAvailable(wireguardConfigPath))
 			{
 				// If the other configuration file exists
-				if(this.isConfigFileAvailable(v2rayConfigPath))
+				if (this.isConfigFileAvailable(v2rayConfigPath))
 				{
 					// Remove the other configuration file
 					Logger.info(`Deleting V2Ray configuration file: ${v2rayConfigPath}`);
-					await fs.rm(v2rayConfigPath, (error) => {
-						if(error)
+					await fs.rm(v2rayConfigPath, (error) =>
+					{
+						if (error)
 							Logger.error(`Failed to delete V2Ray configuration file: ${error}`);
 					});
 				}
@@ -418,18 +419,19 @@ class NodeManager
 			// Update the listen port
 			this.updateConfigValue(wireguardConfigPath, 'listen_port', current_vpn_port);
 		}
-		else if(this.nodeConfig.vpn_type === 'v2ray')
+		else if (this.nodeConfig.vpn_type === 'v2ray')
 		{
 			// If file does not exist, create it
-			if(!this.isConfigFileAvailable(v2rayConfigPath))
+			if (!this.isConfigFileAvailable(v2rayConfigPath))
 			{
 				// If the other configuration file exists
-				if(this.isConfigFileAvailable(wireguardConfigPath))
+				if (this.isConfigFileAvailable(wireguardConfigPath))
 				{
 					// Remove the other configuration file
 					Logger.info(`Deleting WireGuard configuration file: ${wireguardConfigPath}`);
-					await fs.rm(wireguardConfigPath, (error) => {
-						if(error)
+					await fs.rm(wireguardConfigPath, (error) =>
+					{
+						if (error)
 							Logger.error(`Failed to delete WireGuard configuration file: ${error}`);
 					});
 				}
@@ -449,10 +451,10 @@ class NodeManager
 		const running = await containerRunning();
 		
 		// If the container exists
-		if(exists)
+		if (exists)
 		{
 			// Stop the container if running
-			if(running)
+			if (running)
 			{
 				Logger.info('Stopping the container to apply VPN configuration changes.');
 				await containerStop();
@@ -463,7 +465,7 @@ class NodeManager
 			await containerRemove();
 			
 			// Start the container if it was running
-			if(running)
+			if (running)
 			{
 				Logger.info('Starting the container after applying VPN configuration changes.');
 				await containerStart();
@@ -514,7 +516,7 @@ class NodeManager
 		const output: string|null = await containerCommand(['process', 'config', 'init']);
 		
 		// Return if the configuration file has been created
-		if(output !== null && output === '')
+		if (output !== null && output === '')
 		{
 			// Load the node configuration
 			await this.loadNodeConfig();
@@ -537,18 +539,18 @@ class NodeManager
 		let output: string|null = '';
 		
 		// Create WireGuard configuration file
-		if(this.nodeConfig.vpn_type === 'wireguard')
+		if (this.nodeConfig.vpn_type === 'wireguard')
 		{
 			output = await containerCommand(['process', 'wireguard', 'config', 'init']);
 		}
 		// Create V2Ray configuration file
-		else if(this.nodeConfig.vpn_type === 'v2ray')
+		else if (this.nodeConfig.vpn_type === 'v2ray')
 		{
 			output = await containerCommand(['process', 'v2ray', 'config', 'init']);
 		}
 		
 		// Return if the configuration file has been created
-		if(output !== null && output === '')
+		if (output !== null && output === '')
 		{
 			// Load the node configuration
 			await this.loadNodeConfig();
@@ -572,11 +574,11 @@ class NodeManager
 	private buildStdinCommand(passphrase: string|null = null, passphraseRepeat: number = 1, stdin: string[]|null = null): string[]|null
 	{
 		// If passphrase required, add it to the stdin
-		if(this.nodeConfig.backend === 'file' && passphrase !== null)
+		if (this.nodeConfig.backend === 'file' && passphrase !== null)
 		{
-			if(stdin === null)
+			if (stdin === null)
 				stdin = [];
-			for(let i = 0; i < passphraseRepeat; i++)
+			for (let i = 0; i < passphraseRepeat; i++)
 				stdin.push(passphrase);
 		}
 		// Return the stdin
@@ -586,12 +588,12 @@ class NodeManager
 	/**
 	 * Check if the passphrase is valid
 	 * @param passphrase string|null
-	 * @returns 
+	 * @returns boolean
 	 */
 	public isPassphraseValid(passphrase: string | null): boolean
 	{
 		// Return false if the passphrase is required but not provided
-		if(this.nodeConfig.backend === 'file' && (passphrase === null || passphrase?.trim().length === 0))
+		if (this.nodeConfig.backend === 'file' && (passphrase === null || passphrase?.trim().length === 0))
 			return false;
 		// Return true if the passphrase is valid
 		return true;
@@ -605,7 +607,7 @@ class NodeManager
 	public async walletUnlock(passphrase: string|null = null): Promise<boolean>
 	{
 		// If passphrase required and not provided
-		if(!this.isPassphraseValid(passphrase))
+		if (!this.isPassphraseValid(passphrase))
 		{
 			Logger.error('Passphrase is required to check if the wallet exists.');
 			return false;
@@ -617,7 +619,7 @@ class NodeManager
 		const output: string|null = await containerCommand(['process', 'keys', 'list'], stdin);
 		
 		// If an error occurred
-		if(output === null || !output.includes('Name'))
+		if (output === null || !output.includes('Name'))
 			return false;
 		
 		// Passphrase can unlock the wallet
@@ -632,7 +634,7 @@ class NodeManager
 	public async walletExists(passphrase: string|null = null): Promise<boolean|undefined>
 	{
 		// If passphrase required and not provided
-		if(!this.isPassphraseValid(passphrase))
+		if (!this.isPassphraseValid(passphrase))
 		{
 			Logger.error('Passphrase is required to check if the wallet exists.');
 			return false;
@@ -642,14 +644,14 @@ class NodeManager
 		let stdin: string[]|null = this.buildStdinCommand(passphrase);
 		
 		// If wallet name if empty
-		if(this.nodeConfig.wallet_name.trim().length === 0)
+		if (this.nodeConfig.wallet_name.trim().length === 0)
 			return undefined;
 		
 		// List all wallet keys
 		const output: string|null = await containerCommand(['process', 'keys', 'list'], stdin);
 		
 		// Check if the passphrase is incorrect
-		if(output === null || isPassphraseError(output))
+		if (output === null || isPassphraseError(output))
 			return undefined;
 		
 		// Return if the wallet exists
@@ -664,7 +666,7 @@ class NodeManager
 	public async walletRemove(passphrase: string|null = null): Promise<boolean|undefined>
 	{
 		// If passphrase required and not provided
-		if(!this.isPassphraseValid(passphrase))
+		if (!this.isPassphraseValid(passphrase))
 		{
 			Logger.error('Passphrase is required to remove the wallet.');
 			return false;
@@ -672,7 +674,7 @@ class NodeManager
 		
 		// Check if wallet does not exists or passphrase is invalid
 		const exists = await this.walletExists(passphrase);
-		if(!exists || exists === undefined)
+		if (!exists || exists === undefined)
 			return exists === undefined ? undefined : true;
 		
 		// Stdin for the command
@@ -682,11 +684,11 @@ class NodeManager
 		const output: string|null = await containerCommand(['process', 'keys', 'delete', this.nodeConfig.wallet_name], stdin);
 		
 		// Check if the passphrase is incorrect
-		if(output === null || isPassphraseError(output))
+		if (output === null || isPassphraseError(output))
 			return undefined;
 		
 		// If the wallet has been removed
-		if(output === '')
+		if (output === '')
 		{
 			// Reset the addresses
 			this.nodeConfig.walletPublicAddress = '';
@@ -706,7 +708,7 @@ class NodeManager
 	public async walletLoadAddresses(passphrase: string|null = null): Promise<boolean|undefined>
 	{
 		// If passphrase required and not provided
-		if(!this.isPassphraseValid(passphrase))
+		if (!this.isPassphraseValid(passphrase))
 		{
 			Logger.error('Passphrase is required to load the wallet addresses.');
 			return false;
@@ -714,9 +716,9 @@ class NodeManager
 		
 		// If wallet does not exist, return false
 		const exists = await this.walletExists(passphrase);
-		if(exists === undefined)
+		if (exists === undefined)
 			return undefined;
-		else if(!exists)
+		else if (!exists)
 		{
 			// Reset the addresses
 			this.nodeConfig.walletPublicAddress = '';
@@ -732,7 +734,7 @@ class NodeManager
 		const output: string|null = await containerCommand(['process', 'keys', 'show'], stdin);
 		
 		// Check if the passphrase is incorrect
-		if(output === null || isPassphraseError(output))
+		if (output === null || isPassphraseError(output))
 			return undefined;
 		
 		// Parse lines to find the wallet addresses
@@ -740,11 +742,12 @@ class NodeManager
 		for (let line of lines)
 		{
 			// Find the line containing the wallet name
-			if(line.includes(this.nodeConfig.wallet_name))
+			if (line.includes(this.nodeConfig.wallet_name))
 			{
 				// Split the line to extract the addresses
-				const parts = line.trim().split(/\s+/);
-				if(parts.length === 3)
+				const parts = line.trim()
+					.split(/\s+/);
+				if (parts.length === 3)
 				{
 					// Store the addresses
 					this.nodeConfig.walletNodeAddress = parts[1];
@@ -770,7 +773,7 @@ class NodeManager
 	public async walletCreate(passphrase: string|null = null): Promise<string[]|null|undefined>
 	{
 		// If passphrase required and not provided
-		if(!this.isPassphraseValid(passphrase))
+		if (!this.isPassphraseValid(passphrase))
 		{
 			Logger.error('Passphrase is required to create a new wallet.');
 			return null;
@@ -778,7 +781,7 @@ class NodeManager
 		
 		// Check if wallet exists, return error if it does
 		const exists = await this.walletExists(passphrase);
-		if(exists)
+		if (exists)
 			return exists === undefined ? undefined : null;
 		
 		// Stdin for the command
@@ -788,14 +791,14 @@ class NodeManager
 		const output: string|null = await containerCommand(['process', 'keys', 'add'], stdin);
 		
 		// Check if the passphrase is incorrect
-		if(output === null || isPassphraseError(output))
+		if (output === null || isPassphraseError(output))
 			return undefined;
 		
 		// Parse the output
 		const parsedOutput = this.parseKeysAddOutput(output);
 		
 		// If the node address and public address have been extracted
-		if(parsedOutput && parsedOutput.nodeAddress && parsedOutput.publicAddress && parsedOutput.mnemonicArray.length === 24)
+		if (parsedOutput && parsedOutput.nodeAddress && parsedOutput.publicAddress && parsedOutput.mnemonicArray.length === 24)
 		{
 			// Store the addresses
 			this.nodeConfig.walletNodeAddress = parsedOutput.nodeAddress as string;
@@ -817,7 +820,7 @@ class NodeManager
 	public async walletRecover(mnemonic: string|string[], passphrase: string|null = null): Promise<boolean|undefined>
 	{
 		// If passphrase required and not provided
-		if(!this.isPassphraseValid(passphrase))
+		if (!this.isPassphraseValid(passphrase))
 		{
 			Logger.error('Passphrase is required to recover the wallet.');
 			return false;
@@ -825,11 +828,11 @@ class NodeManager
 		
 		// Check if wallet exists, return error if it does
 		const exists = await this.walletExists(passphrase);
-		if(exists)
+		if (exists)
 			return exists === undefined ? undefined : false;
 		
 		// Convert string[] to string
-		if(Array.isArray(mnemonic))
+		if (Array.isArray(mnemonic))
 			mnemonic = mnemonic.join(' ');
 		
 		// Stdin for the command
@@ -839,13 +842,13 @@ class NodeManager
 		const output: string|null = await containerCommand(['process', 'keys', 'add', '--recover'], stdin);
 		
 		// Check if the passphrase is incorrect
-		if(output === null || isPassphraseError(output))
+		if (output === null || isPassphraseError(output))
 			return undefined;
 		
 		// Parse the output
 		const parsedOutput = this.parseKeysAddOutput(output);
 		// If the node address and public address have been extracted
-		if(parsedOutput && parsedOutput.nodeAddress && parsedOutput.publicAddress && parsedOutput.mnemonicArray.length === 24)
+		if (parsedOutput && parsedOutput.nodeAddress && parsedOutput.publicAddress && parsedOutput.mnemonicArray.length === 24)
 		{
 			// Store the addresses
 			this.nodeConfig.walletNodeAddress = parsedOutput.nodeAddress as string;
@@ -880,10 +883,13 @@ class NodeManager
 		
 		// Extract mnemonic phrase
 		const mnemonicMatch = output.match(mnemonicRegex);
-		const mnemonicArray = mnemonicMatch ? mnemonicMatch[0].trim().split(/\s+/) : [];
+		const mnemonicArray = mnemonicMatch
+			? mnemonicMatch[0].trim()
+				.split(/\s+/)
+			: [];
 		
 		// If the node address and public address have been extracted
-		if(nodeAddress && publicAddress && mnemonicArray.length === 24)
+		if (nodeAddress && publicAddress && mnemonicArray.length === 24)
 		{
 			// Return data
 			return {
@@ -899,7 +905,7 @@ class NodeManager
 	/**
 	 * Get wallet balance
 	 * @param publicAddress string|null
-	 * @returns 
+	 * @returns Promise<BalanceWallet>
 	 */
 	public async getWalletBalance(publicAddress: string|null = null): Promise<BalanceWallet>
 	{
@@ -913,21 +919,21 @@ class NodeManager
 		};
 		
 		// If address is empty, use the node address
-		if(publicAddress === null || publicAddress.trim().length === 0)
+		if (publicAddress === null || publicAddress.trim().length === 0)
 			publicAddress = this.nodeConfig.walletPublicAddress;
 		
 		// If address is still empty, return 0 balance
-		if(publicAddress === null || publicAddress.trim().length === 0)
+		if (publicAddress === null || publicAddress.trim().length === 0)
 			return walletBalance;
 		
 		// Try each API endpoint
-		for(const url of config.API_BALANCE)
+		for (const url of config.API_BALANCE)
 		{
 			try
 			{
 				// Get wallet balance
 				const response = await axios.get(`${url}${publicAddress}`, { timeout: 60000 });
-				if(response.data)
+				if (response.data)
 				{
 					apiResponse = response.data as BalancesResponse;
 					break;
@@ -937,14 +943,15 @@ class NodeManager
 					Logger.error(`API ${url} returned an empty response.`);
 				}
 			}
-			catch(error)
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			catch (_error)
 			{
 				Logger.error(`API ${url} is unreachable. Trying another API...`);
 			}
 		}
 		
 		// If the API response is invalid
-		if(!apiResponse)
+		if (!apiResponse)
 		{
 			Logger.error('Failed to retrieve wallet balance.');
 			return walletBalance;
@@ -952,7 +959,7 @@ class NodeManager
 		
 		// Find the DVPN balance
 		const dvpnObject = apiResponse.balances?.find((balance: any) => balance.denom === 'udvpn');
-		if(dvpnObject)
+		if (dvpnObject)
 		{
 			// Convert the balance (udvpn) to DVPN
 			walletBalance.amount = parseInt(dvpnObject.amount, 10) / 1000000;
@@ -1005,7 +1012,7 @@ class NodeManager
 			// Attempt to get the node status
 			const response = await axios.get(statusUrl, { timeout: 15000, httpsAgent });
 			// If the response is valid
-			if(response.status === 200 && response.data?.success === true)
+			if (response.status === 200 && response.data?.success === true)
 			{
 				// Extract the node status
 				const data = response.data.result;
@@ -1037,7 +1044,7 @@ class NodeManager
 			}
 			else
 			{
-				Logger.error("Failed to get the node status.");
+				Logger.error('Failed to get the node status.');
 			}
 		}
 		catch (error)
@@ -1057,7 +1064,7 @@ class NodeManager
 		const install = await checkInstallation();
 		
 		// Detect if the node is installed
-		if(install.image === false
+		if (install.image === false
 			|| install.containerExists === false
 			|| install.nodeConfig === false
 			|| install.vpnConfig === false
@@ -1066,7 +1073,7 @@ class NodeManager
 			return 'uninstalled';
 		
 		// Detect if the node is running
-		if(install.containerRunning)
+		if (install.containerRunning)
 			return 'running';
 		else
 			return 'stopped';
@@ -1091,12 +1098,12 @@ class NodeManager
 	{
 		this.nodeConfig.node_type = nodeType;
 		// Set the prices based on the node type
-		if(this.nodeConfig.node_type === 'datacenter')
+		if (this.nodeConfig.node_type === 'datacenter')
 		{
 			this.nodeConfig.gigabyte_prices = DATACENTER_GIGABYTE_PRICES;
 			this.nodeConfig.hourly_prices = DATACENTER_HOURLY_PRICES;
 		}
-		else if(this.nodeConfig.node_type === 'residential')
+		else if (this.nodeConfig.node_type === 'residential')
 		{
 			this.nodeConfig.gigabyte_prices = RESIDENTIAL_GIGABYTE_PRICES;
 			this.nodeConfig.hourly_prices = RESIDENTIAL_HOURLY_PRICES;

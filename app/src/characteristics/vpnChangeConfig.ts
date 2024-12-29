@@ -22,7 +22,7 @@ export class VpnChangeTypeCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(uuid: string) 
+	constructor(uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -32,9 +32,9 @@ export class VpnChangeTypeCharacteristic
 	/**
 	 * Create a new instance of VpnChangeTypeCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -50,18 +50,20 @@ export class VpnChangeTypeCharacteristic
 	 * @param callback (result: number, data: Buffer) => void
 	 * @returns void
 	 */
-	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
+	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		// Create the VPN configuration
 		vpnChangeType().then((statusVpn: boolean) =>
 		{
 			Logger.info(`VPN configuration file created: ${statusVpn}`);
 			callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from('0'));
+			return null;
 		})
-		.catch((error: any) =>
-		{
-			Logger.error(`Error while creating the VPN configuration: ${error}`);
-			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from('1'));
-		});
+			.catch ((error: any) =>
+			{
+				Logger.error(`Error while creating the VPN configuration: ${error}`);
+				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from('1'));
+				return null;
+			});
 	}
 }

@@ -39,7 +39,7 @@ export class SystemActionsCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(private uuid: string) 
+	constructor(private uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -49,9 +49,9 @@ export class SystemActionsCharacteristic
 	/**
 	 * Create a new instance of SystemActionsCharacteristic
 	 */
-	public create() 
+	public create()
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -71,22 +71,22 @@ export class SystemActionsCharacteristic
 	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		let response;
-		switch(this.actionStatus)
+		switch (this.actionStatus)
 		{
 			case SystemActionStatus.NOT_STARTED:
-				response = '0'; 
+				response = '0';
 				break;
 			case SystemActionStatus.IN_PROGRESS:
-				response = '1'; 
+				response = '1';
 				break;
 			case SystemActionStatus.COMPLETED:
-				response = '2'; 
+				response = '2';
 				break;
 			case SystemActionStatus.ERROR:
-				response = '-1'; 
+				response = '-1';
 				break;
 			default:
-				response = '0'; 
+				response = '0';
 				break;
 		}
 		
@@ -106,7 +106,7 @@ export class SystemActionsCharacteristic
 	{
 		const action = data.toString('utf-8').trim();
 		
-		if(this.actionStatus === SystemActionStatus.IN_PROGRESS)
+		if (this.actionStatus === SystemActionStatus.IN_PROGRESS)
 		{
 			Logger.error('System action already in progress');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
@@ -115,7 +115,7 @@ export class SystemActionsCharacteristic
 		
 		this.actionStatus = SystemActionStatus.IN_PROGRESS;
 		
-		if(action === 'update-system')
+		if (action === 'update-system')
 		{
 			Logger.info('Starting system update...');
 			updateSystem().then(() =>
@@ -123,15 +123,17 @@ export class SystemActionsCharacteristic
 				this.actionStatus = SystemActionStatus.COMPLETED;
 				Logger.info('System update completed successfully');
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+				return null;
 			})
-			.catch(error =>
-			{
-				this.actionStatus = SystemActionStatus.ERROR;
-				Logger.error(`Error updating system: ${error}`);
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			});
+				.catch ((error) =>
+				{
+					this.actionStatus = SystemActionStatus.ERROR;
+					Logger.error(`Error updating system: ${error}`);
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+					return null;
+				});
 		}
-		else if(action === 'update-sentinel')
+		else if (action === 'update-sentinel')
 		{
 			Logger.info('Starting Sentinel update...');
 			// Update Sentinel
@@ -140,15 +142,17 @@ export class SystemActionsCharacteristic
 				this.actionStatus = SystemActionStatus.COMPLETED;
 				Logger.info('Sentinel update completed successfully');
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+				return null;
 			})
-			.catch(error =>
-			{
-				this.actionStatus = SystemActionStatus.ERROR;
-				Logger.error(`Error updating Sentinel: ${error}`);
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			});
+				.catch ((error) =>
+				{
+					this.actionStatus = SystemActionStatus.ERROR;
+					Logger.error(`Error updating Sentinel: ${error}`);
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+					return null;
+				});
 		}
-		else if(action === 'reset')
+		else if (action === 'reset')
 		{
 			Logger.info('Starting system reset...');
 			resetSystem().then(() =>
@@ -157,18 +161,21 @@ export class SystemActionsCharacteristic
 				Logger.info('System reset completed successfully.');
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 				// Shutdown the application (Restart performed by systemd) in 1 second
-				setTimeout(() => {
+				setTimeout(() =>
+				{
 					process.exit(0);
 				}, 1000);
+				return null;
 			})
-			.catch(error =>
-			{
-				this.actionStatus = SystemActionStatus.ERROR;
-				Logger.error(`Error resetting system: ${error}`);
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			});
+				.catch ((error) =>
+				{
+					this.actionStatus = SystemActionStatus.ERROR;
+					Logger.error(`Error resetting system: ${error}`);
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+					return null;
+				});
 		}
-		else if(action === 'reboot')
+		else if (action === 'reboot')
 		{
 			// Send callback before rebooting the system
 			callback(this.Bleno.Characteristic.RESULT_SUCCESS);
@@ -177,15 +184,17 @@ export class SystemActionsCharacteristic
 			{
 				this.actionStatus = SystemActionStatus.COMPLETED;
 				Logger.info('System is rebooting...');
+				return null;
 			})
-			.catch(error =>
-			{
-				this.actionStatus = SystemActionStatus.ERROR;
-				Logger.error(`Error rebooting system: ${error}`);
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			});
+				.catch ((error) =>
+				{
+					this.actionStatus = SystemActionStatus.ERROR;
+					Logger.error(`Error rebooting system: ${error}`);
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+					return null;
+				});
 		}
-		else if(action === 'halt')
+		else if (action === 'halt')
 		{
 			// Send callback before shutting down the system
 			callback(this.Bleno.Characteristic.RESULT_SUCCESS);
@@ -194,13 +203,15 @@ export class SystemActionsCharacteristic
 			{
 				this.actionStatus = SystemActionStatus.COMPLETED;
 				Logger.info('System is shutting down...');
+				return null;
 			})
-			.catch(error =>
-			{
-				this.actionStatus = SystemActionStatus.ERROR;
-				Logger.error(`Error shutting down system: ${error}`);
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			});
+				.catch ((error) =>
+				{
+					this.actionStatus = SystemActionStatus.ERROR;
+					Logger.error(`Error shutting down system: ${error}`);
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+					return null;
+				});
 		}
 		else
 		{

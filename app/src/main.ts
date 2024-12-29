@@ -23,11 +23,13 @@ const __dirname = path.dirname(__filename);
 // Initialize Sentry
 initSentry();
 // Finish the transaction on exit
-process.on('exit', () => {
+process.on('exit', () =>
+{
 	Logger.info('Application exiting...');
 });
 // Handle uncaught exceptions
-process.on('SIGINT', () => {
+process.on('SIGINT', () =>
+{
 	Logger.info('Application exiting... (SIGINT)');
 	process.exit(0);
 });

@@ -114,7 +114,7 @@ export class NodeMnemonicCharacteristic
 		else
 		{
 			// Calculate the chunk size
-			const index = this.readIndex -1;
+			const index = this.readIndex - 1;
 			const chunkSize = Math.min(20, this.expectedLength - (index * 20));
 			// Create the chunk buffer
 			const chunk = Buffer.alloc(chunkSize);
@@ -176,7 +176,7 @@ export class NodeMnemonicCharacteristic
 			const mnemonicRegex = /^(\b\w+\b\s*){24}$/;
 			
 			// Check if the hash matches and mnemonic is valid
-			if(calculatedHash === hash && mnemonicRegex.test(mnemonic))
+			if (calculatedHash === hash && mnemonicRegex.test(mnemonic))
 			{
 				nodeManager.setMnemonic(mnemonic.split(' '));
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
@@ -184,7 +184,7 @@ export class NodeMnemonicCharacteristic
 			else
 			{
 				// If mnemonic is invalid
-				if(!mnemonicRegex.test(mnemonic))
+				if (!mnemonicRegex.test(mnemonic))
 					Logger.error('Mnemonic format is invalid');
 				else
 					Logger.error('Hash mismatch for received mnemonic');

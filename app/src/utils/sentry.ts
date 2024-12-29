@@ -1,6 +1,6 @@
-import * as Sentry from "@sentry/node";
-import { randomUUID } from "crypto";
-import config from "@utils/configuration";
+import * as Sentry from '@sentry/node';
+import { randomUUID } from 'crypto';
+import config from '@utils/configuration';
 
 // Sentry enabled flag
 let sentryEnabled = false;
@@ -14,9 +14,9 @@ const sessionId = randomUUID();
 export const initSentry = () =>
 {
 	// If the Sentry DSN is not defined
-	if(!config.SENTRY_DSN)
+	if (!config.SENTRY_DSN)
 	{
-		console.log("Sentry is disabled. No DSN provided.");
+		console.log('Sentry is disabled. No DSN provided.');
 		return;
 	}
 	
@@ -24,12 +24,12 @@ export const initSentry = () =>
 	sentryEnabled = true;
 	// Initialize Sentry
 	Sentry.init({
-		dsn: config.SENTRY_DSN || "https://<PUBLIC_KEY>@<HOST>/<PROJECT_ID>",
+		dsn: config.SENTRY_DSN || '',
 		// Configure performance tracing
 		tracesSampleRate: 1.0,
 	});
 	
-	console.log("Sentry initialized with session ID:", sessionId);
+	console.log('Sentry initialized with session ID:', sessionId);
 };
 
 /**
@@ -39,15 +39,16 @@ export const initSentry = () =>
  */
 export const captureException = (error: any) =>
 {
-	if(!sentryEnabled)
+	if (!sentryEnabled)
 		return;
 	
 	// Configure the scope for the message
-	Sentry.withScope((scope) => {
+	Sentry.withScope((scope) =>
+	{
 		// Identify the unique session
-		scope.setTag("session_id", sessionId);
+		scope.setTag('session_id', sessionId);
 		// Add device identifier
-		scope.setTag("device", config.BLE_CHARACTERISTIC_SEED || "unknown_device");
+		scope.setTag('device', config.BLE_CHARACTERISTIC_SEED || 'unknown_device');
 		// Capture the exception
 		Sentry.captureException(error);
 	});
@@ -59,19 +60,20 @@ export const captureException = (error: any) =>
  * @param level - The level of the message
  * @returns void
  */
-export const captureMessage = (message: string, level: Sentry.SeverityLevel = "info") =>
+export const captureMessage = (message: string, level: Sentry.SeverityLevel = 'info') =>
 {
-	if(!sentryEnabled)
+	if (!sentryEnabled)
 		return;
 	
 	// Configure the scope for the message
-	Sentry.withScope((scope) => {
+	Sentry.withScope((scope) =>
+	{
 		// Identify the unique session
 		scope.setTag('session_id', sessionId);
 		// Add device identifier
 		scope.setTag('device', config.BLE_CHARACTERISTIC_SEED || 'unknown_device');
 		// Capture the message with the specified level
-		if(level === 'error')
+		if (level === 'error')
 		{
 			// Capture the message as an error
 			Sentry.captureMessage(message, level);

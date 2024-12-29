@@ -25,7 +25,7 @@ export class NodeActionsCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(private uuid: string) 
+	constructor(private uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -35,9 +35,9 @@ export class NodeActionsCharacteristic
 	/**
 	 * Create a new instance of NodePortCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -60,7 +60,7 @@ export class NodeActionsCharacteristic
 		// Get the value from the buffer
 		const action = data.toString('utf-8').trim();
 		
-		if(action === 'start')
+		if (action === 'start')
 		{
 			Logger.info('Starting the container...');
 			// Start the container
@@ -68,14 +68,16 @@ export class NodeActionsCharacteristic
 			{
 				Logger.info('Container started successfully');
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+				return null;
 			})
-			.catch(error =>
-			{
-				Logger.error(`Error starting the container: ${error}`);
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			});
+				.catch ((error) =>
+				{
+					Logger.error(`Error starting the container: ${error}`);
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+					return null;
+				});
 		}
-		else if(action === 'stop')
+		else if (action === 'stop')
 		{
 			Logger.info('Stopping the container...');
 			// Stop the container
@@ -83,14 +85,16 @@ export class NodeActionsCharacteristic
 			{
 				Logger.info('Container stopped successfully');
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+				return null;
 			})
-			.catch(error =>
-			{
-				Logger.error(`Error stopping the container: ${error}`);
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			});
+				.catch ((error) =>
+				{
+					Logger.error(`Error stopping the container: ${error}`);
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+					return null;
+				});
 		}
-		else if(action === 'restart')
+		else if (action === 'restart')
 		{
 			Logger.info('Restarting the container...');
 			// Restart the container
@@ -98,14 +102,16 @@ export class NodeActionsCharacteristic
 			{
 				Logger.info('Container restarted successfully');
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+				return null;
 			})
-			.catch(error =>
-			{
-				Logger.error(`Error restarting the container: ${error}`);
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			});
+				.catch ((error) =>
+				{
+					Logger.error(`Error restarting the container: ${error}`);
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+					return null;
+				});
 		}
-		else if(action === 'remove')
+		else if (action === 'remove')
 		{
 			Logger.info('Removing the container...');
 			// Remove the container
@@ -113,12 +119,14 @@ export class NodeActionsCharacteristic
 			{
 				Logger.info('Container removed successfully');
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+				return null;
 			})
-			.catch(error =>
-			{
-				Logger.error(`Error removing the container: ${error}`);
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			});
+				.catch ((error) =>
+				{
+					Logger.error(`Error removing the container: ${error}`);
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+					return null;
+				});
 		}
 		else
 		{

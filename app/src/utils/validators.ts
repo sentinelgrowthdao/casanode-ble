@@ -27,7 +27,8 @@ export async function isValidDns(dnsName: string): Promise<boolean>
 		await dns.resolve(dnsName);
 		return true;
 	}
-	catch (error)
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	catch (_error)
 	{
 		return false;
 	}

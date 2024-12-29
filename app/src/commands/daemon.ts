@@ -77,7 +77,7 @@ export const daemonCommand = async () =>
 	}
 	catch (error: any)
 	{
-		Logger.error("An unexpected error occurred in daemon process.", error);
+		Logger.error('An unexpected error occurred in daemon process.', error);
 	}
 };
 
@@ -89,7 +89,7 @@ const startWebServer = async () =>
 {
 	try
 	{
-		Logger.info("Starting web server...");
+		Logger.info('Starting web server...');
 		
 		// Get the web server instance
 		const webServer = WebServer.getInstance();
@@ -98,11 +98,11 @@ const startWebServer = async () =>
 		// Start the web server
 		webServer.start();
 		
-		Logger.info("Web server started successfully.");
+		Logger.info('Web server started successfully.');
 	}
 	catch (error: any)
 	{
-		Logger.error("Failed to start the web server.", error);
+		Logger.error('Failed to start the web server.', error);
 	}
 };
 
@@ -124,7 +124,7 @@ const startBluetooth = async () =>
 		}
 		
 		// Check if the Bluetooth is disabled
-		if(config.BLE_ENABLED === 'false')
+		if (config.BLE_ENABLED === 'false')
 		{
 			Logger.info('Bluetooth is disabled. Exiting Bluetooth initialization.');
 			return;
@@ -213,10 +213,10 @@ const startBluetooth = async () =>
 			}
 		});
 		
-		Logger.info("Bluetooth initialized successfully.");
+		Logger.info('Bluetooth initialized successfully.');
 	}
 	catch (error: any)
 	{
-		Logger.error("Failed to initialize Bluetooth.", error);
+		Logger.error('Failed to initialize Bluetooth.', error);
 	}
-}
+};

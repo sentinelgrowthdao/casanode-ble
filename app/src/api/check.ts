@@ -6,8 +6,6 @@ import { nodeConfig } from '@utils/node';
 import { checkInstallation as checkNodeInstall, type InstallationCheck } from '@actions/index';
 import { PortCheckStatus } from '@constants/portCheckStatus';
 
-import nodeManager from '@utils/node';
-
 /**
  * GET /api/v1/check/installation
  * Returns the node installation status
@@ -50,11 +48,11 @@ export async function checkPort(req: Request, res: Response): Promise<void>
 	let portToCheck: number = 0;
 	
 	// Determine which port to check
-	if(requestedPort == 'node') 
+	if (requestedPort == 'node')
 	{
 		portToCheck = configData.node_port;
-	} 
-	else if(requestedPort == 'vpn') 
+	}
+	else if (requestedPort == 'vpn')
 	{
 		portToCheck = configData.vpn_port;
 	}
@@ -68,7 +66,7 @@ export async function checkPort(req: Request, res: Response): Promise<void>
 	}
 	
 	// If port is not set, return an error
-	if(portToCheck === 0)
+	if (portToCheck === 0)
 	{
 		res.status(400).json({
 			error: true,
@@ -94,7 +92,7 @@ export async function checkPort(req: Request, res: Response): Promise<void>
 		else
 			portCheckStatus = PortCheckStatus.CLOSED;
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		Logger.error(`Error while checking port: ${error}`);
 		portCheckStatus = PortCheckStatus.ERROR;

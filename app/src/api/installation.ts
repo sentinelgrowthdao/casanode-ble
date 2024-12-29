@@ -36,11 +36,11 @@ export async function installConfiguration(req: Request, res: Response): Promise
 		// Start generating the certificate
 		statusSummary.certificate = await certificateGenerate();
 		
-		Logger.info(`Configuration installation completed successfully`);
+		Logger.info('Configuration installation completed successfully');
 		// Return the status summary in a well-structured JSON response
 		res.json(statusSummary);
 	}
-	catch(error)
+	catch (error)
 	{
 		Logger.error(`Error during configuration installation: ${error}`);
 		// Return a structured error response
@@ -66,13 +66,13 @@ export async function dockerImage(req: Request, res: Response): Promise<void>
 		// Start the image pull process
 		const pullStatus = await imagePull();
 
-		Logger.info(`Docker image installation completed successfully`);
+		Logger.info('Docker image installation completed successfully');
 		// Return the status summary in a well-structured JSON response
 		res.json({
 			imagePull: pullStatus,
 		});
 	}
-	catch(error)
+	catch (error)
 	{
 		// Return a structured error response
 		Logger.error(`Error while installing Docker image: ${error}`);

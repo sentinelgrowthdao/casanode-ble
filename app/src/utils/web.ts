@@ -26,14 +26,14 @@ class WebServer
 	private constructor()
 	{
 		// If the WEB_LISTEN configuration is set
-		if(config.WEB_LISTEN && config.WEB_LISTEN.includes(':'))
+		if (config.WEB_LISTEN && config.WEB_LISTEN.includes(':'))
 		{
 			// Set the port and hostname from the configuration
 			this.webHostname = config.WEB_LISTEN.split(':')[0] || '0.0.0.0';
 			this.webPort = parseInt(config.WEB_LISTEN.split(':')[1]) || 8080;
 		}
 		// If the API_LISTEN configuration is set
-		if(config.API_LISTEN && config.API_LISTEN.includes(':'))
+		if (config.API_LISTEN && config.API_LISTEN.includes(':'))
 		{
 			// Set the port and hostname from the configuration
 			this.apiHostname = config.API_LISTEN.split(':')[0] || '0.0.0.0';
@@ -126,10 +126,11 @@ class WebServer
 	public start()
 	{
 		// Start the HTTP server (for the main route / on webPort)
-		http.createServer(this.app).listen(this.webPort, this.webHostname, () =>
-		{
-			Logger.info(`Web server running at http://${this.webHostname}:${this.webPort}`);
-		});
+		http.createServer(this.app)
+			.listen(this.webPort, this.webHostname, () =>
+			{
+				Logger.info(`Web server running at http://${this.webHostname}:${this.webPort}`);
+			});
 		
 		// SSL options for the HTTPS server
 		const sslOptions = {
@@ -138,10 +139,11 @@ class WebServer
 		};
 		
 		// Start the HTTPS server (for API and / on apiPort)
-		https.createServer(sslOptions, this.app).listen(this.apiPort, this.apiHostname, () =>
-		{
-			Logger.info(`API server running securely at https://${this.apiHostname}:${this.apiPort}`);
-		});
+		https.createServer(sslOptions, this.app)
+			.listen(this.apiPort, this.apiHostname, () =>
+			{
+				Logger.info(`API server running securely at https://${this.apiHostname}:${this.apiPort}`);
+			});
 	}
 }
 

@@ -10,13 +10,13 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
 	const token = authHeader && authHeader.split(' ')[1];
 	
 	// Check if token is provided
-	if(token == null)
+	if (token == null)
 	{
 		return res.status(401).json({ error: 'Token is required' });
 	}
 	
 	// Check against the token in the configuration
-	if(token !== config.API_AUTH)
+	if (token !== config.API_AUTH)
 	{
 		return res.status(403).json({ error: 'Invalid token' });
 	}

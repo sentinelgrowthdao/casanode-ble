@@ -14,7 +14,7 @@ export function redirectToHTTPS(req: Request, res: Response, next: NextFunction)
 	{
 		const hostname = req.hostname;
 		const apiPort = parseInt(config.API_LISTEN.split(':')[1]) || 8081;
-		
+
 		const redirectUrl = `https://${hostname}:${apiPort}${req.url}`;
 		console.log(`Redirecting API request from HTTP to HTTPS: ${redirectUrl}`);
 		return res.redirect(301, redirectUrl);

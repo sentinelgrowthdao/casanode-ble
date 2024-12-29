@@ -38,9 +38,9 @@ export class CheckPortCharacteristic
 	/**
 	 * Create a new instance of CheckPortCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -60,7 +60,7 @@ export class CheckPortCharacteristic
 	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		let response;
-		switch(this.portCheckStatus)
+		switch (this.portCheckStatus)
 		{
 			case PortCheckStatus.NOT_STARTED: response = '0'; break;
 			case PortCheckStatus.IN_PROGRESS: response = '1'; break;
@@ -88,15 +88,15 @@ export class CheckPortCharacteristic
 		let portToCheck: number;
 		
 		// Determine which port to check
-		if (requestedPort === 'node') 
+		if (requestedPort === 'node')
 		{
 			portToCheck = configData.node_port;
-		} 
-		else if (requestedPort === 'vpn') 
+		}
+		else if (requestedPort === 'vpn')
 		{
 			portToCheck = configData.vpn_port;
-		} 
-		else 
+		}
+		else
 		{
 			Logger.error('Invalid port type requested');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
@@ -104,7 +104,7 @@ export class CheckPortCharacteristic
 		}
 		
 		// Check if the port check is already in progress
-		if(this.portCheckStatus === PortCheckStatus.IN_PROGRESS)
+		if (this.portCheckStatus === PortCheckStatus.IN_PROGRESS)
 		{
 			Logger.error('Port check already in progress');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
@@ -122,19 +122,21 @@ export class CheckPortCharacteristic
 		
 		// Send the request to the API
 		axios.get(checkUrl, { timeout: 60000 })
-		.then((response) =>
-		{
-			Logger.info(`Port check response received`);
-			// Check the response
-			if (response.data?.error === false && response.data?.node?.success === true) 
-				this.portCheckStatus = PortCheckStatus.OPEN;
-			else 
-				this.portCheckStatus = PortCheckStatus.CLOSED;
-		})
-		.catch((error) =>
-		{
-			Logger.error(`Error while checking port: ${error}`);
-			this.portCheckStatus = PortCheckStatus.ERROR;
-		});
+			.then((response) =>
+			{
+				Logger.info('Port check response received');
+				// Check the response
+				if (response.data?.error === false && response.data?.node?.success === true)
+					this.portCheckStatus = PortCheckStatus.OPEN;
+				else
+					this.portCheckStatus = PortCheckStatus.CLOSED;
+				return null;
+			})
+			.catch ((error) =>
+			{
+				Logger.error(`Error while checking port: ${error}`);
+				this.portCheckStatus = PortCheckStatus.ERROR;
+				return null;
+			});
 	}
 }

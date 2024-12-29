@@ -28,7 +28,7 @@ webRouter.use('/assets', express.static(assetsDir));
 /**
  * Serve the index.html file
  */
-webRouter.get('/', async(req: Request, res: Response) =>
+webRouter.get('/', async (req: Request, res: Response) =>
 {
 	// Get node configuration
 	const nodeConfig = nodeManager.getConfig();
@@ -48,7 +48,7 @@ webRouter.get('/', async(req: Request, res: Response) =>
 	};
 	
 	// If bluetooth is available and enabled
-	if(await isBluetoothAvailable() && config.BLE_ENABLED !== 'false')
+	if (await isBluetoothAvailable() && config.BLE_ENABLED !== 'false')
 	{
 		qrData.bluetooth = {
 			uuid: config.BLE_UUID,
@@ -66,7 +66,7 @@ webRouter.get('/', async(req: Request, res: Response) =>
 	fs.readFile(htmlFilePath, 'utf8',(err, html) =>
 	{
 		// Send error if file could not be loaded
-		if(err)
+		if (err)
 		{
 			Logger.error('Error loading HTML file');
 			res.status(500).send('Error loading HTML file');

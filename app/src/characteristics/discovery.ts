@@ -21,7 +21,7 @@ export class DiscoveryCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(uuid: string) 
+	constructor(uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -31,9 +31,9 @@ export class DiscoveryCharacteristic
 	/**
 	 * Create a new instance of MonikerCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -49,7 +49,7 @@ export class DiscoveryCharacteristic
 	 * @param callback (result: number, data: Buffer) => void
 	 * @returns void
 	 */
-	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
+	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		// Get local IP address
 		const localIPAddress = getLocalIPAddress();

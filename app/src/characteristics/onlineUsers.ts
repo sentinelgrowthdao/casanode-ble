@@ -21,7 +21,7 @@ export class OnlineUsersCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(uuid: string) 
+	constructor(uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -31,9 +31,9 @@ export class OnlineUsersCharacteristic
 	/**
 	 * Create a new instance of OnlineUsersCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -49,19 +49,21 @@ export class OnlineUsersCharacteristic
 	 * @param callback (result: number, data: Buffer) => void
 	 * @returns void
 	 */
-	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
+	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		// Get the status of the node
 		nodeManager.getNodeStatus().then((data: NodeStatus|null) =>
 		{
 			// Return the value to the subscriber
 			callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(data?.peers.toString() || '0'));
+			return null;
 		})
-		.catch((error: any) =>
-		{
-			Logger.error(`Error while reading the node status: ${error}`);
-			callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from('0'));
-		});
+			.catch ((error: any) =>
+			{
+				Logger.error(`Error while reading the node status: ${error}`);
+				callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from('0'));
+				return null;
+			});
 		
 	}
 }

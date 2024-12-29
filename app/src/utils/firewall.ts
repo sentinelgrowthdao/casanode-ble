@@ -1,6 +1,6 @@
 
-import { Logger } from './logger';
 import ufw from 'node-ufw';
+import { Logger } from './logger';
 
 class FirewallManager
 {
@@ -25,8 +25,8 @@ class FirewallManager
 	}
 	
 	/**
-	 * Enable port 
-	 * @param port 
+	 * Enable port in firewall
+	 * @param port: number
 	 */
 	public async enable(port: number): Promise<boolean>
 	{
@@ -48,8 +48,8 @@ class FirewallManager
 	}
 	
 	/**
-	 * Delete port 
-	 * @param port 
+	 * Delete port from firewall
+	 * @param port: number
 	 */
 	public async delete(port: number): Promise<boolean>
 	{

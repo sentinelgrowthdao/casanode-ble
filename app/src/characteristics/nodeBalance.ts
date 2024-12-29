@@ -39,7 +39,7 @@ export class NodeBalanceCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(private uuid: string) 
+	constructor(private uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -49,9 +49,9 @@ export class NodeBalanceCharacteristic
 	/**
 	 * Create a new instance of NodeBalanceCharacteristic
 	 */
-	public create() 
+	public create()
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -71,7 +71,7 @@ export class NodeBalanceCharacteristic
 	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		let response;
-		switch(this.balanceStatus)
+		switch (this.balanceStatus)
 		{
 			case BalanceStatus.NOT_STARTED: response = '0'; break;
 			case BalanceStatus.IN_PROGRESS: response = '1'; break;
@@ -91,9 +91,9 @@ export class NodeBalanceCharacteristic
 	 * @param callback (result: number) => void
 	 * @returns void
 	 */
-	public onWriteRequest(data: Buffer, offset: number, withoutResponse: boolean, callback: (result: number) => void) 
+	public onWriteRequest(data: Buffer, offset: number, withoutResponse: boolean, callback: (result: number) => void)
 	{
-		if(this.balanceStatus === BalanceStatus.IN_PROGRESS)
+		if (this.balanceStatus === BalanceStatus.IN_PROGRESS)
 		{
 			Logger.error('Balance retrieval already in progress');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
@@ -115,18 +115,19 @@ export class NodeBalanceCharacteristic
 			return;
 		}
 		
-		walletBalance(publicAddress)
-		.then((balance) =>
+		walletBalance(publicAddress).then((balance) =>
 		{
 			this.balanceValue = `${balance.amount} ${balance.denom}`;
 			this.balanceStatus = BalanceStatus.COMPLETED;
 			Logger.info(`Wallet balance retrieved successfully: ${this.balanceValue}`);
+			return null;
 		})
-		.catch((error: any) =>
-		{
-			Logger.error(`Error while retrieving wallet balance: ${error}`);
-			this.balanceStatus = BalanceStatus.ERROR;
-			this.balanceValue = '0 DVPN';
-		});
+			.catch ((error: any) =>
+			{
+				Logger.error(`Error while retrieving wallet balance: ${error}`);
+				this.balanceStatus = BalanceStatus.ERROR;
+				this.balanceValue = '0 DVPN';
+				return null;
+			});
 	}
 }

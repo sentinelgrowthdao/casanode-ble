@@ -1,9 +1,9 @@
 import * as path from 'path';
 import fs from 'fs-extra';
 import forge from 'node-forge';
+import { getLocalIPAddress } from '@utils/network';
 import config from './configuration';
 import { Logger } from './logger';
-import { getLocalIPAddress } from '@utils/network';
 
 export interface CertificateInfo
 {
@@ -100,7 +100,7 @@ class CertificateManager
 			cert.publicKey = publicKey;
 			
 			// Check if CA certificate and key are provided
-			if(caCertPath && caKeyPath)
+			if (caCertPath && caKeyPath)
 			{
 				// CA certificate and key are provided
 				// Load the CA private key from the .pem file
@@ -118,10 +118,10 @@ class CertificateManager
 				
 				// Add extensions
 				cert.setExtensions([
-					{name: 'basicConstraints', cA: false},
-					{name: 'keyUsage', digitalSignature: true, keyEncipherment: true, dataEncipherment: true,},
-					{name: 'extKeyUsage', serverAuth: true, clientAuth: true,},
-					{name: 'subjectAltName', altNames: [{type: 7, ip: localIPAddress}]}
+					{ name: 'basicConstraints', cA: false },
+					{ name: 'keyUsage', digitalSignature: true, keyEncipherment: true, dataEncipherment: true, },
+					{ name: 'extKeyUsage', serverAuth: true, clientAuth: true, },
+					{ name: 'subjectAltName', altNames: [{ type: 7, ip: localIPAddress }] }
 				]);
 				
 				// Sign the server certificate with the CA's private key
@@ -137,7 +137,7 @@ class CertificateManager
 				const privateKeyPem = forge.pki.privateKeyToPem(privateKey);
 				await fs.writeFile(keyFilePath, privateKeyPem);
 				
-				Logger.info("Server certificate has been generated and signed by the CA.");
+				Logger.info('Server certificate has been generated and signed by the CA.');
 				return true;
 			}
 			// No CA provided, generate a self-signed certificate
@@ -148,10 +148,10 @@ class CertificateManager
 				
 				// Add extensions
 				cert.setExtensions([
-					{name: 'basicConstraints', cA: false},
-					{name: 'keyUsage', digitalSignature: true, keyEncipherment: true, dataEncipherment: true,},
-					{name: 'extKeyUsage', serverAuth: true, clientAuth: true,},
-					{name: 'subjectAltName', altNames: [{type: 7, ip: localIPAddress}]}
+					{ name: 'basicConstraints', cA: false },
+					{ name: 'keyUsage', digitalSignature: true, keyEncipherment: true, dataEncipherment: true, },
+					{ name: 'extKeyUsage', serverAuth: true, clientAuth: true, },
+					{ name: 'subjectAltName', altNames: [{ type: 7, ip: localIPAddress }] }
 				]);
 				
 				// Sign the certificate with its own private key
@@ -167,7 +167,7 @@ class CertificateManager
 				const privateKeyPem = forge.pki.privateKeyToPem(privateKey);
 				await fs.writeFile(keyFilePath, privateKeyPem);
 				
-				Logger.info("Self-signed certificate and key have been generated.");
+				Logger.info('Self-signed certificate and key have been generated.');
 				return true;
 			}
 		}
@@ -196,7 +196,7 @@ class CertificateManager
 			// Check if the certificate file do not exists
 			if (!fs.pathExistsSync(certFilePath))
 			{
-				Logger.info("Certificate or key file not found.");
+				Logger.info('Certificate or key file not found.');
 				return null;
 			}
 			
@@ -244,7 +244,7 @@ class CertificateManager
 			await fs.remove(certFilePath);
 			await fs.remove(keyFilePath);
 			
-			Logger.info("Certificate files have been removed.");
+			Logger.info('Certificate files have been removed.');
 			return true;
 		}
 		catch (error)

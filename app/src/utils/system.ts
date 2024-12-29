@@ -1,7 +1,6 @@
 import { exec } from 'child_process';
 import * as os from 'os';
 import * as fs from 'fs/promises';
-
 import { Logger } from '@utils/logger';
 import { imagePull, containerStop, imagesRemove, containerRemove } from '@utils/docker';
 import nodeManager from '@utils/node';
@@ -33,7 +32,7 @@ export async function updateSystem(): Promise<void>
 			}
 			
 			// Execute system update commands here
-			exec('sudo apt update && sudo apt upgrade -y', (error, stdout, stderr) =>
+			exec('sudo apt update && sudo apt upgrade -y', (error, _stdout, _stderr) =>
 			{
 				if (error)
 				{
@@ -67,7 +66,7 @@ export async function updateSentinel(): Promise<void>
 		{
 			refreshNetworkConfiguration();
 			// Execute Sentinel update commands here
-			exec('sudo apt update && sudo apt upgrade -y', (error, stdout, stderr) =>
+			exec('sudo apt update && sudo apt upgrade -y', (error, _stdout, _stderr) =>
 			{
 				if (error)
 				{
@@ -186,7 +185,7 @@ export async function shutdownSystem(): Promise<void>
 {
 	return new Promise((resolve, reject) =>
 	{
-		exec('sudo shutdown -h now', (error, stdout, stderr) =>
+		exec('sudo shutdown -h now', (error, _stdout, _stderr) =>
 		{
 			if (error)
 				reject(`Error shutting down system: ${error.message}`);
@@ -204,7 +203,7 @@ export async function rebootSystem(): Promise<void>
 {
 	return new Promise((resolve, reject) =>
 	{
-		exec('sudo shutdown -r now', (error, stdout, stderr) =>
+		exec('sudo shutdown -r now', (error, _stdout, _stderr) =>
 		{
 			if (error)
 				reject(`Error rebooting system: ${error.message}`);

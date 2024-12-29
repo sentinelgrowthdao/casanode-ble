@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { authenticateToken } from './authMiddleware';
 import { getStatus } from '@api/status';
 import { checkInstallation, checkPort } from '@api/check';
 import {
@@ -35,6 +34,7 @@ import {
 	walletRestore,
 	walletRemove,
 } from '@api/wallet';
+import { authenticateToken } from './authMiddleware';
 
 // Create a new router
 const apiRouter = Router();

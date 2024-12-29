@@ -21,7 +21,7 @@ export class PublicAddressCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(private uuid: string) 
+	constructor(private uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -31,9 +31,9 @@ export class PublicAddressCharacteristic
 	/**
 	 * Create a new instance of PublicAddressCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -49,15 +49,15 @@ export class PublicAddressCharacteristic
 	 * @param callback (result: number, data: Buffer) => void
 	 * @returns void
 	 */
-	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
+	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		// Get the value from the configuration
 		const address = nodeManager.getConfig().walletPublicAddress;
 		// If address is empty
-		if(address === '')
+		if (address === '')
 		{
 			// If the passphrase is unavailable
-			if(!nodeManager.passphraseAvailable())
+			if (!nodeManager.passphraseAvailable())
 			{
 				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from(''));
 				return true;
@@ -72,10 +72,14 @@ export class PublicAddressCharacteristic
 				const address = nodeManager.getConfig().walletPublicAddress;
 				// Return the value to the subscriber
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(address));
-			}).catch((error: any) => {
-				Logger.error(`Error while loading the wallet addresses: ${error}`);
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from(''));
-			});
+				return null;
+			})
+				.catch ((error: any) =>
+				{
+					Logger.error(`Error while loading the wallet addresses: ${error}`);
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR, Buffer.from(''));
+					return null;
+				});
 		}
 		else
 		{

@@ -21,7 +21,7 @@ export class WalletActionsCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(uuid: string) 
+	constructor(uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -31,9 +31,9 @@ export class WalletActionsCharacteristic
 	/**
 	 * Create a new instance of NodeLocationCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -57,7 +57,7 @@ export class WalletActionsCharacteristic
 		const value = data.toString('utf-8').trim();
 		
 		// Check if the value is invalid
-		if (value !== 'create' && value !== 'remove' && value !== 'restore') 
+		if (value !== 'create' && value !== 'remove' && value !== 'restore')
 		{
 			Logger.error('Invalid value for wallet action');
 			callback(this.Bleno.Characteristic.RESULT_INVALID_ATTRIBUTE_LENGTH);
@@ -68,13 +68,13 @@ export class WalletActionsCharacteristic
 		const passphrase = nodeManager.getConfig().walletPassphrase;
 		
 		// If request is to create a new wallet
-		if (value === 'create') 
+		if (value === 'create')
 		{
 			// Check if the wallet already exists
 			walletExists(passphrase).then((exists) =>
 			{
 				// Skip if wallet already exists
-				if(exists) 
+				if (exists)
 				{
 					Logger.error('Wallet already exists');
 					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
@@ -85,11 +85,11 @@ export class WalletActionsCharacteristic
 					walletCreate(passphrase).then((mnemonic: string[] | null | undefined) =>
 					{
 						// If an error occurred while creating the wallet
-						if(typeof mnemonic === 'undefined' || mnemonic === null)
+						if (typeof mnemonic === 'undefined' || mnemonic === null)
 						{
 							Logger.error('Error creating wallet');
 							callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-							return;
+							return null;
 						}
 						
 						// Set the mnemonic in the configuration
@@ -97,16 +97,21 @@ export class WalletActionsCharacteristic
 						
 						Logger.info('Wallet created successfully');
 						callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-					}).catch((error) => {
+						return null;
+					}).catch ((_error) =>
+					{
 						Logger.error('Error creating wallet');
 						callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
 					});
 				}
+				
+				return null;
 			})
-			.catch((error) => {
-				Logger.error('Error checking wallet existence');
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			});
+				.catch ((_error) =>
+				{
+					Logger.error('Error checking wallet existence');
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+				});
 		}
 		// If request is to remove the wallet
 		else if (value === 'remove')
@@ -115,38 +120,44 @@ export class WalletActionsCharacteristic
 			walletExists(passphrase).then((exists) =>
 			{
 				// If wallet exists
-				if(exists) 
+				if (exists)
 				{
 					// Remove the wallet
 					walletRemove(passphrase).then(() =>
 					{
 						Logger.info('Wallet removed successfully');
 						callback(this.Bleno.Characteristic.RESULT_SUCCESS);
+						return null;
 					})
-					.catch((error) => {
-						Logger.error('Error removing wallet');
-						callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-					});
+						.catch ((_error) =>
+						{
+							Logger.error('Error removing wallet');
+							callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+							return null;
+						});
 				}
 				else
 				{
 					Logger.error('Wallet does not exist');
 					callback(this.Bleno.Characteristic.RESULT_SUCCESS);
 				}
+				
+				return null;
 			})
-			.catch((error) => {
-				Logger.error('Error checking wallet existence');
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			});
+				.catch ((_error) =>
+				{
+					Logger.error('Error checking wallet existence');
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+				});
 		}
 		// If request is to recover an existing wallet
-		else if (value === 'restore') 
+		else if (value === 'restore')
 		{
 			// Check if the wallet already exists
 			walletExists(passphrase).then((exists) =>
 			{
 				// Skip if wallet already exists
-				if(exists) 
+				if (exists)
 				{
 					Logger.error('Wallet already exists');
 					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
@@ -157,28 +168,35 @@ export class WalletActionsCharacteristic
 					const mnemonic = nodeManager.getConfig().walletMnemonic;
 					
 					// Recover the wallet
-					walletRecover(mnemonic, passphrase).then((recover: boolean | undefined) =>
+					walletRecover(mnemonic, passphrase).then((_recover: boolean | undefined) =>
 					{
 						// If an error occurred while creating the wallet
-						if(typeof mnemonic === 'undefined')
+						if (typeof mnemonic === 'undefined')
 						{
 							Logger.error('Error recovering wallet');
 							callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-							return;
+							return null;
 						}
 						
 						Logger.info('Wallet recovered successfully');
 						callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-					}).catch((error) => {
+						return null;
+					}).catch ((_error) =>
+					{
 						Logger.error('Error creating wallet');
 						callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+						return null;
 					});
 				}
+				
+				return null;
 			})
-			.catch((error) => {
-				Logger.error('Error checking wallet existence');
-				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-			});
+				.catch ((_error) =>
+				{
+					Logger.error('Error checking wallet existence');
+					callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+					return null;
+				});
 		}
 		
 	}

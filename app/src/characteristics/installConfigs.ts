@@ -43,7 +43,7 @@ export class InstallConfigsCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(uuid: string) 
+	constructor(uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -53,9 +53,9 @@ export class InstallConfigsCharacteristic
 	/**
 	 * Create a new instance of InstallConfigsCharacteristic
 	 */
-	public create() 
+	public create()
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -75,16 +75,16 @@ export class InstallConfigsCharacteristic
 	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		let response;
-		switch(this.configStatus)
+		switch (this.configStatus)
 		{
 			case ConfigStatus.NOT_STARTED:
-				response = '0'; 
+				response = '0';
 				break;
 			case ConfigStatus.IN_PROGRESS:
-				response = '1'; 
+				response = '1';
 				break;
 			case ConfigStatus.ERROR:
-				response = '-1'; 
+				response = '-1';
 				break;
 			case ConfigStatus.COMPLETED:
 				response = this.statusSummary;
@@ -103,9 +103,9 @@ export class InstallConfigsCharacteristic
 	 * @param callback (result: number) => void
 	 * @returns void
 	 */
-	public onWriteRequest(data: Buffer, offset: number, withoutResponse: boolean, callback: (result: number) => void) 
+	public onWriteRequest(data: Buffer, offset: number, withoutResponse: boolean, callback: (result: number) => void)
 	{
-		if(this.configStatus === ConfigStatus.IN_PROGRESS)
+		if (this.configStatus === ConfigStatus.IN_PROGRESS)
 		{
 			Logger.error('Configuration installation already in progress');
 			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
@@ -125,23 +125,25 @@ export class InstallConfigsCharacteristic
 			// Start creating the VPN configuration
 			return createVpnConfig();
 		})
-		.then((statusVpn: boolean) =>
-		{
-			this.statusSummary += statusVpn ? '1' : '0';
-			
-			// Start generating the certificate
-			return certificateGenerate();
-		})
-		.then((certSuccess: boolean) =>
-		{
-			this.statusSummary += certSuccess ? '1' : '0';
-			this.configStatus = ConfigStatus.COMPLETED;
-			Logger.info(`Configuration installation completed with status: ${this.statusSummary}`);
-		})
-		.catch((error: any) =>
-		{
-			this.configStatus = ConfigStatus.ERROR;
-			Logger.error(`Error during configuration installation: ${error}`);
-		});
+			.then((statusVpn: boolean) =>
+			{
+				this.statusSummary += statusVpn ? '1' : '0';
+				
+				// Start generating the certificate
+				return certificateGenerate();
+			})
+			.then((certSuccess: boolean) =>
+			{
+				this.statusSummary += certSuccess ? '1' : '0';
+				this.configStatus = ConfigStatus.COMPLETED;
+				Logger.info(`Configuration installation completed with status: ${this.statusSummary}`);
+				return null;
+			})
+			.catch ((error: any) =>
+			{
+				this.configStatus = ConfigStatus.ERROR;
+				Logger.error(`Error during configuration installation: ${error}`);
+				return null;
+			});
 	}
 }

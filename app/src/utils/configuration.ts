@@ -47,30 +47,30 @@ class ConfigurationLoader
 	
 	// Default configuration
 	private defaultConfig: AppConfigData =
-	{
-		BLENO_DEVICE_NAME: 'Casanode',
-		DOCKER_IMAGE_NAME: 'wajatmaka/sentinel-aarch64-alpine:v0.7.1',
-		DOCKER_CONTAINER_NAME: 'sentinel-dvpn-node',
-		CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/opt/casanode/.sentinelnode',
-		LOG_DIR: '/var/log/casanode',
-		DOCKER_SOCKET: this.getDockerDefaultSocketPath(),
-		BLE_ENABLED: true,
-		BLE_UUID: '00001820-0000-1000-8000-00805f9b34fb',
-		BLE_DISCOVERY_UUID: '0000a2d4-0000-1000-8000-00805f9b34fb',
-		BLE_CHARACTERISTIC_SEED: uuidv4(),
-		WEB_LISTEN: '0.0.0.0:8080',
-		API_LISTEN: '0.0.0.0:8081',
-		API_AUTH: this.generateAuthToken(),
-		API_BALANCE: [
-			"https://api-sentinel.busurnode.com/cosmos/bank/v1beta1/balances/",
-			"https://api.sentinel.quokkastake.io/cosmos/bank/v1beta1/balances/",
-			"https://wapi.foxinodes.net/api/v1/sentinel/address/"
-		],
-		FOXINODES_API_CHECK_IP: "https://wapi.foxinodes.net/api/v1/sentinel/check-ip",
-		FOXINODES_API_DVPN_CONFIG: "https://wapi.foxinodes.net/api/v1/sentinel/dvpn-node/configuration",
-		FOXINODES_API_CHECK_PORT: "https://wapi.foxinodes.net/api/v1/sentinel/dvpn-node/check-port/",
-		SENTRY_DSN: '',
-	};
+		{
+			BLENO_DEVICE_NAME: 'Casanode',
+			DOCKER_IMAGE_NAME: 'wajatmaka/sentinel-aarch64-alpine:v0.7.1',
+			DOCKER_CONTAINER_NAME: 'sentinel-dvpn-node',
+			CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/opt/casanode/.sentinelnode',
+			LOG_DIR: '/var/log/casanode',
+			DOCKER_SOCKET: this.getDockerDefaultSocketPath(),
+			BLE_ENABLED: true,
+			BLE_UUID: '00001820-0000-1000-8000-00805f9b34fb',
+			BLE_DISCOVERY_UUID: '0000a2d4-0000-1000-8000-00805f9b34fb',
+			BLE_CHARACTERISTIC_SEED: uuidv4(),
+			WEB_LISTEN: '0.0.0.0:8080',
+			API_LISTEN: '0.0.0.0:8081',
+			API_AUTH: this.generateAuthToken(),
+			API_BALANCE: [
+				'https://api-sentinel.busurnode.com/cosmos/bank/v1beta1/balances/',
+				'https://api.sentinel.quokkastake.io/cosmos/bank/v1beta1/balances/',
+				'https://wapi.foxinodes.net/api/v1/sentinel/address/'
+			],
+			FOXINODES_API_CHECK_IP: 'https://wapi.foxinodes.net/api/v1/sentinel/check-ip',
+			FOXINODES_API_DVPN_CONFIG: 'https://wapi.foxinodes.net/api/v1/sentinel/dvpn-node/configuration',
+			FOXINODES_API_CHECK_PORT: 'https://wapi.foxinodes.net/api/v1/sentinel/dvpn-node/check-port/',
+			SENTRY_DSN: '',
+		};
 	
 	private constructor()
 	{
@@ -85,7 +85,7 @@ class ConfigurationLoader
 	public static getInstance(): ConfigurationLoader
 	{
 		// Create instance if it does not exist
-		if(!ConfigurationLoader.instance)
+		if (!ConfigurationLoader.instance)
 			ConfigurationLoader.instance = new ConfigurationLoader();
 		// Return instance
 		return ConfigurationLoader.instance;
@@ -122,7 +122,7 @@ class ConfigurationLoader
 		const filteredConfig = Object.keys(mergedConfig).reduce((acc, key) =>
 		{
 			const value = mergedConfig[key];
-			if(value !== undefined)
+			if (value !== undefined)
 			{
 				acc[key] = value;
 			}
@@ -140,7 +140,7 @@ class ConfigurationLoader
 	{
 		try
 		{
-			if(fs.existsSync(this.configFile))
+			if (fs.existsSync(this.configFile))
 			{
 				// Parse configuration file
 				const config: ConfigFileData = dotenv.parse(fs.readFileSync(this.configFile));
@@ -152,17 +152,16 @@ class ConfigurationLoader
 					let value = config[key];
 					
 					// Skip keys with empty values
-					if (!value.trim()) {
+					if (!value.trim())
 						continue;
-					}
 					
 					// Check if value is an array
-					if(value.startsWith('[') && value.endsWith(']'))
+					if (value.startsWith('[') && value.endsWith(']'))
 					{
 						parsedConfig[key] = value
 							.slice(1, -1)
 							.split(',')
-							.map(item => item.trim());
+							.map((item) => item.trim());
 					}
 					else
 					{
@@ -177,7 +176,7 @@ class ConfigurationLoader
 				return {};
 			}
 		}
-		catch(error)
+		catch (error)
 		{
 			Logger.error(`An error occurred while loading configuration file: ${error}`);
 			return {};
@@ -195,7 +194,7 @@ class ConfigurationLoader
 			const configData = Object.entries(this.config)
 				.map(([key, value]) =>
 				{
-					if(Array.isArray(value))
+					if (Array.isArray(value))
 					{
 						const arrayValues = value.join(',');
 						return `${key}=[${arrayValues}]`;
@@ -209,7 +208,7 @@ class ConfigurationLoader
 			fs.writeFileSync(this.configFile, configData);
 			return true;
 		}
-		catch(error)
+		catch (error)
 		{
 			Logger.error(`An error occurred while saving configuration file: ${error}`);
 			return false;
@@ -224,14 +223,14 @@ class ConfigurationLoader
 	public async getRemoteAddress(): Promise<RemoteAddressData>
 	{
 		// Initialize default values
-		let nodeIP = "0.0.0.0";
-		let nodeCountry = "NA";
+		let nodeIP = '0.0.0.0';
+		let nodeCountry = 'NA';
 		
 		try
 		{
 			// Attempt to get the IP and country from the primary API
 			const response = await axios.get(this.config.FOXINODES_API_CHECK_IP, { timeout: 60000 });
-			if(response.status === 200)
+			if (response.status === 200)
 			{
 				const data = response.data;
 				nodeIP = data.ip || nodeIP;
@@ -239,7 +238,7 @@ class ConfigurationLoader
 			}
 			else
 			{
-				Logger.error("Failed to fetch IP from primary API.");
+				Logger.error('Failed to fetch IP from primary API.');
 			}
 		}
 		catch (error)
@@ -248,15 +247,15 @@ class ConfigurationLoader
 			try
 			{
 				// Fallback to checkip.dyndns.org
-				const response = await axios.get("http://checkip.dyndns.org/", { timeout: 60000 });
-				if(response.status === 200)
+				const response = await axios.get('http://checkip.dyndns.org/', { timeout: 60000 });
+				if (response.status === 200)
 				{
 					const value = response.data;
-					nodeIP = value.split("Current IP Address: ")[1].split("<")[0];
+					nodeIP = value.split('Current IP Address: ')[1].split('<')[0];
 				}
 				else
 				{
-					Logger.error("Failed to fetch IP from fallback method.");
+					Logger.error('Failed to fetch IP from fallback method.');
 				}
 			}
 			catch (fallbackError)
@@ -282,11 +281,11 @@ class ConfigurationLoader
 		{
 			// Fetch the configuration from the API
 			const response = await axios.get(this.config.FOXINODES_API_DVPN_CONFIG, { timeout: 60000 });
-			if(response.status === 200)
+			if (response.status === 200)
 			{
 				const data = response.data;
 				// Check if the data is valid
-				if(data && data.error === false)
+				if (data && data.error === false)
 				{
 					// Extract the configuration data
 					const chainId = data.chain_id || this.config.CHAIN_ID;
@@ -314,17 +313,17 @@ class ConfigurationLoader
 					};
 					
 					// Log
-					Logger.info("Network configuration has been refreshed.");
+					Logger.info('Network configuration has been refreshed.');
 					return true;
 				}
 				else
 				{
-					Logger.error("Invalid network configuration data.");
+					Logger.error('Invalid network configuration data.');
 				}
 			}
 			else
 			{
-				Logger.error("Failed to fetch network configuration.");
+				Logger.error('Failed to fetch network configuration.');
 			}
 		}
 		catch (err)

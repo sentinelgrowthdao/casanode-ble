@@ -1,7 +1,4 @@
 import { createRequire } from 'module';
-
-import { Logger } from '@utils/logger';
-import nodeManager from '@utils/node';
 import certificateManager from '@utils/certificate';
 
 export class CertExpirityCharacteristic
@@ -21,7 +18,7 @@ export class CertExpirityCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(uuid: string) 
+	constructor(uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -31,9 +28,9 @@ export class CertExpirityCharacteristic
 	/**
 	 * Create a new instance of CertExpirityCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -49,7 +46,7 @@ export class CertExpirityCharacteristic
 	 * @param callback (result: number, data: Buffer) => void
 	 * @returns void
 	 */
-	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
+	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		// Get the value from the certificate
 		const info = certificateManager.info();

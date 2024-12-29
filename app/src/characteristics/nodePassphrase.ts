@@ -21,7 +21,7 @@ export class NodePassphraseCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(private uuid: string) 
+	constructor(private uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -31,9 +31,9 @@ export class NodePassphraseCharacteristic
 	/**
 	 * Create a new instance of NodePassphraseCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -50,7 +50,7 @@ export class NodePassphraseCharacteristic
 	 * @param callback (result: number, data: Buffer) => void
 	 * @returns void
 	 */
-	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
+	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		// Get the value from the configuration
 		const value = nodeManager.passphraseAvailable() ? 'true' : 'false';
@@ -69,7 +69,7 @@ export class NodePassphraseCharacteristic
 	public onWriteRequest(data: Buffer, offset: number, withoutResponse: boolean, callback: (result: number) => void)
 	{
 		// If passphrase is not required
-		if(nodeManager.passphraseRequired() === false)
+		if (nodeManager.passphraseRequired() === false)
 		{
 			Logger.error('Passphrase is not required, but it was sent via Bluetooth.');
 			callback(this.Bleno.Characteristic.RESULT_SUCCESS);
@@ -103,12 +103,15 @@ export class NodePassphraseCharacteristic
 				
 				// Notify the subscriber if the value is set
 				callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-				Logger.info(`Parameter "passphrase" updated via Bluetooth.`);
+				Logger.info('Parameter "passphrase" updated via Bluetooth.');
+				return null;
 			}
-		}).catch((error) =>
-		{
-			Logger.error(`Error in onWriteRequest: ${error.message}`);
-			callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
-		});
+		})
+			.catch ((error) =>
+			{
+				Logger.error(`Error in onWriteRequest: ${error.message}`);
+				callback(this.Bleno.Characteristic.RESULT_UNLIKELY_ERROR);
+				return null;
+			});
 	}
 }

@@ -21,12 +21,12 @@ export async function certificateRenew(req: Request, res: Response): Promise<voi
 		const certRenew : boolean = await nodeCertificateGenerate();
 		
 		// Return the certificate renewal status
-		Logger.info(`Certificate renewal completed successfully`);
+		Logger.info('Certificate renewal completed successfully');
 		res.json({
 			renew: certRenew,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error during configuration installation: ${error}`);
@@ -51,12 +51,12 @@ export async function certificateRemove(req: Request, res: Response): Promise<vo
 		const certRemove : boolean = await nodeCertificateRemove();
 		
 		// Return the certificate removal status
-		Logger.info(`Certificate removal completed successfully`);
+		Logger.info('Certificate removal completed successfully');
 		res.json({
 			remove: certRemove,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error during certificate removal: ${error}`);

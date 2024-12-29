@@ -1,7 +1,7 @@
 import { createRequire } from 'module';
 
 import { Logger } from '@utils/logger';
-import nodeManager, { NodeConfigData } from '@utils/node';
+import nodeManager from '@utils/node';
 
 export class NodeConfigCharacteristic
 {
@@ -20,7 +20,7 @@ export class NodeConfigCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(uuid: string) 
+	constructor(uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -30,9 +30,9 @@ export class NodeConfigCharacteristic
 	/**
 	 * Create a new instance of NodeConfigCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -56,7 +56,7 @@ export class NodeConfigCharacteristic
 		const value = data.toString('utf-8').trim();
 		
 		// Check if the value is invalid
-		if (value !== 'apply') 
+		if (value !== 'apply')
 		{
 			Logger.error('Invalid value received via Bluetooth for updating the node configuration.');
 			callback(this.Bleno.Characteristic.RESULT_INVALID_ATTRIBUTE_LENGTH);
@@ -68,6 +68,6 @@ export class NodeConfigCharacteristic
 		
 		// Notify the subscriber if the value is set
 		callback(this.Bleno.Characteristic.RESULT_SUCCESS);
-		Logger.info(`Node configuration updated.`);
+		Logger.info('Node configuration updated.');
 	}
 }

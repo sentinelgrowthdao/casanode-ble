@@ -21,7 +21,7 @@ export class BandwidthSpeedCharacteristic
 	/**
 	 * Create a new instance of Characteristic
 	 */
-	constructor(uuid: string) 
+	constructor(uuid: string)
 	{
 		const require = createRequire(import.meta.url);
 		this.Bleno = require('bleno');
@@ -31,9 +31,9 @@ export class BandwidthSpeedCharacteristic
 	/**
 	 * Create a new instance of BandwidthSpeedCharacteristic
 	 */
-	public create()//: typeof Bleno.Characteristic 
+	public create()//: typeof Bleno.Characteristic
 	{
-		if(this.Bleno === undefined)
+		if (this.Bleno === undefined)
 			return null;
 		
 		return new this.Bleno.Characteristic({
@@ -49,7 +49,7 @@ export class BandwidthSpeedCharacteristic
 	 * @param callback (result: number, data: Buffer) => void
 	 * @returns void
 	 */
-	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void) 
+	public onReadRequest(offset: number, callback: (result: number, data: Buffer) => void)
 	{
 		let info = {
 			d: -1,
@@ -64,12 +64,14 @@ export class BandwidthSpeedCharacteristic
 			info.u = data?.bandwidth?.upload ? data.bandwidth.upload : -1;
 			// Return the value to the subscriber
 			callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(JSON.stringify(info)));
+			return null;
 		})
-		.catch((error: any) =>
-		{
-			Logger.error(`Error while reading the node status: ${error}`);
-			callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(JSON.stringify(info)));
-		});
+			.catch ((error: any) =>
+			{
+				Logger.error(`Error while reading the node status: ${error}`);
+				callback(this.Bleno.Characteristic.RESULT_SUCCESS, Buffer.from(JSON.stringify(info)));
+				return null;
+			});
 		
 	}
 }

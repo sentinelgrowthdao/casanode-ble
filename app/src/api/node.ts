@@ -54,18 +54,16 @@ export async function nodeConfigurationSetValues(req: Request, res: Response): P
 {
 	try
 	{
-		// Get the node configuration
-		const nodeConfig = nodeManager.getConfig();
 		// Indicate if vpnType was changed
 		let vpnTypeChanged = false;
 		
 		// Validate and set 'moniker'
-		if(req.body.moniker)
+		if (req.body.moniker)
 		{
 			// Get the value from the request
 			const moniker = req.body.moniker.trim();
 			// Check if the value is at least 8 characters long
-			if(moniker.length < 8)
+			if (moniker.length < 8)
 			{
 				res.status(400).json({
 					error: true,
@@ -79,12 +77,12 @@ export async function nodeConfigurationSetValues(req: Request, res: Response): P
 		}
 		
 		// Validate and set 'backend'
-		if(req.body.backend)
+		if (req.body.backend)
 		{
 			// Get the value from the request
 			const backend = req.body.backend.trim().toLowerCase();
 			// Check if the value is either 'test' or 'file'
-			if(backend !== 'test' && backend !== 'file')
+			if (backend !== 'test' && backend !== 'file')
 			{
 				res.status(400).json({
 					error: true,
@@ -98,12 +96,12 @@ export async function nodeConfigurationSetValues(req: Request, res: Response): P
 		}
 		
 		// Validate and set 'nodeType'
-		if(req.body.nodeType)
+		if (req.body.nodeType)
 		{
 			// Get the value from the request
 			const nodeType = req.body.nodeType.trim().toLowerCase();
 			// Check if the value is either 'residential' or 'datacenter'
-			if(nodeType !== 'residential' && nodeType !== 'datacenter')
+			if (nodeType !== 'residential' && nodeType !== 'datacenter')
 			{
 				res.status(400).json({
 					error: true,
@@ -117,12 +115,12 @@ export async function nodeConfigurationSetValues(req: Request, res: Response): P
 		}
 		
 		// Validate and set 'nodeIp'
-		if(req.body.nodeIp)
+		if (req.body.nodeIp)
 		{
 			// Get the value from the request
 			const nodeIp = req.body.nodeIp.trim();
 			// Check if the value is a valid IP or DNS
-			if(!isValidIP(nodeIp) && !isValidDns(nodeIp))
+			if (!isValidIP(nodeIp) && !isValidDns(nodeIp))
 			{
 				res.status(400).json({
 					error: true,
@@ -136,12 +134,12 @@ export async function nodeConfigurationSetValues(req: Request, res: Response): P
 		}
 		
 		// Validate and set 'nodePort'
-		if(req.body.nodePort)
+		if (req.body.nodePort)
 		{
 			// Get the value from the request
 			const nodePort = parseInt(req.body.nodePort, 10);
 			// Check if the value is a valid port number
-			if(isNaN(nodePort) || nodePort < 1 || nodePort > 65535)
+			if (isNaN(nodePort) || nodePort < 1 || nodePort > 65535)
 			{
 				res.status(400).json({
 					error: true,
@@ -155,12 +153,12 @@ export async function nodeConfigurationSetValues(req: Request, res: Response): P
 		}
 		
 		// Validate and set 'vpnType'
-		if(req.body.vpnType)
+		if (req.body.vpnType)
 		{
 			// Get the value from the request
 			const vpnType = req.body.vpnType.trim().toLowerCase();
 			// Check if the value is either 'wireguard' or 'v2ray'
-			if(vpnType !== 'wireguard' && vpnType !== 'v2ray')
+			if (vpnType !== 'wireguard' && vpnType !== 'v2ray')
 			{
 				res.status(400).json({
 					error: true,
@@ -176,12 +174,12 @@ export async function nodeConfigurationSetValues(req: Request, res: Response): P
 		}
 		
 		// Validate and set 'vpnPort'
-		if(req.body.vpnPort)
+		if (req.body.vpnPort)
 		{
 			// Get the value from the request
 			const vpnPort = parseInt(req.body.vpnPort, 10);
 			// Check if the value is a valid port number
-			if(isNaN(vpnPort) || vpnPort < 1 || vpnPort > 65535)
+			if (isNaN(vpnPort) || vpnPort < 1 || vpnPort > 65535)
 			{
 				res.status(400).json({
 					error: true,
@@ -195,12 +193,12 @@ export async function nodeConfigurationSetValues(req: Request, res: Response): P
 		}
 		
 		// Validate and set 'maximumPeers'
-		if(req.body.maximumPeers)
+		if (req.body.maximumPeers)
 		{
 			// Get the value from the request
 			const maximumPeers = parseInt(req.body.maximumPeers, 10);
 			// Check if the value is a valid integer
-			if(isNaN(maximumPeers) || maximumPeers < 1 || maximumPeers > 99999)
+			if (isNaN(maximumPeers) || maximumPeers < 1 || maximumPeers > 99999)
 			{
 				res.status(400).json({
 					error: true,
@@ -262,7 +260,7 @@ export async function nodeConfigurationApply(req: Request, res: Response): Promi
 			success: true,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error during node configuration update: ${error}`);
@@ -289,12 +287,12 @@ export async function nodeStart(req: Request, res: Response): Promise<void>
 		const nodeStart = await containerStart();
 		
 		// Return the node start status
-		Logger.info(`Node start completed successfully`);
+		Logger.info('Node start completed successfully');
 		res.json({
 			start: nodeStart,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error during node start: ${error}`);
@@ -321,12 +319,12 @@ export async function nodeStop(req: Request, res: Response): Promise<void>
 		const nodeStop = await containerStop();
 		
 		// Return the node stop status
-		Logger.info(`Node stop completed successfully`);
+		Logger.info('Node stop completed successfully');
 		res.json({
 			stop: nodeStop,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error during node stop: ${error}`);
@@ -353,12 +351,12 @@ export async function nodeRestart(req: Request, res: Response): Promise<void>
 		const nodeRestart = await containerRestart();
 		
 		// Return the node restart status
-		Logger.info(`Node restart completed successfully`);
+		Logger.info('Node restart completed successfully');
 		res.json({
 			restart: nodeRestart,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error during node restart: ${error}`);
@@ -385,12 +383,12 @@ export async function nodeRemove(req: Request, res: Response): Promise<void>
 		const nodeRemove = await containerRemove();
 		
 		// Return the node removal status
-		Logger.info(`Node removal completed successfully`);
+		Logger.info('Node removal completed successfully');
 		res.json({
 			remove: nodeRemove,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error during node removal: ${error}`);
@@ -439,7 +437,7 @@ export async function nodeAddress(req: Request, res: Response): Promise<void>
 			address: nodeConfig.walletNodeAddress,
 		});
 	}
-	catch(error: any)
+	catch (error: any)
 	{
 		// Return a structured error response
 		Logger.error(`Error while loading the wallet address: ${error}`);
@@ -467,7 +465,7 @@ export async function nodeBalance(req: Request, res: Response): Promise<void>
 		const publicAddress = nodeManager.getConfig().walletPublicAddress;
 		
 		// Check if the public address is empty
-		if(publicAddress === '')
+		if (publicAddress === '')
 		{
 			Logger.error('Public address is missing');
 			throw new Error('Public address is missing');
