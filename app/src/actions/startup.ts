@@ -61,6 +61,6 @@ export const loadingSystemInformations = async (): Promise<boolean> =>
  */
 async function runCommand(command: string): Promise<string>
 {
-	const { stdout, _stderr } = await execPromise(command);
+	const { stdout } = await execPromise(command);
 	return stdout.trim() || '';
 }
