@@ -8,6 +8,10 @@ import {
 	nodeCommand,
 	walletCommand,
 } from '@commands/index';
+import {
+	initSentry,
+} from '@utils/sentry';
+import { Logger } from './utils/logger';
 
 // Global variable for the base directory
 process.env.BASE_DIR = process.cwd();
@@ -15,6 +19,9 @@ process.env.BASE_DIR = process.cwd();
 // Get the directory of the current file
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Initialize Sentry
+initSentry();
 // Finish the transaction on exit
 process.on('exit', () => {
 	Logger.info('Application exiting...');

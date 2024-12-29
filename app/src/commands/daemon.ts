@@ -59,124 +59,164 @@ function generateUUIDFromSeed(characteristicId: string) : string
  */
 export const daemonCommand = async () =>
 {
-	console.log('Daemon process started');
 	Logger.info('Daemon process started.');
 	
-	// Load system information
-	await loadingSystemInformations();
-	
-	// Load node information
-	await loadingNodeInformations();
-	
-	// Get the web server instance
-	const webServer = WebServer.getInstance();
-	// Initialize SSL and routes
-	await webServer.init();
-	// Start the web server
-	webServer.start();
-	
-	// Check if Bluetooth is available
-	const bluetoothAvailable = await isBluetoothAvailable();
-	// If Bluetooth is not available, log a info and exit the initialization
-	if (!bluetoothAvailable)
+	try
 	{
-		console.warn('No Bluetooth controller found. Continuing without Bluetooth support.');
-		Logger.info('No Bluetooth controller found. Continuing without Bluetooth support.');
-		// Exit the Bluetooth initialization if no antenna is found
-		return;
+		// Load system information
+		await loadingSystemInformations();
+		
+		// Load node information
+		await loadingNodeInformations();
+		
+		// Start the web server
+		await startWebServer();
+		
+		// Start the Bluetooth service
+		await startBluetooth();
 	}
-	
-	// Check if the Bluetooth is disabled
-	if(config.BLE_ENABLED === 'false')
+	catch (error: any)
 	{
-		console.log('Bluetooth is disabled. Exiting Bluetooth initialization.');
-		Logger.info('Bluetooth is disabled. Exiting Bluetooth initialization.');
-		// Exit the Bluetooth initialization if it is disabled
-		return;
+		Logger.error("An unexpected error occurred in daemon process.", error);
 	}
-	
-	// Dynamically import the Bleno module using CommonJS require
-	const require = createRequire(import.meta.url);
-	const bleno = require('bleno');
-	
-	// Create a new primary service with the UUID and characteristics
-	const service = new bleno.PrimaryService({
-		uuid: `${config.BLE_UUID}`,
-		characteristics: [
-			new DiscoveryCharacteristic(`${config.BLE_DISCOVERY_UUID}`).create(),
-			new MonikerCharacteristic(generateUUIDFromSeed('moniker')).create(),
-			new NodeTypeCharacteristic(generateUUIDFromSeed('node-type')).create(),
-			new NodeIpCharacteristic(generateUUIDFromSeed('node-ip')).create(),
-			new NodePortCharacteristic(generateUUIDFromSeed('node-port')).create(),
-			new VpnTypeCharacteristic(generateUUIDFromSeed('vpn-type')).create(),
-			new VpnPortCharacteristic(generateUUIDFromSeed('vpn-port')).create(),
-			new MaxPeersCharacteristic(generateUUIDFromSeed('max-peers')).create(),
-			new NodeConfigCharacteristic(generateUUIDFromSeed('node-config')).create(),
-			new NodeLocationCharacteristic(generateUUIDFromSeed('node-location')).create(),
-			new CertExpirityCharacteristic(generateUUIDFromSeed('cert-expirity')).create(),
-			new BandwidthSpeedCharacteristic(generateUUIDFromSeed('bandwidth-speed')).create(),
-			new SystemUptimeCharacteristic(generateUUIDFromSeed('system-uptime')).create(),
-			new CasanodeVersionCharacteristic(generateUUIDFromSeed('casanode-version')).create(),
-			new DockerImageCharacteristic(generateUUIDFromSeed('docker-image')).create(),
-			new SystemArchCharacteristic(generateUUIDFromSeed('system-arch')).create(),
-			new SystemOsCharacteristic(generateUUIDFromSeed('system-os')).create(),
-			new SystemKernelCharacteristic(generateUUIDFromSeed('system-kernel')).create(),
-			new NodePassphraseCharacteristic(generateUUIDFromSeed('node-passphrase')).create(),
-			new PublicAddressCharacteristic(generateUUIDFromSeed('public-address')).create(),
-			new NodeAddressCharacteristic(generateUUIDFromSeed('node-address')).create(),
-			new NodeBalanceCharacteristic(generateUUIDFromSeed('node-balance')).create(),
-			new NodeStatusCharacteristic(generateUUIDFromSeed('node-status')).create(),
-			new CheckInstallationCharacteristic(generateUUIDFromSeed('check-installation')).create(),
-			new InstallDockerImageCharacteristic(generateUUIDFromSeed('install-docker-image')).create(),
-			new InstallConfigsCharacteristic(generateUUIDFromSeed('install-configs')).create(),
-			new NodeActionsCharacteristic(generateUUIDFromSeed('node-actions')).create(),
-			new SystemActionsCharacteristic(generateUUIDFromSeed('system-actions')).create(),
-			new CertificateActionsCharacteristic(generateUUIDFromSeed('certificate-actions')).create(),
-			new NodeMnemonicCharacteristic(generateUUIDFromSeed('node-mnemonic')).create(),
-			new WalletActionsCharacteristic(generateUUIDFromSeed('wallet-actions')).create(),
-			new NodeKeyringBackendCharacteristic(generateUUIDFromSeed('node-keyring-backend')).create(),
-			new OnlineUsersCharacteristic(generateUUIDFromSeed('online-users')).create(),
-			new VpnChangeTypeCharacteristic(generateUUIDFromSeed('vpn-change-type')).create(),
-			new CheckPortCharacteristic(generateUUIDFromSeed('check-port')).create(),
-		]
-	});
-	
-	/**
-	 * Event listener for the stateChange event
-	 * @param state string
-	 */
-	bleno.on('stateChange', (state: any) =>
-	{
-		// If the state is powered on, start advertising the service
-		if (state === 'poweredOn')
-		{
-			Logger.info('Bluetooth powered on. Application started successfully.');
-			bleno.startAdvertising('Casanode', [`${config.BLE_UUID}`]);
-		}
-		else
-		{
-			Logger.info('Bluetooth powered off. Stopping advertising.');
-			bleno.stopAdvertising();
-		}
-	});
-	
-	/**
-	 * Event listener for the advertisingStart event
-	 * @param error any
-	 */
-	bleno.on('advertisingStart', (error: any) =>
-	{
-		if (!error)
-		{
-			console.log('Advertising...');
-			Logger.info('Advertising...');
-			// Set the services to be advertised
-			bleno.setServices([service]);
-		}
-		else
-		{
-			console.error('Advertising failed: ' + error);
-			Logger.error('Advertising failed: ' + error);
-		}
-	});
 };
+
+/**
+ * Start the web server
+ * @returns void
+ */
+const startWebServer = async () =>
+{
+	try
+	{
+		Logger.info("Starting web server...");
+		
+		// Get the web server instance
+		const webServer = WebServer.getInstance();
+		// Initialize SSL and routes
+		await webServer.init();
+		// Start the web server
+		webServer.start();
+		
+		Logger.info("Web server started successfully.");
+	}
+	catch (error: any)
+	{
+		Logger.error("Failed to start the web server.", error);
+	}
+};
+
+/**
+ * Start the Bluetooth service
+ * @returns void
+ */
+const startBluetooth = async () =>
+{
+	try
+	{
+		// Check if Bluetooth is available
+		const bluetoothAvailable = await isBluetoothAvailable();
+		// If Bluetooth is not available, log a info and exit the initialization
+		if (!bluetoothAvailable)
+		{
+			Logger.info('No Bluetooth controller found. Continuing without Bluetooth support.');
+			return;
+		}
+		
+		// Check if the Bluetooth is disabled
+		if(config.BLE_ENABLED === 'false')
+		{
+			Logger.info('Bluetooth is disabled. Exiting Bluetooth initialization.');
+			return;
+		}
+		
+		// Dynamically import the Bleno module using CommonJS require
+		const require = createRequire(import.meta.url);
+		const bleno = require('bleno');
+		
+		// Create a new primary service with the UUID and characteristics
+		const service = new bleno.PrimaryService({
+			uuid: `${config.BLE_UUID}`,
+			characteristics: [
+				new DiscoveryCharacteristic(`${config.BLE_DISCOVERY_UUID}`).create(),
+				new MonikerCharacteristic(generateUUIDFromSeed('moniker')).create(),
+				new NodeTypeCharacteristic(generateUUIDFromSeed('node-type')).create(),
+				new NodeIpCharacteristic(generateUUIDFromSeed('node-ip')).create(),
+				new NodePortCharacteristic(generateUUIDFromSeed('node-port')).create(),
+				new VpnTypeCharacteristic(generateUUIDFromSeed('vpn-type')).create(),
+				new VpnPortCharacteristic(generateUUIDFromSeed('vpn-port')).create(),
+				new MaxPeersCharacteristic(generateUUIDFromSeed('max-peers')).create(),
+				new NodeConfigCharacteristic(generateUUIDFromSeed('node-config')).create(),
+				new NodeLocationCharacteristic(generateUUIDFromSeed('node-location')).create(),
+				new CertExpirityCharacteristic(generateUUIDFromSeed('cert-expirity')).create(),
+				new BandwidthSpeedCharacteristic(generateUUIDFromSeed('bandwidth-speed')).create(),
+				new SystemUptimeCharacteristic(generateUUIDFromSeed('system-uptime')).create(),
+				new CasanodeVersionCharacteristic(generateUUIDFromSeed('casanode-version')).create(),
+				new DockerImageCharacteristic(generateUUIDFromSeed('docker-image')).create(),
+				new SystemArchCharacteristic(generateUUIDFromSeed('system-arch')).create(),
+				new SystemOsCharacteristic(generateUUIDFromSeed('system-os')).create(),
+				new SystemKernelCharacteristic(generateUUIDFromSeed('system-kernel')).create(),
+				new NodePassphraseCharacteristic(generateUUIDFromSeed('node-passphrase')).create(),
+				new PublicAddressCharacteristic(generateUUIDFromSeed('public-address')).create(),
+				new NodeAddressCharacteristic(generateUUIDFromSeed('node-address')).create(),
+				new NodeBalanceCharacteristic(generateUUIDFromSeed('node-balance')).create(),
+				new NodeStatusCharacteristic(generateUUIDFromSeed('node-status')).create(),
+				new CheckInstallationCharacteristic(generateUUIDFromSeed('check-installation')).create(),
+				new InstallDockerImageCharacteristic(generateUUIDFromSeed('install-docker-image')).create(),
+				new InstallConfigsCharacteristic(generateUUIDFromSeed('install-configs')).create(),
+				new NodeActionsCharacteristic(generateUUIDFromSeed('node-actions')).create(),
+				new SystemActionsCharacteristic(generateUUIDFromSeed('system-actions')).create(),
+				new CertificateActionsCharacteristic(generateUUIDFromSeed('certificate-actions')).create(),
+				new NodeMnemonicCharacteristic(generateUUIDFromSeed('node-mnemonic')).create(),
+				new WalletActionsCharacteristic(generateUUIDFromSeed('wallet-actions')).create(),
+				new NodeKeyringBackendCharacteristic(generateUUIDFromSeed('node-keyring-backend')).create(),
+				new OnlineUsersCharacteristic(generateUUIDFromSeed('online-users')).create(),
+				new VpnChangeTypeCharacteristic(generateUUIDFromSeed('vpn-change-type')).create(),
+				new CheckPortCharacteristic(generateUUIDFromSeed('check-port')).create(),
+			]
+		});
+		
+		/**
+		 * Event listener for the stateChange event
+		 * @param state string
+		 */
+		bleno.on('stateChange', (state: any) =>
+		{
+			// If the state is powered on, start advertising the service
+			if (state === 'poweredOn')
+			{
+				Logger.info('Bluetooth powered on. Application started successfully.');
+				bleno.startAdvertising('Casanode', [`${config.BLE_UUID}`]);
+			}
+			else
+			{
+				Logger.info('Bluetooth powered off. Stopping advertising.');
+				bleno.stopAdvertising();
+			}
+		});
+		
+		/**
+		 * Event listener for the advertisingStart event
+		 * @param error any
+		 */
+		bleno.on('advertisingStart', (error: any) =>
+		{
+			if (!error)
+			{
+				Logger.info('Advertising...');
+				// Set the services to be advertised
+				bleno.setServices([service]);
+			}
+			else
+			{
+				Logger.error('Advertising failed: ' + error);
+			}
+		});
+		
+		Logger.info("Bluetooth initialized successfully.");
+	}
+	catch (error: any)
+	{
+		Logger.error("Failed to initialize Bluetooth.", error);
+	}
+}

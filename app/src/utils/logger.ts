@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import config from './configuration';
+import { captureException, captureMessage } from '@utils/sentry';
 
 export class Logger 
 {
@@ -35,17 +36,32 @@ export class Logger
 		const timestamp = this.getFormattedDate();
 		const logMessage = `[${timestamp}] INFO: ${message}\n`;
 		this.writeToLog(logMessage);
+		
+		// Capture the message
+		captureMessage(message, 'info');
+		// Show the message in the console
+		console.log(message);
 	}
 	
 	/**
 	 * Log an error message
 	 * @param message - The message to log
+	 * @param error - The error object
 	 */
-	public static error(message: string): void 
+	public static error(message: string, error?: Error): void 
 	{
 		const timestamp = this.getFormattedDate();
 		const logMessage = `[${timestamp}] ERROR: ${message}\n`;
 		this.writeToLog(logMessage);
+		
+		// Capture the error message
+		if (error)
+			captureException(error);
+		else
+			captureMessage(message, 'error');
+
+		// Show the message in the console
+		console.error(message);
 	}
 	
 	/**
