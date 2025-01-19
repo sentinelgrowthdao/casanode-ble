@@ -169,3 +169,7 @@ Remove Wallet
 ```bash
 curl -X DELETE -H "Authorization: Bearer <token>" -k https://192.168.x.x:8081/api/v1/wallet/remove
 ```
+
+## License
+
+This project is licensed under the GPL v3 License - see the LICENSE file for details.
