@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+echo "Stopping Casanode service..."
+systemctl stop casanode.service || true
+systemctl disable casanode.service || true
+systemctl stop casanode-startup.service || true
+systemctl disable casanode-startup.service || true

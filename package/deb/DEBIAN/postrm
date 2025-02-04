@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+echo "Removing Casanode files..."
+rm -rf /opt/casanode
+rm -rf /var/log/casanode
+rm -f /etc/systemd/system/casanode.service
+rm -f /etc/systemd/system/casanode-startup.service
+
+echo "Reloading systemd..."
+systemctl daemon-reload

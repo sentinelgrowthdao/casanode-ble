@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+
+echo "Creating casanode user..."
+adduser --system --group --home /opt/casanode --uid 150 casanode || true
+chown -R casanode:casanode /opt/casanode
+chmod +x /opt/casanode/startup.sh
+
+echo "Enabling systemd services..."
+systemctl enable casanode.service
+systemctl enable casanode-startup.service
+systemctl daemon-reload
+
+echo "Starting Casanode service..."
+systemctl start casanode.service

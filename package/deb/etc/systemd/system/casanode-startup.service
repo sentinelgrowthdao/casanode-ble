@@ -1,0 +1,11 @@
+[Unit]
+Description=Casanode Startup Initialization
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/casanode/startup.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
