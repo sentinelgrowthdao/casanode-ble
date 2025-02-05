@@ -41,7 +41,7 @@ chown -R root:root "$DEB_DIR"
 
 # Variables for package creation
 PACKAGE_NAME="casanode"
-VERSION="1.0.0"
+VERSION=$(grep '"version"' "$APP_DIR/package.json" | sed -E 's/.*"version": "([^"]+)".*/\1/')
 ARCHITECTURE="all"  # Since the project is in Node.js, we can use "all"
 DEB_FILE="$DIST_DIR/${PACKAGE_NAME}_${VERSION}_${ARCHITECTURE}.deb"
 
