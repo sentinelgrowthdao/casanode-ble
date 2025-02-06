@@ -6,6 +6,13 @@ adduser --system --group --home /opt/casanode --uid 150 casanode || true
 chown -R casanode:casanode /opt/casanode
 chmod +x /opt/casanode/startup.sh
 
+echo "Setting correct permissions for /etc/casanode.conf..."
+chown casanode:casanode /etc/casanode.conf
+chmod 600 /etc/casanode.conf
+
+echo "Installing node modules..."
+npm install --prefix /opt/casanode/app --production
+
 echo "Enabling systemd services..."
 systemctl enable casanode.service
 systemctl enable casanode-startup.service
