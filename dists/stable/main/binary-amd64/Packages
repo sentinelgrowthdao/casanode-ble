@@ -1,0 +1,21 @@
+Package: casanode
+Source: casanode
+Version: 0.1.0
+Architecture: all
+Maintainer: FoxinouFr <foxinou@foxinodes.net>
+Depends: nodejs, docker-ce | docker.io, sudo
+Filename: pool/main/casanode_1.0.0-alpha5_all.deb
+Size: 101588
+MD5sum: 50579e0d9c1cfe8f44ec0201fa8cee95
+SHA1: 5af48c090316ee8f8a27c00638a7d7fb836510bf
+SHA256: 67b29f28381e146dd3e7b359a1d5fed5561937600a46f548c8431506174bd8fa
+Section: net
+Priority: optional
+Homepage: https://github.com/sentinelgrowthdao/casanode-ble
+Description: Casanode - dVPN node management via Bluetooth and TCP API
+  Casanode is a lightweight service for managing decentralized VPN (dVPN) nodes.
+  It enables secure communication via Bluetooth Low Energy (BLE) and a RESTful
+  TCP API, allowing monitoring, configuration, and lifecycle control. The service
+  includes Docker support and SSL authentication for secure node operations.
+Standards-Version: 4.1.4
+
