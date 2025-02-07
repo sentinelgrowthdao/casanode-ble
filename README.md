@@ -1,1 +1,1 @@
-APT repository for my project
+APT repository for casanode-ble
