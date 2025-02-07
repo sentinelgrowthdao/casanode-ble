@@ -10,6 +10,10 @@ echo "Setting correct permissions for /etc/casanode.conf..."
 chown casanode:casanode /etc/casanode.conf
 chmod 600 /etc/casanode.conf
 
+echo "Setting correct permissions for /var/log/casanode..."
+chown -R casanode:casanode /var/log/casanode
+chmod -R 755 /var/log/casanode
+
 echo "Installing node modules..."
 npm install --prefix /opt/casanode/app --production
 
