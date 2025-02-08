@@ -55,7 +55,22 @@ ARCHITECTURE="all"  # Since the project is in Node.js, we can use "all"
 DEB_FILE="$DIST_DIR/${PACKAGE_NAME}_${VERSION}_${ARCHITECTURE}.deb"
 
 mkdir -p "$DIST_DIR"
+
+# Temporary modification of the control file for the alpha version
+echo "=== Modifying DEBIAN/control file to set alpha version ==="
+CONTROL_FILE="$DEB_DIR/DEBIAN/control"
+BACKUP_CONTROL_FILE="$DEB_DIR/DEBIAN/control.bak"
+# Backup the original control file
+cp "$CONTROL_FILE" "$BACKUP_CONTROL_FILE"
+# Replace the Version field with the package version
+sed -i "s/^Version: .*/Version: ${VERSION}/" "$CONTROL_FILE"
+echo "Control file modified: $(grep ^Version: "$CONTROL_FILE")"
+
 echo "=== Building .deb package ==="
 dpkg-deb --build --root-owner-group "$DEB_DIR" "$DEB_FILE"
+
+# Restoring the original control file
+echo "=== Restoring original control file ==="
+mv "$BACKUP_CONTROL_FILE" "$CONTROL_FILE"
 
 echo -e "\e[32mPackage built successfully: $DEB_FILE\e[0m"
