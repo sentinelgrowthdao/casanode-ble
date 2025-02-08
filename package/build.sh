@@ -21,6 +21,7 @@ npm run build
 echo "=== Copying compiled application files from $APP_DIR/dist to $TARGET_APP_DIR ==="
 mkdir -p "$TARGET_APP_DIR/app"
 cp -r "$APP_DIR/dist/"* "$TARGET_APP_DIR/app/"
+cp -r "$APP_DIR/web/" "$TARGET_APP_DIR/web/"
 
 echo "=== Copying package.json and package-lock.json ==="
 cp "$APP_DIR/package.json" "$TARGET_APP_DIR/app/"
