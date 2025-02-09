@@ -5,10 +5,10 @@ Architecture: all
 Maintainer: FoxinouFr <foxinou@foxinodes.net>
 Depends: nodejs, docker-ce | docker.io, sudo
 Filename: pool/main/casanode_1.0.0-alpha5_all.deb
-Size: 296108
-MD5sum: 90ed15ed3e7f3f603ae79ce7c308f14c
-SHA1: 5f4646fd136c0efcbc0f0b084af792ea13fdc5e4
-SHA256: ea30f058e8023100bae5e8dbfef874a252172fdc9ec56a8f4c8698fa8fa3bf72
+Size: 296132
+MD5sum: 33a4fd2400b93455cc054e409ad70f29
+SHA1: 51befb144a5ae71d7b42fc5e3dd8b4f16d3bfea1
+SHA256: 375e560c5eaea1dfd060101d8bbd68e1df2d9b25c83937c9df5805e043c00a73
 Section: net
 Priority: optional
 Homepage: https://github.com/sentinelgrowthdao/casanode-ble
