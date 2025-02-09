@@ -35,6 +35,15 @@ else
 	echo "Docker rootless is already installed." | tee -a "$LOGFILE"
 fi
 
+# Ensure that Docker rootless is started (check via systemctl --user)
+if ! su -l "$USER" -c 'systemctl --user is-active docker' >/dev/null 2>&1
+then
+	echo "Starting Docker rootless for user $USER..." | tee -a "$LOGFILE"
+	su -l "$USER" -c 'systemctl --user start docker'
+else
+	echo "Docker rootless is already running." | tee -a "$LOGFILE"
+fi
+
 # Check and apply necessary capabilities to node if needed
 NODE_PATH=$(eval readlink -f $(which node))
 if ! getcap "$NODE_PATH" | grep -q "cap_net_raw+eip"
