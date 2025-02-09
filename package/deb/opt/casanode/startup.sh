@@ -35,7 +35,7 @@ then
 	
 	# Install Docker rootless
 	echo "Installing Docker rootless..." | tee -a "$LOGFILE"
-	su -l "$USER" -c "export XDG_RUNTIME_DIR=/run/user/\$(id -u) && \
+	su -s /bin/bash -l "$USER" -c "export XDG_RUNTIME_DIR=/run/user/\$(id -u) && \
 	export DBUS_SESSION_BUS_ADDRESS=unix:path=\$XDG_RUNTIME_DIR/bus && \
 	dockerd-rootless-setuptool.sh install" | tee -a "$LOGFILE"
 	echo "Docker rootless installation completed." | tee -a "$LOGFILE"
@@ -47,10 +47,10 @@ else
 fi
 
 # Ensure that Docker rootless is started (check via systemctl --user)
-if ! su -l "$USER" -c 'systemctl --user is-active docker' >/dev/null 2>&1
+if ! su -s /bin/bash -l "$USER" -c 'systemctl --user is-active docker' >/dev/null 2>&1
 then
 	echo "Starting Docker rootless for user $USER..." | tee -a "$LOGFILE"
-	su -l "$USER" -c 'systemctl --user start docker'
+	su -s /bin/bash -l "$USER" -c 'systemctl --user start docker'
 else
 	echo "Docker rootless is already running." | tee -a "$LOGFILE"
 fi
