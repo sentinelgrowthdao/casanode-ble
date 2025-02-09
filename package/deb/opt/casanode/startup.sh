@@ -3,35 +3,45 @@
 CONFIGFILE="/etc/casanode.conf"
 LOGFILE="/var/log/casanode/startup.log"
 USER="casanode"
+FLAGFILE="/opt/$USER/.docker_rootless_installed"
 
 # Clear the log file at the start of each execution
 > "$LOGFILE"
 
 # Check if Docker socket file exist
-if [ -f /etc/systemd/system/multi-user.target.wants/docker.service ]
+if [ ! -f "$FLAGFILE" ]
 then
 	echo "Docker rootless is not installed. Installing..." | tee -a "$LOGFILE"
 	
-	# Check if Docker rootful is running and stop it
+	# Stop Docker rootful if it is running
 	echo "Rootful Docker is running. Stopping Docker rootful..." | tee -a "$LOGFILE"
 	systemctl disable --now docker.service docker.socket
-	rm /var/run/docker.sock
+	rm -f /var/run/docker.sock
 	echo "Docker rootful stopped." | tee -a "$LOGFILE"
 	
-	# Enable linger for the casanode user to allow the service to start at boot
-	loginctl enable-linger casanode
-	echo "Linger enabled for casanode user." | tee -a "$LOGFILE"
+	# Enable linger for the user to allow the service to start at boot
+	loginctl enable-linger "$USER"
+	echo "Linger enabled for $USER user." | tee -a "$LOGFILE"
 	
-	# Add subuid and subgid entries for casanode as required by Docker rootless mode
-	echo "casanode:100000:65536" >> /etc/subuid
-	echo "casanode:100000:65536" >> /etc/subgid
+	# Add entries to /etc/subuid and /etc/subgid if they do not already exist
+	if ! grep -q "^${USER}:" /etc/subuid
+	then
+		echo "${USER}:100000:65536" >> /etc/subuid
+	fi
+	if ! grep -q "^${USER}:" /etc/subgid
+	then
+		echo "${USER}:100000:65536" >> /etc/subgid
+	fi
 	
 	# Install Docker rootless
 	echo "Installing Docker rootless..." | tee -a "$LOGFILE"
-	su -l "$USER" -c 'export XDG_RUNTIME_DIR=/run/user/$(id -u casanode) && \
-	export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus && \
-	dockerd-rootless-setuptool.sh install' | tee -a "$LOGFILE"
+	su -l "$USER" -c "export XDG_RUNTIME_DIR=/run/user/\$(id -u) && \
+	export DBUS_SESSION_BUS_ADDRESS=unix:path=\$XDG_RUNTIME_DIR/bus && \
+	dockerd-rootless-setuptool.sh install" | tee -a "$LOGFILE"
 	echo "Docker rootless installation completed." | tee -a "$LOGFILE"
+	
+	# Create the installation flag to avoid reinstalling on the next startup
+	touch "$FLAGFILE"
 else
 	echo "Docker rootless is already installed." | tee -a "$LOGFILE"
 fi
