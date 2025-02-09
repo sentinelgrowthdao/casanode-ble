@@ -1,5 +1,6 @@
 #!/bin/bash
 
+CONFIGFILE="/etc/casanode.conf"
 LOGFILE="/var/log/casanode/startup.log"
 USER="casanode"
 
@@ -60,10 +61,10 @@ UFW_STATUS=$(ufw status | grep -i "Status: active")
 if [ -z "$UFW_STATUS" ]
 then
 	# Load configuration file
-	if [ -f /etc/casanode.conf ]; then
-		. /etc/casanode.conf
+	if [ -f "$CONFIGFILE" ]; then
+		. "$CONFIGFILE"
 	else
-		echo "Configuration file /etc/casanode.conf not found. Using default values." | tee -a "$LOGFILE"
+		echo "Configuration file $CONFIGFILE not found. Using default values." | tee -a "$LOGFILE"
 		WEB_LISTEN="0.0.0.0:8080"
 		API_LISTEN="0.0.0.0:8081"
 	fi
