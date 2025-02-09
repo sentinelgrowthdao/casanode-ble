@@ -45,6 +45,9 @@ chmod 644 "$DEB_DIR/etc/logrotate.d/casanode"
 # Ensure the startup.sh script is executable
 chmod +x "$TARGET_APP_DIR/startup.sh"
 
+# Save the current user
+CURRENT_USER=$(stat -c '%U' "$DEB_DIR")
+
 # Change the owner of all package files to comply with Debian standards
 chown -R root:root "$DEB_DIR"
 
@@ -72,5 +75,8 @@ dpkg-deb --build --root-owner-group "$DEB_DIR" "$DEB_FILE"
 # Restoring the original control file
 echo "=== Restoring original control file ==="
 mv "$BACKUP_CONTROL_FILE" "$CONTROL_FILE"
+
+echo "=== Restoring permissions to $CURRENT_USER on the package directory ==="
+chown -R "$CURRENT_USER:$CURRENT_USER" "$DEB_DIR"
 
 echo -e "\e[32mPackage built successfully: $DEB_FILE\e[0m"
