@@ -50,12 +50,25 @@ fi
 UFW_STATUS=$(ufw status | grep -i "Status: active")
 if [ -z "$UFW_STATUS" ]
 then
+	# Load configuration file
+	if [ -f /etc/casanode.conf ]; then
+		. /etc/casanode.conf
+	else
+		echo "Configuration file /etc/casanode.conf not found. Using default values." | tee -a "$LOGFILE"
+		WEB_LISTEN="0.0.0.0:8080"
+		API_LISTEN="0.0.0.0:8081"
+	fi
+	
+	# Extract ports from configuration
+	WEB_PORT=$(echo "$WEB_LISTEN" | cut -d':' -f2)
+	API_PORT=$(echo "$API_LISTEN" | cut -d':' -f2)
+	
 	echo "Configuring UFW rules..." | tee -a "$LOGFILE"
 	ufw default deny incoming | tee -a "$LOGFILE"
 	ufw default allow outgoing | tee -a "$LOGFILE"
 	ufw allow ssh | tee -a "$LOGFILE"
-	ufw allow 8080 | tee -a "$LOGFILE"
-	ufw allow 8081 | tee -a "$LOGFILE"
+	ufw allow "$WEB_PORT" | tee -a "$LOGFILE"
+	ufw allow "$API_PORT" | tee -a "$LOGFILE"
 	ufw --force enable | tee -a "$LOGFILE"
 	echo "UFW rules configured." | tee -a "$LOGFILE"
 else
