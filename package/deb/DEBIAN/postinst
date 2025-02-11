@@ -28,7 +28,7 @@ chown -R casanode:casanode /var/log/casanode
 chmod -R 755 /var/log/casanode
 
 echo "Installing node modules..."
-npm install --prefix /opt/casanode/app --production
+npm install --prefix /opt/casanode/app --production || { echo "❌ npm install failed"; exit 1; }
 
 echo "Enabling systemd services..."
 systemctl enable casanode.service
