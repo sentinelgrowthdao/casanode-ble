@@ -6,3 +6,8 @@ systemctl stop casanode.service || true
 systemctl disable casanode.service || true
 systemctl stop casanode-startup.service || true
 systemctl disable casanode-startup.service || true
+
+if [ "$1" = "purge" ]; then
+	echo "Removing logs directory /var/log/casanode..."
+	rm -rf /var/log/casanode
+fi
