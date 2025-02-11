@@ -23,6 +23,7 @@ chown casanode:casanode /etc/casanode.conf
 chmod +x /opt/casanode/startup.sh
 
 echo "Setting correct permissions for /var/log/casanode..."
+mkdir -p /var/log/casanode
 chown -R casanode:casanode /var/log/casanode
 chmod -R 755 /var/log/casanode
 
