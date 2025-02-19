@@ -1,10 +1,11 @@
 import { exec } from 'child_process';
 import * as os from 'os';
 import * as fs from 'fs/promises';
+import * as path from 'path';
 import { Logger } from '@utils/logger';
 import { imagePull, containerStop, imagesRemove, containerRemove } from '@utils/docker';
 import nodeManager from '@utils/node';
-import { resetConfiguration, refreshNetworkConfiguration } from '@utils/configuration';
+import config, { resetConfiguration, refreshNetworkConfiguration } from '@utils/configuration';
 
 /**
  * Promise-based function to update the system
@@ -31,8 +32,12 @@ export async function updateSystem(): Promise<void>
 				return;
 			}
 			
+			// Log file path
+			const logFilePath = path.join(config?.LOG_DIR || '/var/log/casanode/', 'updater.log');
+			// Systemd command to run the updater script
+			const command = `sudo systemd-run --unit=casanode-updater --description="Updating Casanode" --service-type=simple /opt/casanode/updater.sh > ${logFilePath} 2>&1`;
 			// Execute system update commands here
-			exec('sudo apt update && sudo apt upgrade -y', (error, _stdout, _stderr) =>
+			exec(command, (error, stdout, stderr) =>
 			{
 				if (error)
 				{
