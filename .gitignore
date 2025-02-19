@@ -4,6 +4,7 @@
 /app/src/test.ts
 /package/deb/opt/casanode/*
 !/package/deb/opt/casanode/startup.sh
+!/package/deb/opt/casanode/updater.sh
 /package/dist/
 
 ######################

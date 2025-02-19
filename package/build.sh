@@ -8,7 +8,7 @@ APP_DIR="/app/"							# Node.js sources in TypeScript
 TARGET_APP_DIR="$DEB_DIR/opt/casanode"	# Destination of the compiled application in the .deb
 
 echo "=== Cleaning previous compiled application files in $TARGET_APP_DIR ==="
-find "$TARGET_APP_DIR" -mindepth 1 ! -name 'startup.sh' -delete
+find "$TARGET_APP_DIR" -mindepth 1 ! -name 'startup.sh' ! -name 'updater.sh' -delete
 
 echo "=== Creating log directory $DEB_DIR/var/log/casanode if it does not exist ==="
 mkdir -p "$DEB_DIR/var/log/casanode"
@@ -44,6 +44,7 @@ chmod 644 "$DEB_DIR/etc/casanode.conf"
 chmod 644 "$DEB_DIR/etc/logrotate.d/casanode"
 # Ensure the startup.sh script is executable
 chmod +x "$TARGET_APP_DIR/startup.sh"
+chmod +x "$TARGET_APP_DIR/updater.sh"
 
 # Save the current user
 CURRENT_USER=$(stat -c '%U' "$DEB_DIR")
