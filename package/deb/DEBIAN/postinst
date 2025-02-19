@@ -21,6 +21,7 @@ sed -i "s/<uid>/$(id -u casanode)/g" /etc/casanode.conf
 chmod 600 /etc/casanode.conf
 chown casanode:casanode /etc/casanode.conf
 chmod +x /opt/casanode/startup.sh
+chmod +x /opt/casanode/updater.sh
 
 echo "Setting correct permissions for /var/log/casanode..."
 mkdir -p /var/log/casanode
