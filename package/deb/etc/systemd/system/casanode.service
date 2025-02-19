@@ -11,7 +11,7 @@ ExecStart=npm --prefix /opt/casanode/app/ run start
 Restart=always
 RestartSec=2s
 TimeoutStopSec=20s
-StartLimitIntervalSec=60
+StartLimitInterval=60
 StartLimitBurst=5
 LimitNOFILE=65535
 
