@@ -37,7 +37,7 @@ export async function updateSystem(): Promise<void>
 			// Systemd command to run the updater script
 			const command = `sudo systemd-run --unit=casanode-updater --description="Updating Casanode" --service-type=simple /opt/casanode/updater.sh > ${logFilePath} 2>&1`;
 			// Execute system update commands here
-			exec(command, (error, stdout, stderr) =>
+			exec(command, (error, _stdout, _stderr) =>
 			{
 				if (error)
 				{
