@@ -1,6 +1,6 @@
 {
   "name": "casanode-ble",
-  "version": "1.0.0-alpha6.1",
+  "version": "1.0.0-alpha6.2",
   "type": "module",
   "scripts": {
     "build": "tsc && tsc-alias && npm run copy-certs",
