@@ -14,6 +14,7 @@ export interface AppConfigData
 	DOCKER_CONTAINER_NAME: string;
 	CONFIG_DIR: string;
 	LOG_DIR: string;
+	CERTS_DIR: string;
 	DOCKER_SOCKET: string;
 	BLE_UUID: string;
 	BLE_DISCOVERY_UUID: string;
@@ -53,6 +54,7 @@ class ConfigurationLoader
 			DOCKER_CONTAINER_NAME: 'sentinel-dvpn-node',
 			CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/opt/casanode/.sentinelnode',
 			LOG_DIR: '/var/log/casanode',
+			CERTS_DIR: '/opt/casanode/app/certs',
 			DOCKER_SOCKET: this.getDockerDefaultSocketPath(),
 			BLE_ENABLED: true,
 			BLE_UUID: '00001820-0000-1000-8000-00805f9b34fb',

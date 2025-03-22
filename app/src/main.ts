@@ -93,13 +93,3 @@ program.action(() => { daemonCommand(); });
 
 // Parse command line arguments
 program.parse(process.argv);
-
-
-/**
- * Get the directory for the certificates
- * @returns string
- */
-export function getCertsDir(): string
-{
-	return path.resolve(__dirname, 'certs');
-}
