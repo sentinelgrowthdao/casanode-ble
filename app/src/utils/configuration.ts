@@ -174,13 +174,13 @@ class ConfigurationLoader
 			}
 			else
 			{
-				Logger.error(`Configuration file ${this.configFile} does not exist. Using default values.`);
+				console.error(`Configuration file ${this.configFile} does not exist. Using default values.`);
 				return {};
 			}
 		}
 		catch (error)
 		{
-			Logger.error(`An error occurred while loading configuration file: ${error}`);
+			console.error(`An error occurred while loading configuration file: ${error}`);
 			return {};
 		}
 	}
@@ -212,7 +212,7 @@ class ConfigurationLoader
 		}
 		catch (error)
 		{
-			Logger.error(`An error occurred while saving configuration file: ${error}`);
+			console.error(`An error occurred while saving configuration file: ${error}`);
 			return false;
 		}
 	}
