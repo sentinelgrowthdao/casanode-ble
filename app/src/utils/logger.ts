@@ -9,7 +9,7 @@ export class Logger
 	 * The path to the log file
 	 * @type {string}
 	 */
-	private static logFilePath = path.join(config?.LOG_DIR || '/var/log/casanode/', 'app-ble.log');
+	private static logFilePath = path.join(config?.LOG_DIR || '/var/log/casanode/', 'app.log');
 	
 	/**
 	 * Get a formatted date string
