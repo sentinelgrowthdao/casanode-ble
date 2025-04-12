@@ -578,6 +578,7 @@ export async function nodePassphraseAvailable(req: Request, res: Response): Prom
 {
 	// Return the passphrase availability
 	res.json({
+		required: nodeManager.passphraseRequired(),
 		available: nodeManager.passphraseAvailable(),
 	});
 }
