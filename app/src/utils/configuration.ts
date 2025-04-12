@@ -10,6 +10,7 @@ export interface AppConfigData
 {
 	[key: string]: string | number | boolean | string[] | undefined;
 	BLENO_DEVICE_NAME: string;
+	CASANODE_VERSION: string;
 	DOCKER_IMAGE_NAME: string;
 	DOCKER_CONTAINER_NAME: string;
 	CONFIG_DIR: string;
@@ -50,6 +51,7 @@ class ConfigurationLoader
 	private defaultConfig: AppConfigData =
 		{
 			BLENO_DEVICE_NAME: 'Casanode',
+			CASANODE_VERSION: 'alpha',
 			DOCKER_IMAGE_NAME: 'wajatmaka/sentinel-aarch64-alpine:v0.7.1',
 			DOCKER_CONTAINER_NAME: 'sentinel-dvpn-node',
 			CONFIG_DIR: process.env.HOME ? path.join(process.env.HOME, '.sentinelnode') : '/opt/casanode/.sentinelnode',

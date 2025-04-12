@@ -41,6 +41,7 @@ export async function nodeConfigurationGetValues(req: Request, res: Response): P
 		vpnPort: nodeConfig.vpn_port || null,
 		maximumPeers: nodeConfig.max_peers || null,
 		dockerImage: config.DOCKER_IMAGE_NAME || null,
+		casanodeVersion: config.CASANODE_VERSION || null,
 	});
 }
 
