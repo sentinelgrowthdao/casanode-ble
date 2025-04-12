@@ -1,0 +1,5 @@
+dbus-python
+PyGObject
+python-dotenv
+requests
+psutil
