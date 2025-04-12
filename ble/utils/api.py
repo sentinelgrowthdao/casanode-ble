@@ -1,8 +1,20 @@
 #!/usr/bin/env python3
+import copy
 import requests
 from urllib.parse import urlparse, urlunparse
 from utils import config, logger
 from utils.network import get_local_ip_address
+
+def sanitize_kwargs(kwargs: dict) -> dict:
+    """
+    Returns a copy of the kwargs where the value of the 'mnemonic' key 
+    under the 'json' dictionary is replaced with [CENSORED] if it exists.
+    """
+    sanitized = copy.deepcopy(kwargs)
+    if 'json' in sanitized and isinstance(sanitized['json'], dict):
+        if 'mnemonic' in sanitized['json']:
+            sanitized['json']['mnemonic'] = "[CENSORED]"
+    return sanitized
 
 class APIClient:
     _instance = None
@@ -30,14 +42,21 @@ class APIClient:
         certs_dir = self.config.get("CERTS_DIR")
         self.ca_cert = f"{certs_dir}/ca.crt"
         print(f"ca_cert: {self.ca_cert}")
-
-    def request(self, method, path="", **kwargs):
-        """
-        Makes an HTTP request with the specified method and path.
-        """
+    
+    def request(self, method, path="", hide_sensitive=False, **kwargs):
         url = f"{self.base_url}/{path.lstrip('/')}"
         timeout = kwargs.pop("timeout", 10)
-        logger.info(f"request() -> {method} {url}, headers={self.headers} kwargs={kwargs}, timeout={timeout}")
+        
+        # Retrieve a sanitized copy for logging.
+        sanitized_kwargs = sanitize_kwargs(kwargs)
+        
+        if hide_sensitive:
+            log_data = "[CENSORED]"
+        else:
+            log_data = sanitized_kwargs
+            
+        logger.info(f"request() -> {method} {url}, headers={self.headers} kwargs={log_data}, timeout={timeout}")
+        
         try:
             response = requests.request(
                 method,
@@ -55,14 +74,14 @@ class APIClient:
             logger.error(f"Error during {method} request to {url}: {e}")
             return None
     
-    def get(self, path="", params=None, timeout=10):
-        return self.request("GET", path, params=params, timeout=timeout)
+    def get(self, path="", params=None, timeout=10, hide_sensitive=False):
+        return self.request("GET", path, hide_sensitive=hide_sensitive, params=params, timeout=timeout)
     
-    def post(self, path="", data=None, json=None, timeout=10):
-        return self.request("POST", path, data=data, json=json, timeout=timeout)
+    def post(self, path="", data=None, json=None, timeout=10, hide_sensitive=False):
+        return self.request("POST", path, hide_sensitive=hide_sensitive, data=data, json=json, timeout=timeout)
     
-    def put(self, path="", data=None, json=None, timeout=10):
-        return self.request("PUT", path, data=data, json=json, timeout=timeout)
+    def put(self, path="", data=None, json=None, timeout=10, hide_sensitive=False):
+        return self.request("PUT", path, hide_sensitive=hide_sensitive, data=data, json=json, timeout=timeout)
     
-    def delete(self, path="", data=None, json=None, timeout=10):
-        return self.request("DELETE", path, data=data, json=json, timeout=timeout)
+    def delete(self, path="", data=None, json=None, timeout=10, hide_sensitive=False):
+        return self.request("DELETE", path, hide_sensitive=hide_sensitive, data=data, json=json, timeout=timeout)
