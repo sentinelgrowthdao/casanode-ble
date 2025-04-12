@@ -63,3 +63,6 @@ class APIClient:
     
     def put(self, path="", data=None, json=None, timeout=10):
         return self.request("PUT", path, data=data, json=json, timeout=timeout)
+    
+    def delete(self, path="", data=None, json=None, timeout=10):
+        return self.request("DELETE", path, data=data, json=json, timeout=timeout)
