@@ -14,6 +14,8 @@ def sanitize_kwargs(kwargs: dict) -> dict:
     if 'json' in sanitized and isinstance(sanitized['json'], dict):
         if 'mnemonic' in sanitized['json']:
             sanitized['json']['mnemonic'] = "[CENSORED]"
+        if 'passphrase' in sanitized['json']:
+            sanitized['json']['passphrase'] = "[CENSORED]"
     return sanitized
 
 class APIClient:
