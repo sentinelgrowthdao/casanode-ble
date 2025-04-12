@@ -13,8 +13,14 @@ class NodeStatusCharacteristic(BaseCharacteristic):
         self.api_client = APIClient()
     
     def get_api_status(self):
-        response = self.api_client.get("api/v1/status")
-        return response.text.strip() if response is not None else "error"
+        response = self.api_client.get("node/status")
+        if response is not None:
+            try:
+                data = response.json()
+                return data.get("status", "error")
+            except ValueError:
+                return "error"
+        return "error"
     
     @dbus.service.method("org.bluez.GattCharacteristic1", in_signature="a{sv}", out_signature="ay")
     def ReadValue(self, options):
