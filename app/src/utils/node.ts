@@ -386,6 +386,18 @@ class NodeManager
 		if (current_vpn_type === this.nodeConfig.vpn_type)
 		{
 			Logger.info('VPN type has not been changed.');
+			
+			// If the configuration file exists, update the VPN port
+			if (this.nodeConfig.vpn_type === 'wireguard')
+			{
+				// Update the listen port
+				this.updateConfigValue(wireguardConfigPath, 'listen_port', current_vpn_port);
+			}
+			else
+			{
+				// Update the listen port
+				this.updateConfigValue(v2rayConfigPath, 'listen_port', current_vpn_port);
+			}
 			return true;
 		}
 		
