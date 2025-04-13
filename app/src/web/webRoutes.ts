@@ -6,7 +6,6 @@ import QRCode from 'qrcode';
 import config from '@utils/configuration';
 import nodeManager from '@utils/node';
 import { getLocalIPAddress } from '@utils/network';
-import { isBluetoothAvailable } from '@utils/bluetooth';
 import { Logger } from '@utils/logger';
 
 // Create __dirname equivalent in ESM
@@ -48,7 +47,7 @@ webRouter.get('/', async (req: Request, res: Response) =>
 	};
 	
 	// If bluetooth is available and enabled
-	if (await isBluetoothAvailable() && config.BLE_ENABLED !== 'false')
+	if (config.BLE_ENABLED !== 'false')
 	{
 		qrData.bluetooth = {
 			uuid: config.BLE_UUID,
