@@ -1,5 +1,4 @@
 import { Logger } from '@utils/logger';
-import config from '@utils/configuration';
 import WebServer from '@utils/web';
 import { loadingNodeInformations, loadingSystemInformations } from '@actions/startup';
 
