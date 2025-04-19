@@ -322,19 +322,20 @@ def register_app(bus, mainloop):
     # Enregistrer l'annonce BLE
     advertisement, ad_manager = register_advertisement(bus, "hci0")
 
-    # Gestion du signal CTRL+C pour un nettoyage propre
+    # Handle CTRL+C signal for clean up
     def signal_handler(sig, frame):
-        logger.info("Ctrl+C détecté, désinscription de l'annonce BLE...")
+        logger.info("Ctrl+C detected, unregistering BLE advertisement...")
         try:
             ad_manager.UnregisterAdvertisement(advertisement.path)
-            logger.info("Advertisement désinscrite.")
-            # On peut désactiver l'advertising système et réinitialiser l'interface si besoin
-            subprocess.run(["sudo", "btmgmt", "advertising", "off"], check=True)
-            subprocess.run(["sudo", "hciconfig", "hci0", "reset"], check=True)
-            logger.info("Interface Bluetooth réinitialisée.")
-        except Exception as e:
-            logger.error("Erreur lors du nettoyage : %s", e)
-        mainloop.quit()
+            logger.info("Advertisement unregistered.")
+            # You can disable system advertising and reset the interface if needed
+            subprocess.run(["sudo", "btmgmt", "advertising", "off"], check=False)
+            subprocess.run(["sudo", "hciconfig", "hci0", "reset"], check=False)
+            logger.info("Bluetooth interface reset.")
+        except Exception as exc:
+            logger.error("Error during cleanup: %s", exc)
+        finally:
+            mainloop.quit()
 
     signal.signal(signal.SIGINT, signal_handler)
 
