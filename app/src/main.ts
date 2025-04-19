@@ -1,6 +1,4 @@
 import { Command } from 'commander';
-import { fileURLToPath } from 'url';
-import path from 'path';
 import {
 	daemonCommand,
 	checkInstallationCommand,
