@@ -398,7 +398,7 @@ def register_app(bus, mainloop):
     service_manager = dbus.Interface(bus.get_object("org.bluez", adapter_path), GATT_MANAGER_IFACE)
 
     service_manager.RegisterApplication(
-        app.path, {},
+        app.path, dbus.Dictionary({}, signature="sv"),
         reply_handler=lambda: logger.info("GATT application registered successfully"),
         error_handler=lambda e: logger.error(f"GATT application registration error: {e}"),
     )
