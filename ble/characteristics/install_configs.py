@@ -48,7 +48,7 @@ class InstallConfigsCharacteristic(BaseCharacteristic):
         Calls the API to install the configuration and updates the status accordingly.
         """
         try:
-            response = self.api_client.post("api/v1/install/configuration")
+            response = self.api_client.post("api/v1/install/configuration", timeout=60)
             if response is not None:
                 if response.status_code == 200:
                     result = response.text.strip()
