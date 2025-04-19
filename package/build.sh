@@ -22,6 +22,7 @@ echo "=== Copying compiled application files from $APP_DIR/dist to $TARGET_APP_D
 mkdir -p "$TARGET_APP_DIR/app"
 cp -r "$APP_DIR/dist/"* "$TARGET_APP_DIR/app/"
 cp -r "$APP_DIR/web/" "$TARGET_APP_DIR/web/"
+cp -r "$APP_DIR/ble/" "$TARGET_APP_DIR/ble/"
 
 echo "=== Copying package.json and package-lock.json ==="
 cp "$APP_DIR/package.json" "$TARGET_APP_DIR/app/"
@@ -39,6 +40,7 @@ chmod 755 "$DEB_DIR/DEBIAN/prerm"
 chmod 755 "$DEB_DIR/DEBIAN/postrm"
 # For example, the systemd file and config must be read-only
 chmod 644 "$DEB_DIR/etc/systemd/system/casanode.service"
+chmod 644 "$DEB_DIR/etc/systemd/system/casanode-ble.service"
 chmod 644 "$DEB_DIR/etc/systemd/system/casanode-startup.service"
 chmod 644 "$DEB_DIR/etc/casanode.conf"
 chmod 644 "$DEB_DIR/etc/logrotate.d/casanode"
