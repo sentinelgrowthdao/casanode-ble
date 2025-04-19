@@ -169,7 +169,7 @@ def register_advertisement(bus, adapter):
     adapter_props.Set(
         "org.bluez.Adapter1",
         "Alias",
-        String(get_config().get("BLENO_DEVICE_NAME", "Casanode")),
+        String(get_config().get("BLENO_DEVICE_NAME", "Casanode"), variant_level=1),
     )
     
     # Get the LEAdvertisingManager1 interface
