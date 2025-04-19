@@ -217,9 +217,9 @@ Log out and log back in for group changes to take effect.
 
 The creation of the .deb package is done in a Docker container. To do this, follow these steps:
 
-1. Start the container by running the `docker.sh` bash script available at the root of the project.
+1. Start the container by running the `deb-build.sh` bash script available at the root of the project.
 2. Once the container is started, execute the `build.sh` script.
-3. To send the .deb file to the GitHub repository, use the `push.sh` bash script (outside the container) available at the root of the project. This script clones a repository and sends everything to the `gh-pages` branch of the repository.
+3. To send the .deb file to the GitHub repository, use the `deb-push.sh` bash script (outside the container) available at the root of the project. This script clones a repository and sends everything to the `gh-pages` branch of the repository.
 
 ## License
 
