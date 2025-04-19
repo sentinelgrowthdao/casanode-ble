@@ -48,17 +48,17 @@ LE_ADVERTISEMENT_IFACE = 'org.bluez.LEAdvertisement1'
 GATT_MANAGER_IFACE = "org.bluez.GattManager1"
 SERVICE_PATH = '/org/bluez/example/service0'
 
-# Pour générer les UUID basés sur un seed
+# To generate UUIDs based on a seed
 def generate_uuid_from_seed(characteristic_id: str) -> str:
     cfg = get_config()
     seed = cfg.get("BLE_CHARACTERISTIC_SEED")
     if seed is None:
-        raise ValueError("La clé 'BLE_CHARACTERISTIC_SEED' doit être définie dans la configuration.")
+        raise ValueError("The key 'BLE_CHARACTERISTIC_SEED' must be set in the configuration.")
     print(f"Generating UUID from seed: {seed}+{characteristic_id}")
     print(f"UUID {characteristic_id}: {str(uuid.uuid5(uuid.NAMESPACE_URL, f'{seed}+{characteristic_id}'))}")
     return str(uuid.uuid5(uuid.NAMESPACE_URL, f"{seed}+{characteristic_id}"))
 
-# --- Partie Application GATT ---
+# GATT Application Section
 class CasanodeService(dbus.service.Object):
     def __init__(self, bus, index, uuid_str, primary):
         self.path = f"/org/bluez/example/service{index}"
@@ -81,8 +81,8 @@ class CasanodeService(dbus.service.Object):
 
 class Application(dbus.service.Object):
     """
-    Implémente org.freedesktop.DBus.ObjectManager pour que BlueZ
-    puisse récupérer tous les services GATT et caractéristiques.
+    Implements org.freedesktop.DBus.ObjectManager so BlueZ
+    can retrieve all GATT services and characteristics.
     """
     PATH = "/org/bluez/example"
     
@@ -97,14 +97,14 @@ class Application(dbus.service.Object):
         for service in self.services:
             response[service.get_path()] = service.get_properties()
             for char in service.characteristics:
-                # On appelle get_properties() si défini dans la caractéristique
+                # Call get_properties() if defined in the characteristic
                 response[char.get_path()] = getattr(char, 'get_properties', lambda: {})()
         return response
 
-# --- Partie Advertisement ---
+# --- Advertisement Section ---
 class Advertisement(dbus.service.Object):
     """
-    Définit une publicité BLE pour rendre l'appareil visible.
+    Defines a BLE advertisement to make the device visible.
     """
     PATH_BASE = "/org/bluez/example/advertisement"
 
@@ -112,9 +112,9 @@ class Advertisement(dbus.service.Object):
         self.path = self.PATH_BASE + str(index)
         self.bus = bus
         self.type = "peripheral"
-        # Le nom local est fixé ici (doit correspondre à vos attentes)
+        # The local name is set here (must match your expectations)
         self.local_name = "Casanode"
-        # On utilise l'UUID du service tel que défini dans la config
+        # Use the service UUID as defined in the config
         self.service_uuids = [get_config().get("BLE_UUID", "00001820-0000-1000-8000-00805f9b34fb")]
         dbus.service.Object.__init__(self, bus, self.path)
 
@@ -144,12 +144,12 @@ class Advertisement(dbus.service.Object):
 
     @dbus.service.method(LE_ADVERTISEMENT_IFACE, in_signature="", out_signature="")
     def Release(self):
-        logger.info("Advertisement libéré.")
+        logger.info("Advertisement released.")
 
 def register_advertisement(bus, adapter):
     """
-    Enregistre l'annonce BLE via l'interface LEAdvertisingManager1.
-    Retourne l'objet Advertisement et l'interface de gestion.
+    Registers the BLE advertisement via the LEAdvertisingManager1 interface.
+    Returns the Advertisement object and the management interface.
     """
     adapter_path = f"/org/bluez/{adapter}"
     ad_manager = dbus.Interface(
@@ -166,8 +166,8 @@ def register_advertisement(bus, adapter):
     ad_manager.RegisterAdvertisement(
         advertisement.path,
         props,
-        reply_handler=lambda: logger.info("Advertising BLE actif."),
-        error_handler=lambda error: logger.error(f"Erreur Advertising : {error}")
+        reply_handler=lambda: logger.info("BLE advertising active."),
+        error_handler=lambda error: logger.error(f"Advertising error: {error}")
     )
     return advertisement, ad_manager
 
@@ -309,7 +309,7 @@ def register_app(bus, mainloop):
     checkInstallation.service = service
     service.characteristics.append(checkInstallation)
 
-    # Ajouter le service à l'application
+    # Add the service to the application
     app.services.append(service)
 
     adapter_path = "/org/bluez/hci0"
@@ -319,7 +319,7 @@ def register_app(bus, mainloop):
         reply_handler=lambda: logger.info("GATT application registered successfully"),
         error_handler=lambda e: logger.error(f"GATT application registration error: {e}"))
 
-    # Enregistrer l'annonce BLE
+    # Register the BLE advertisement
     advertisement, ad_manager = register_advertisement(bus, "hci0")
 
     # Handle CTRL+C signal for clean up
@@ -339,7 +339,7 @@ def register_app(bus, mainloop):
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    logger.info("Serveur GATT et Advertisement BLE actif sur Raspberry Pi.")
+    logger.info("GATT server and BLE Advertisement active on Raspberry Pi.")
     mainloop.run()
 
 def main():
