@@ -191,6 +191,9 @@ def register_advertisement(bus, adapter):
     )
     return advertisement, ad_manager
 
+def iface_present(objects: dict, path: str, iface: str) -> bool:
+    return iface in objects.get(path, {})
+
 def ensure_adapter_powered(
     bus: dbus.Bus,
     adapter: str = "hci0",
@@ -207,10 +210,7 @@ def ensure_adapter_powered(
         "org.freedesktop.DBus.Properties",
     )
 
-    # ---- STEP 0: make sure the adapter isn't RF‑blocked (optional) --------
-    # subprocess.run(["rfkill", "unblock", "bluetooth"], check=False)
-
-    # ---- STEP 1: power the adapter on --------------------------------------
+    # Power the adapter on
     start = time.time()
     while True:
         powered = props.Get(ADAPTER_IFACE, "Powered")
@@ -238,7 +238,7 @@ def ensure_adapter_powered(
         # give BlueZ a tiny moment before re‑checking Powered
         time.sleep(retry_delay)
 
-    # ---- STEP 2: wait for LEAdvertisingManager1 to appear ------------------
+    # Wait for LEAdvertisingManager1 to appear
     obj_mgr = dbus.Interface(
         bus.get_object(BLUEZ_SERVICE_NAME, "/"),
         "org.freedesktop.DBus.ObjectManager",
@@ -246,14 +246,11 @@ def ensure_adapter_powered(
 
     start = time.time()
     while True:
-        for path, ifaces in obj_mgr.GetManagedObjects().items():
-            if LE_ADVERTISING_MANAGER_IFACE in ifaces:
-                return            # success!
-
+        objs = obj_mgr.GetManagedObjects()
+        if iface_present(objs, adapter_path, LE_ADVERTISING_MANAGER_IFACE) and iface_present(objs, adapter_path, GATT_MANAGER_IFACE):
+            break
         if time.time() - start > timeout:
-            raise RuntimeError(
-                f"{LE_ADVERTISING_MANAGER_IFACE} not exposed after {timeout}s"
-            )
+            raise RuntimeError("BlueZ plugins not ready in time")
         time.sleep(retry_delay)
 
 def register_app(bus, mainloop):
