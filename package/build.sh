@@ -5,6 +5,7 @@ set -e
 DEB_DIR="/package/deb"					# Files intended for the .deb
 DIST_DIR="/package/dist"				# Where the generated .deb will be placed
 APP_DIR="/app/"							# Node.js sources in TypeScript
+BLE_DIR="/ble/"							# BLE sources in Python
 TARGET_APP_DIR="$DEB_DIR/opt/casanode"	# Destination of the compiled application in the .deb
 
 echo "=== Cleaning previous compiled application files in $TARGET_APP_DIR ==="
@@ -22,7 +23,7 @@ echo "=== Copying compiled application files from $APP_DIR/dist to $TARGET_APP_D
 mkdir -p "$TARGET_APP_DIR/app"
 cp -r "$APP_DIR/dist/"* "$TARGET_APP_DIR/app/"
 cp -r "$APP_DIR/web/" "$TARGET_APP_DIR/web/"
-cp -r "$APP_DIR/ble/" "$TARGET_APP_DIR/ble/"
+cp -r "$BLE_DIR" "$TARGET_APP_DIR/ble/"
 
 echo "=== Copying package.json and package-lock.json ==="
 cp "$APP_DIR/package.json" "$TARGET_APP_DIR/app/"
