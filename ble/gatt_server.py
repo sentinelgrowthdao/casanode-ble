@@ -2,9 +2,12 @@
 import dbus
 import dbus.mainloop.glib
 import dbus.service
+from dbus import String
+from dbus.exceptions import DBusException
 import signal
 import subprocess
 import uuid
+import time
 from gi.repository import GLib
 from utils.config import get_config
 from utils import logger
@@ -46,6 +49,7 @@ BLUEZ_SERVICE_NAME = 'org.bluez'
 LE_ADVERTISING_MANAGER_IFACE = 'org.bluez.LEAdvertisingManager1'
 LE_ADVERTISEMENT_IFACE = 'org.bluez.LEAdvertisement1'
 GATT_MANAGER_IFACE = "org.bluez.GattManager1"
+ADAPTER_IFACE = "org.bluez.Adapter1"
 SERVICE_PATH = '/org/bluez/example/service0'
 
 # To generate UUIDs based on a seed
@@ -151,18 +155,34 @@ def register_advertisement(bus, adapter):
     Registers the BLE advertisement via the LEAdvertisingManager1 interface.
     Returns the Advertisement object and the management interface.
     """
+    # Ensure the adapter is powered on
+    ensure_adapter_powered(bus, adapter)
+    
+    # Get the LEAdvertisingManager1 interface
     adapter_path = f"/org/bluez/{adapter}"
+    
+    # Set the adapter’s Alias so that BLE scanners see “Casanode”
+    adapter_props = dbus.Interface(
+        bus.get_object(BLUEZ_SERVICE_NAME, adapter_path),
+        "org.freedesktop.DBus.Properties",
+    )
+    adapter_props.Set(
+        "org.bluez.Adapter1",
+        "Alias",
+        String(get_config().get("BLENO_DEVICE_NAME", "Casanode")),
+    )
+    
+    # Get the LEAdvertisingManager1 interface
     ad_manager = dbus.Interface(
         bus.get_object(BLUEZ_SERVICE_NAME, adapter_path),
         LE_ADVERTISING_MANAGER_IFACE,
     )
+    
+    # Create the advertisement object
     advertisement = Advertisement(bus, 0)
-    props = dbus.Dictionary(
-        {
-            "Type": "peripheral",
-        },
-        signature="sv",
-    )
+    props = dbus.Dictionary({"Type": "peripheral"}, signature="sv")
+    
+    # Register the advertisement
     ad_manager.RegisterAdvertisement(
         advertisement.path,
         props,
@@ -170,6 +190,71 @@ def register_advertisement(bus, adapter):
         error_handler=lambda error: logger.error(f"Advertising error: {error}")
     )
     return advertisement, ad_manager
+
+def ensure_adapter_powered(
+    bus: dbus.Bus,
+    adapter: str = "hci0",
+    timeout: float = 8.0,
+    retry_delay: float = 0.25,
+) -> None:
+    """
+    Ensure the Bluetooth adapter is powered *and* exposes LEAdvertisingManager1.
+    Retries politely when BlueZ reports org.bluez.Error.Busy.
+    """
+    adapter_path = f"/org/bluez/{adapter}"
+    props = dbus.Interface(
+        bus.get_object(BLUEZ_SERVICE_NAME, adapter_path),
+        "org.freedesktop.DBus.Properties",
+    )
+
+    # ---- STEP 0: make sure the adapter isn't RF‑blocked (optional) --------
+    # subprocess.run(["rfkill", "unblock", "bluetooth"], check=False)
+
+    # ---- STEP 1: power the adapter on --------------------------------------
+    start = time.time()
+    while True:
+        powered = props.Get(ADAPTER_IFACE, "Powered")
+        if powered:
+            break
+
+        try:
+            logger.info(f"Adapter {adapter} is off; powering on…")
+            props.Set(
+                ADAPTER_IFACE,
+                "Powered",
+                dbus.Boolean(True, variant_level=1),
+            )
+        except DBusException as exc:
+            # BlueZ returns Busy while it (re)initialises the controller
+            if "org.bluez.Error.Busy" in exc.get_dbus_name() or "Busy" in str(exc):
+                if time.time() - start > timeout:
+                    raise RuntimeError(
+                        f"Adapter {adapter} stayed busy for {timeout}s"
+                    ) from exc
+                time.sleep(retry_delay)
+                continue
+            raise
+
+        # give BlueZ a tiny moment before re‑checking Powered
+        time.sleep(retry_delay)
+
+    # ---- STEP 2: wait for LEAdvertisingManager1 to appear ------------------
+    obj_mgr = dbus.Interface(
+        bus.get_object(BLUEZ_SERVICE_NAME, "/"),
+        "org.freedesktop.DBus.ObjectManager",
+    )
+
+    start = time.time()
+    while True:
+        for path, ifaces in obj_mgr.GetManagedObjects().items():
+            if LE_ADVERTISING_MANAGER_IFACE in ifaces:
+                return            # success!
+
+        if time.time() - start > timeout:
+            raise RuntimeError(
+                f"{LE_ADVERTISING_MANAGER_IFACE} not exposed after {timeout}s"
+            )
+        time.sleep(retry_delay)
 
 def register_app(bus, mainloop):
     # Create the main application
@@ -315,9 +400,11 @@ def register_app(bus, mainloop):
     adapter_path = "/org/bluez/hci0"
     service_manager = dbus.Interface(bus.get_object("org.bluez", adapter_path), GATT_MANAGER_IFACE)
 
-    service_manager.RegisterApplication(app.path, {},
+    service_manager.RegisterApplication(
+        app.path, {},
         reply_handler=lambda: logger.info("GATT application registered successfully"),
-        error_handler=lambda e: logger.error(f"GATT application registration error: {e}"))
+        error_handler=lambda e: logger.error(f"GATT application registration error: {e}"),
+    )
 
     # Register the BLE advertisement
     advertisement, ad_manager = register_advertisement(bus, "hci0")
@@ -333,7 +420,7 @@ def register_app(bus, mainloop):
             subprocess.run(["sudo", "hciconfig", "hci0", "reset"], check=False)
             logger.info("Bluetooth interface reset.")
         except Exception as exc:
-            logger.error("Error during cleanup: %s", exc)
+            logger.error(f"Error during cleanup: {exc}")
         finally:
             mainloop.quit()
 
