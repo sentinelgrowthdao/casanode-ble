@@ -23,7 +23,14 @@ echo "=== Copying compiled application files from $APP_DIR/dist to $TARGET_APP_D
 mkdir -p "$TARGET_APP_DIR/app"
 cp -r "$APP_DIR/dist/"* "$TARGET_APP_DIR/app/"
 cp -r "$APP_DIR/web/" "$TARGET_APP_DIR/web/"
+
+echo "=== Copying ble files from $BLE_DIR to $TARGET_APP_DIR ==="
 cp -r "$BLE_DIR" "$TARGET_APP_DIR/ble/"
+echo "=== Removing Python temporary and cache files from $TARGET_APP_DIR/ble ==="
+# Delete compiled bytecode
+find "$TARGET_APP_DIR/ble/" -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete
+# Remove __pycache__ directories
+find "$TARGET_APP_DIR/ble/" -type d -name '__pycache__' -exec rm -rf {} +
 
 echo "=== Copying package.json and package-lock.json ==="
 cp "$APP_DIR/package.json" "$TARGET_APP_DIR/app/"
