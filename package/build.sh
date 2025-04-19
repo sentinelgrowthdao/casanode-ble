@@ -71,6 +71,8 @@ cp "$CONTROL_FILE" "$BACKUP_CONTROL_FILE"
 # Replace the Version field with the package version
 sed -i "s/^Version: .*/Version: ${VERSION}/" "$CONTROL_FILE"
 echo "Control file modified: $(grep ^Version: "$CONTROL_FILE")"
+# Replace the version parameter in casanode.conf
+sed -i "s/^version=.*/version=${VERSION}/" "$DEB_DIR/etc/casanode.conf"
 
 echo "=== Building .deb package ==="
 dpkg-deb --build --root-owner-group "$DEB_DIR" "$DEB_FILE"
