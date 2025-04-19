@@ -151,13 +151,21 @@ def register_advertisement(bus, adapter):
     Enregistre l'annonce BLE via l'interface LEAdvertisingManager1.
     Retourne l'objet Advertisement et l'interface de gestion.
     """
-    adapter_path = "/org/bluez/" + adapter
-    ad_manager = dbus.Interface(bus.get_object(BLUEZ_SERVICE_NAME, adapter_path),
-                                LE_ADVERTISING_MANAGER_IFACE)
+    adapter_path = f"/org/bluez/{adapter}"
+    ad_manager = dbus.Interface(
+        bus.get_object(BLUEZ_SERVICE_NAME, adapter_path),
+        LE_ADVERTISING_MANAGER_IFACE,
+    )
     advertisement = Advertisement(bus, 0)
+    props = dbus.Dictionary(
+        {
+            "Type": "peripheral",
+        },
+        signature="sv",
+    )
     ad_manager.RegisterAdvertisement(
         advertisement.path,
-        {"Type": "peripheral"},
+        props,
         reply_handler=lambda: logger.info("Advertising BLE actif."),
         error_handler=lambda error: logger.error(f"Erreur Advertising : {error}")
     )
