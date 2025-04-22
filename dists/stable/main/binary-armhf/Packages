@@ -19,10 +19,10 @@ Depends: nodejs,
      libbluetooth-dev,
      bluez
 Filename: pool/main/casanode_1.0.0-alpha6.3_all.deb
-Size: 289624
-MD5sum: 3cfde4a32fb26c394cac8143ce6b60af
-SHA1: 0f75323ac9d5c076dd0e2b94f459666c5f4017b5
-SHA256: 340942105f2485bb0731972b6c139fbcb80546d8f3fb43c6a76e51f0beb9b242
+Size: 295856
+MD5sum: fd250b6259f2461a9a60bd0e5a0c33e2
+SHA1: 9312278bbe8554a9c0ac03ee6733219e69590eb5
+SHA256: 04b0f6c6ed52a1a6be9a7262ebb647f3bc1fce8d63384f15f037f6ae0fb09947
 Section: net
 Priority: optional
 Homepage: https://github.com/sentinelgrowthdao/casanode-ble
