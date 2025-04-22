@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import copy
 import requests
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urljoin
 from utils import config, logger
 from utils.network import get_local_ip_address
 
@@ -31,22 +31,26 @@ class APIClient:
             return
         self._initialized = True
         
+        # Load configuration
         self.config = config.get_config()
-        api_listen = self.config.get("API_LISTEN")
-        local_ip = get_local_ip_address() or "127.0.0.1"
-        
-        parts = api_listen.split(":")
-        port = parts[1] if len(parts) == 2 else "8081"
-        
-        self.base_url = f"https://{local_ip}:{port}"
         self.headers = {"Authorization": f"Bearer {self.config.get('API_AUTH')}"}
+
+        # Define the API listen address and port
+        api_listen = self.config.get("API_LISTEN")
+        parts = api_listen.split(":")
+        self.port = parts[1] if len(parts) == 2 else "8081"
         
+        # Define the CA certificate path
         certs_dir = self.config.get("CERTS_DIR")
         self.ca_cert = f"{certs_dir}/ca.crt"
-        print(f"ca_cert: {self.ca_cert}")
+    
+    def _build_url(self, path=""):
+        local_ip = get_local_ip_address() or "127.0.0.1"
+        base_url = f"https://{local_ip}:{self.port}"
+        return urljoin(base_url + "/", path)
     
     def request(self, method, path="", hide_sensitive=False, **kwargs):
-        url = f"{self.base_url}/{path.lstrip('/')}"
+        url = self._build_url(path.lstrip('/'))
         timeout = kwargs.pop("timeout", 10)
         
         # Retrieve a sanitized copy for logging.
