@@ -43,6 +43,7 @@ npm install --prefix /opt/casanode/app --production || { echo "Error: Failed to 
 
 echo "Enabling systemd services..."
 systemctl enable casanode.service
+systemctl enable casanode-ble.service
 systemctl enable casanode-startup.service
 systemctl daemon-reload
 
