@@ -8,6 +8,7 @@ else
 fi
 
 echo "Setting up casanode permissions..."
+mkdir -p /opt/casanode/.config/
 chown -R casanode:casanode /opt/casanode
 if command -v sudo &>/dev/null; then
 	usermod -aG sudo,adm,docker casanode
