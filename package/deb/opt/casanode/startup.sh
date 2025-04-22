@@ -40,6 +40,13 @@ then
 	dockerd-rootless-setuptool.sh install" | tee -a "$LOGFILE"
 	echo "Docker rootless installation completed." | tee -a "$LOGFILE"
 	
+	# Create the necessary directories for Docker rootless
+	su -s /bin/bash -l "$USER" -c "mkdir -p /opt/casanode/.config/systemd/user/docker.service.d && \
+	cat > /opt/casanode/.config/systemd/user/docker.service.d/env.conf <<'EOT'
+[Service]
+Environment=XDG_RUNTIME_DIR=/run/user/%U
+EOT"
+	
 	# Create the installation flag to avoid reinstalling on the next startup
 	touch "$FLAGFILE"
 else
