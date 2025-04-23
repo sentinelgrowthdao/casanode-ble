@@ -13,13 +13,13 @@ if [ ! -f "$FLAGFILE" ]
 then
 	echo "Docker rootless is not installed. Installing..." | tee -a "$LOGFILE"
 	
-	# Stop Docker rootful if it is running
-	echo "Rootful Docker is running. Stopping Docker rootful..." | tee -a "$LOGFILE"
+	# Stop Docker rootful
+	echo "Stopping rootful Docker..." | tee -a "$LOGFILE"
 	systemctl disable --now docker.service docker.socket
 	rm -f /var/run/docker.sock
 	echo "Docker rootful stopped." | tee -a "$LOGFILE"
 	
-	# Enable linger for the user to allow the service to start at boot
+	# Enable linger
 	loginctl enable-linger "$USER"
 	echo "Linger enabled for $USER user." | tee -a "$LOGFILE"
 	
@@ -33,24 +33,31 @@ then
 		echo "${USER}:100000:65536" >> /etc/subgid
 	fi
 	
+	# Ensure ownership of .config
+	chown -R casanode:casanode /opt/casanode/.config
+	
 	# Install Docker rootless
 	echo "Installing Docker rootless..." | tee -a "$LOGFILE"
-	su -s /bin/bash -l "$USER" -c "export XDG_RUNTIME_DIR=/run/user/\$(id -u) && \
-	export DBUS_SESSION_BUS_ADDRESS=unix:path=\$XDG_RUNTIME_DIR/bus && \
-	dockerd-rootless-setuptool.sh install" | tee -a "$LOGFILE"
-	echo "Docker rootless installation completed." | tee -a "$LOGFILE"
+	su - "$USER" -s /bin/bash -l -c \
+		"dockerd-rootless-setuptool.sh install -f --skip-iptables" | tee -a "$LOGFILE"
 	
-	# Create the necessary directories for Docker rootless
-	su -s /bin/bash -l "$USER" -c "mkdir -p /opt/casanode/.config/systemd/user/docker.service.d && \
+	# Create the systemd user directory if it doesn't exist
+	if [ ! -d /opt/casanode/.config/systemd/user/docker.service.d ]
+	then
+		mkdir -p /opt/casanode/.config/systemd/user/docker.service.d
+	fi
+	# Create the environment file for systemd user service
 	cat > /opt/casanode/.config/systemd/user/docker.service.d/env.conf <<'EOT'
 [Service]
 Environment=XDG_RUNTIME_DIR=/run/user/%U
-EOT"
+EOT
+	# Change ownership of the systemd directory
+	chown -R casanode:casanode /opt/casanode/.config/systemd/
 	
 	# Create the installation flag to avoid reinstalling on the next startup
 	touch "$FLAGFILE"
 else
-	echo "Docker rootless is already installed." | tee -a "$LOGFILE"
+	echo "Docker rootless already installed." | tee -a "$LOGFILE"
 fi
 
 # Ensure that Docker rootless is started (check via systemctl --user)
