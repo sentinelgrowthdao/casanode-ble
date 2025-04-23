@@ -64,7 +64,7 @@ fi
 if ! su -s /bin/bash -l "$USER" -c 'systemctl --user is-active docker' >/dev/null 2>&1
 then
 	echo "Starting Docker rootless for user $USER..." | tee -a "$LOGFILE"
-	su -s /bin/bash -l "$USER" -c 'systemctl --user start docker'
+	su - "$USER" -s /bin/bash -l -c "XDG_RUNTIME_DIR=/run/user/$(id -u $USER) systemctl --user start docker"
 else
 	echo "Docker rootless is already running." | tee -a "$LOGFILE"
 fi
