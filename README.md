@@ -52,7 +52,7 @@ curl -X DELETE -H "Authorization: Bearer <token>" -k https://192.168.x.x:8081/ap
 Node Status
 
 ```bash
-curl -X PUT -H "Authorization: Bearer <token>" -k https://192.168.x.x:8081/api/v1/node/status
+curl -X GET -H "Authorization: Bearer <token>" -k https://192.168.x.x:8081/api/v1/node/status
 ```
 
 Node Configuration

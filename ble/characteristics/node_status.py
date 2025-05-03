@@ -13,7 +13,7 @@ class NodeStatusCharacteristic(BaseCharacteristic):
         self.api_client = APIClient()
     
     def get_api_status(self):
-        response = self.api_client.get("node/status")
+        response = self.api_client.get("api/v1/node/status")
         if response is not None:
             try:
                 data = response.json()
