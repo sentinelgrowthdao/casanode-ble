@@ -9,14 +9,16 @@ import json
 
 class InstallConfigsCharacteristic(BaseCharacteristic):
     def __init__(self, bus, index, uuid):
-        flags = ['read', 'write']
+        flags = ['read', 'write', 'notify']
         super().__init__(bus, index, uuid, flags)
         self.service_path = '/org/bluez/example/service0'
-        # Status values: "0" = not started, "1" = in progress, "2" (or "111") = success, "-1" = error
+        # Status values: "0" = not started, "1" = in progress, "2"/"111" = success, "-1" = error
         self.config_status = "0"
         self.api_client = APIClient()
         # Lock for thread-safety when reading/writing the config_status
         self.lock = threading.Lock()
+        # Initialize the notifying flag.
+        self.notifying = False
     
     @dbus.service.method("org.bluez.GattCharacteristic1", in_signature="a{sv}", out_signature="ay")
     def ReadValue(self, options):
@@ -41,7 +43,8 @@ class InstallConfigsCharacteristic(BaseCharacteristic):
             raise dbus.DBusException("org.bluez.Error.InvalidValue")
         with self.lock:
             self.config_status = "1"
-        threading.Thread(target=self._install_configs).start()
+        self._notify_clients()
+        threading.Thread(target=self._install_configs, daemon=True).start()
     
     def _install_configs(self):
         """
@@ -67,7 +70,31 @@ class InstallConfigsCharacteristic(BaseCharacteristic):
                 with self.lock:
                     self.config_status = "-1"
                 logger.error("InstallConfigsCharacteristic: Installation failed (no response)")
+            self._notify_clients()
         except Exception as e:
             with self.lock:
                 self.config_status = "-1"
             logger.error(f"InstallConfigsCharacteristic: Exception during installation: {e}")
+            self._notify_clients()
+    
+    @dbus.service.method("org.bluez.GattCharacteristic1", in_signature="", out_signature="")
+    def StartNotify(self):
+        logger.info("[Configs] StartNotify")
+        self.notifying = True
+
+    @dbus.service.method("org.bluez.GattCharacteristic1", in_signature="", out_signature="")
+    def StopNotify(self):
+        logger.info("[Configs] StopNotify")
+        self.notifying = False
+
+    def _notify_clients(self):
+        """Sends a PropertiesChanged if at least one client is subscribed."""
+        if not self.notifying:
+            return
+        with self.lock:
+            arr = [dbus.Byte(b) for b in self.config_status.encode('utf-8')]
+        self.PropertiesChanged(
+            "org.bluez.GattCharacteristic1",
+            {"Value": dbus.Array(arr, signature='y')},
+            []
+        )
