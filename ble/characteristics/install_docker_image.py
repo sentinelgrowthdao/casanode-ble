@@ -15,17 +15,17 @@ class InstallStatus(Enum):
 
 class InstallDockerImageCharacteristic(BaseCharacteristic):
 	def __init__(self, bus, index, uuid):
-		# This characteristic supports read and write operations.
-		flags = ['read', 'write']
+		# This characteristic supports read write, and notify.
+		flags = ['read', 'write', 'notify']
 		super().__init__(bus, index, uuid, flags)
 		self.service_path = '/org/bluez/example/service0'
 		self.api_client = APIClient()
-
 		# Initialize the installation status.
 		self.install_status = InstallStatus.NOT_STARTED
-
 		# Lock for thread-safety when modifying install_status.
 		self.lock = threading.Lock()
+		# Initialize the notifying flag.
+		self.notifying = False
 
 	@dbus.service.method("org.bluez.GattCharacteristic1", in_signature="a{sv}", out_signature="ay")
 	def ReadValue(self, options):
@@ -54,11 +54,13 @@ class InstallDockerImageCharacteristic(BaseCharacteristic):
 					return
 				self.install_status = InstallStatus.IN_PROGRESS
 			# Start the installation in a separate thread.
-			threading.Thread(target=self._install_docker_image).start()
+			self._notify_clients()
+			threading.Thread(target=self._install_docker_image, daemon=True).start()
 		else:
 			logger.error(f"InstallDockerImageCharacteristic: Unknown action '{action}'")
 			with self.lock:
 				self.install_status = InstallStatus.ERROR
+			self._notify_clients()
 
 	def _install_docker_image(self):
 		"""
@@ -74,7 +76,31 @@ class InstallDockerImageCharacteristic(BaseCharacteristic):
 				else:
 					self.install_status = InstallStatus.ERROR
 					logger.error("InstallDockerImageCharacteristic: Installation failed (no response)")
+			self._notify_clients()
 		except Exception as e:
 			with self.lock:
 				self.install_status = InstallStatus.ERROR
 			logger.error(f"InstallDockerImageCharacteristic: Error installing docker image: {e}")
+			self._notify_clients()
+
+	@dbus.service.method("org.bluez.GattCharacteristic1", in_signature="", out_signature="")
+	def StartNotify(self):
+		logger.info("[Docker] StartNotify")
+		self.notifying = True
+
+	@dbus.service.method("org.bluez.GattCharacteristic1", in_signature="", out_signature="")
+	def StopNotify(self):
+		logger.info("[Docker] StopNotify")
+		self.notifying = False
+
+	def _notify_clients(self):
+		"""Emits a PropertiesChanged signal if a client is subscribed."""
+		if not getattr(self, 'notifying', False):
+			return
+		with self.lock:
+			val = [dbus.Byte(b) for b in self.install_status.value.encode()]
+		self.PropertiesChanged(
+			"org.bluez.GattCharacteristic1",
+			{"Value": dbus.Array(val, signature="y")},
+			[]
+		)
