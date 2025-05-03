@@ -663,7 +663,7 @@ class NodeManager
 		if (!this.isPassphraseValid(passphrase))
 		{
 			Logger.error('Passphrase is required to check if the wallet exists.');
-			return false;
+			return undefined;
 		}
 		
 		// Stdin for the command
