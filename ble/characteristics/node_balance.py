@@ -19,7 +19,7 @@ class NodeBalanceCharacteristic(BaseCharacteristic):
     """
     
     def __init__(self, bus, index, uuid):
-        flags = ['read', 'write']
+        flags = ['read', 'write', 'notify']
         super().__init__(bus, index, uuid, flags)
         self.service_path = '/org/bluez/example/service0'
         self.api_client = APIClient()
@@ -30,6 +30,8 @@ class NodeBalanceCharacteristic(BaseCharacteristic):
         # a valid balance string (e.g. "123.45 USD") on success,
         # "-1" on error.
         self.balance_state = "0"
+        self.notifying = False
+        self.lock = threading.Lock()
     
     @dbus.service.method("org.bluez.GattCharacteristic1", in_signature="aya{sv}", out_signature="")
     def WriteValue(self, value, options):
@@ -42,35 +44,36 @@ class NodeBalanceCharacteristic(BaseCharacteristic):
         
         # Check for the expected command; adjust the command string if needed.
         if command == "udvpn":
-            # Set status to "1" (in progress) and start the API call in a new thread.
-            self.balance_state = "1"
-            threading.Thread(target=self._fetch_balance).start()
+            with self.lock:
+                # Set status to "1" (in progress) and start the API call in a new thread.
+                self.balance_state = "1"
+            self._notify_clients()
+            threading.Thread(target=self._fetch_balance, daemon=True).start()
         else:
             logger.error(f"NodeBalanceCharacteristic: Unknown command '{command}'")
-            self.balance_state = "-1"
+            with self.lock:
+                self.balance_state = "-1"
+            self._notify_clients()
     
     def _fetch_balance(self):
         """
-        Calls the API to fetch the node's balance and updates balance_state accordingly.
+        Fetch the node's balance from the API.
         """
         try:
-            response = self.api_client.get("api/v1/node/balance")
-            if response is not None:
-                data = response.json()
-                # Expecting the API to return JSON like: { "balance": "123.45 USD" }
-                balance = data.get("balance")
-                if balance:
-                    self.balance_state = str(balance)
-                    logger.info(f"NodeBalanceCharacteristic: Fetched balance '{balance}'")
+            resp = self.api_client.get("api/v1/node/balance")
+            with self.lock:
+                if resp and resp.ok:
+                    bal = resp.json().get("balance")
+                    self.balance_state = bal or "-1"
                 else:
                     self.balance_state = "-1"
-                    logger.error("NodeBalanceCharacteristic: Balance not found in API response")
-            else:
-                self.balance_state = "-1"
-                logger.error("NodeBalanceCharacteristic: No response from API")
+            logger.info(f"NodeBalanceCharacteristic: fetched '{self.balance_state}'")
         except Exception as e:
-            self.balance_state = "-1"
-            logger.error(f"NodeBalanceCharacteristic: Exception during balance fetch: {e}")
+            with self.lock:
+                self.balance_state = "-1"
+            logger.error(f"NodeBalanceCharacteristic: Exception during fetch: {e}")
+        finally:
+            self._notify_clients()
     
     @dbus.service.method("org.bluez.GattCharacteristic1", in_signature="a{sv}", out_signature="ay")
     def ReadValue(self, options):
@@ -82,3 +85,25 @@ class NodeBalanceCharacteristic(BaseCharacteristic):
         """
         logger.info(f"NodeBalanceCharacteristic: Current balance state '{self.balance_state}'")
         return [dbus.Byte(b) for b in self.balance_state.encode("utf-8")]
+
+    @dbus.service.method("org.bluez.GattCharacteristic1", in_signature="", out_signature="")
+    def StartNotify(self):
+        logger.info("NodeBalanceCharacteristic: StartNotify")
+        self.notifying = True
+    
+    @dbus.service.method("org.bluez.GattCharacteristic1", in_signature="", out_signature="")
+    def StopNotify(self):
+        logger.info("NodeBalanceCharacteristic: StopNotify")
+        self.notifying = False
+    
+    def _notify_clients(self):
+        """Sends a PropertiesChanged signal if a client is subscribed."""
+        if not self.notifying:
+            return
+        with self.lock:
+            arr = [dbus.Byte(b) for b in self.balance_state.encode()]
+        self.PropertiesChanged(
+            "org.bluez.GattCharacteristic1",
+            {"Value": dbus.Array(arr, signature='y')},
+            []
+        )
