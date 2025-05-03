@@ -212,16 +212,16 @@ export async function nodeConfigurationSetValues(req: Request, res: Response): P
 			nodeManager.setMaxPeers(maximumPeers);
 		}
 		
-		// Refresh the configuration files with the new values
-		Logger.info('Starting node configuration update process');
-		nodeManager.refreshConfigFiles();
-		
 		// If vpnType was changed, execute vpnChangeType
 		if (vpnTypeChanged)
 		{
 			Logger.info('VpnType changed, executing vpnChangeType');
 			await vpnChangeType();
 		}
+		
+		// Refresh the configuration files with the new values
+		Logger.info('Starting node configuration update process');
+		nodeManager.refreshConfigFiles();
 		
 		// Return the node configuration
 		Logger.info('Node configuration updated successfully');
