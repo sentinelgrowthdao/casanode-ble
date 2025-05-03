@@ -28,7 +28,11 @@ class BaseCharacteristic(dbus.service.Object):
 		if interface != "org.bluez.GattCharacteristic1":
 			raise Exception("Invalid interface requested")
 		return self.get_properties()["org.bluez.GattCharacteristic1"]
-
+	
+	@dbus.service.signal(dbus_interface='org.freedesktop.DBus.Properties', signature='sa{sv}as')
+	def PropertiesChanged(self, interface, changed, invalidated):
+		pass
+	
 	# @dbus.service.method("org.bluez.GattCharacteristic1", in_signature="", out_signature="")
 	# def StartNotify(self):
 	# 	pass
