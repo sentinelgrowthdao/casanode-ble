@@ -1,7 +1,7 @@
 [Unit]
 Description=Casanode BLE Service
-After=network.target casanode.service
 Requires=casanode.service
+After=casanode.service
 
 [Service]
 User=casanode

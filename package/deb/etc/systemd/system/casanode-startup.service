@@ -1,6 +1,7 @@
 [Unit]
 Description=Casanode Startup Initialization
-After=network.target
+Wants=dhcpcd.service
+After=dhcpcd.service
 
 [Service]
 Type=oneshot
