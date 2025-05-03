@@ -2,7 +2,7 @@
 import dbus
 import dbus.mainloop.glib
 import dbus.service
-from dbus import String
+from dbus import String, Boolean, UInt32
 from dbus.exceptions import DBusException
 import signal
 import subprocess
@@ -58,9 +58,48 @@ def generate_uuid_from_seed(characteristic_id: str) -> str:
     seed = cfg.get("BLE_CHARACTERISTIC_SEED")
     if seed is None:
         raise ValueError("The key 'BLE_CHARACTERISTIC_SEED' must be set in the configuration.")
-    print(f"Generating UUID from seed: {seed}+{characteristic_id}")
-    print(f"UUID {characteristic_id}: {str(uuid.uuid5(uuid.NAMESPACE_URL, f'{seed}+{characteristic_id}'))}")
     return str(uuid.uuid5(uuid.NAMESPACE_URL, f"{seed}+{characteristic_id}"))
+
+def configure_ble_controller():
+    """
+    Run btmgmt in interactive mode to set:
+      - bondable off
+      - connection-parameters 24 40 0 1000 (10 s supervision timeout)
+    """
+    cmds = "\n".join([
+        "menu le",
+        "bondable off",
+        "connection-parameters 24 40 0 1000",
+        "back",
+        "exit"
+    ]) + "\n"
+    try:
+        logger.info("Configuring BLE controller parameters via btmgmt…")
+        subprocess.run(
+            ["sudo", "btmgmt"],
+            input=cmds,
+            text=True,
+            check=True
+        )
+        logger.info("BLE controller configured")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"btmgmt configuration failed: {e}")
+
+def disable_pairing_via_dbus(bus, adapter="hci0"):
+    """
+    Disable pairing on Adapter1 via D-Bus
+    """
+    path = f"/org/bluez/{adapter}"
+    props = dbus.Interface(
+        bus.get_object(BLUEZ_SERVICE_NAME, path),
+        "org.freedesktop.DBus.Properties"
+    )
+    try:
+        props.Set(ADAPTER_IFACE, "Pairable", Boolean(False))
+        props.Set(ADAPTER_IFACE, "PairableTimeout", UInt32(0))
+        logger.info("Adapter1.Pairable set to False, PairableTimeout=0")
+    except Exception as e:
+        logger.error(f"Failed to disable pairing via D-Bus: {e}")
 
 # GATT Application Section
 class CasanodeService(dbus.service.Object):
@@ -432,6 +471,14 @@ def register_app(bus, mainloop):
 def main():
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     bus = dbus.SystemBus()
+    
+    # configure controller (btmgmt)
+    configure_ble_controller()
+    
+    # disable pairing via D-Bus
+    disable_pairing_via_dbus(bus, "hci0")
+    
+    # Then start the GATT server
     mainloop = GLib.MainLoop()
     register_app(bus, mainloop)
 
