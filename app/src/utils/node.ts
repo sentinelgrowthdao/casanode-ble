@@ -524,6 +524,10 @@ class NodeManager
 	 */
 	public async createNodeConfig(): Promise<boolean>
 	{
+		// Check if the configuration file already exists
+		if (this.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'config.toml')))
+			return true;
+		
 		// Create configuration file
 		const output: string|null = await containerCommand(['process', 'config', 'init']);
 		
@@ -553,11 +557,21 @@ class NodeManager
 		// Create WireGuard configuration file
 		if (this.nodeConfig.vpn_type === 'wireguard')
 		{
+			// Check if the configuration file already exists
+			if (this.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'wireguard.toml')))
+				return true;
+			
+			// Create configuration file
 			output = await containerCommand(['process', 'wireguard', 'config', 'init']);
 		}
 		// Create V2Ray configuration file
 		else if (this.nodeConfig.vpn_type === 'v2ray')
 		{
+			// Check if the configuration file already exists
+			if (this.isConfigFileAvailable(path.join(config.CONFIG_DIR, 'v2ray.toml')))
+				return true;
+			
+			// Create configuration file
 			output = await containerCommand(['process', 'v2ray', 'config', 'init']);
 		}
 		
