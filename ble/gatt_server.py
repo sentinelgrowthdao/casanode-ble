@@ -393,10 +393,13 @@ def register_app(bus, mainloop):
 
     # Add the service to the application
     app.services.append(service)
-
+    
+    # Ensure the adapter is powered on
+    ensure_adapter_powered(bus, "hci0")
+    
     adapter_path = "/org/bluez/hci0"
     service_manager = dbus.Interface(bus.get_object("org.bluez", adapter_path), GATT_MANAGER_IFACE)
-
+    
     service_manager.RegisterApplication(
         app.path, dbus.Dictionary({}, signature="sv"),
         reply_handler=lambda: logger.info("GATT application registered successfully"),
