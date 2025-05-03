@@ -8,11 +8,13 @@ from utils.api import APIClient
 
 class CertificateActionsCharacteristic(BaseCharacteristic):
     def __init__(self, bus, index, uuid):
-        flags = ['read', 'write']
+        flags = ['read', 'write', 'notify']
         super().__init__(bus, index, uuid, flags)
         self.service_path = '/org/bluez/example/service0'
         self.cert_status = "0"
         self.api_client = APIClient()
+        self.lock = threading.Lock()
+        self.notifying = False
     
     @dbus.service.method("org.bluez.GattCharacteristic1", in_signature="a{sv}", out_signature="ay")
     def ReadValue(self, options):
@@ -28,17 +30,46 @@ class CertificateActionsCharacteristic(BaseCharacteristic):
         if self.cert_status == "1":
             logger.error("Certificate renewal already in progress")
             raise dbus.DBusException("org.bluez.Error.UnlikelyError")
-        self.cert_status = "1"
-        threading.Thread(target=self._renew_certificate).start()
+        with self.lock:
+            self.cert_status = "1"
+        self._notify_clients()
+        threading.Thread(target=self._renew_certificate, daemon=True).start()
     
     def _renew_certificate(self):
-        response = self.api_client.post("api/v1/certificate/renew")
-        if response is not None:
-            if response.status_code == 200:
-                self.cert_status = "2"
-                logger.info("Certificate renewed successfully")
-            else:
+        try:
+            response = self.api_client.post("api/v1/certificate/renew")
+            with self.lock:
+                if response and response.status_code == 200:
+                    self.cert_status = "2"
+                    logger.info("Certificate renewed successfully")
+                else:
+                    self.cert_status = "-1"
+                    logger.error("Certificate renewal failed")
+        except Exception as e:
+            with self.lock:
                 self.cert_status = "-1"
-                logger.error("Certificate renewal failed")
-        else:
-            self.cert_status = "-1"
+            logger.error(f"Certificate renewal exception: {e}")
+        finally:
+            self._notify_clients()
+
+    @dbus.service.method("org.bluez.GattCharacteristic1", in_signature="", out_signature="")
+    def StartNotify(self):
+        logger.info("CertificateActionsCharacteristic: StartNotify")
+        self.notifying = True
+    
+    @dbus.service.method("org.bluez.GattCharacteristic1", in_signature="", out_signature="")
+    def StopNotify(self):
+        logger.info("CertificateActionsCharacteristic: StopNotify")
+        self.notifying = False
+    
+    def _notify_clients(self):
+        """Sends a PropertiesChanged signal if a client is subscribed."""
+        if not self.notifying:
+            return
+        with self.lock:
+            arr = [dbus.Byte(b) for b in self.cert_status.encode('utf-8')]
+        self.PropertiesChanged(
+            "org.bluez.GattCharacteristic1",
+            {"Value": dbus.Array(arr, signature='y')},
+            []
+        )
