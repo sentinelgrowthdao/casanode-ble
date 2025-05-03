@@ -9,7 +9,7 @@ from utils.api import APIClient
 class SystemActionsCharacteristic(BaseCharacteristic):
 	# This characteristic supports system actions like update, reboot, halt, etc.
 	def __init__(self, bus, index, uuid):
-		flags = ['read', 'write']
+		flags = ['read', 'write', 'notify']
 		super().__init__(bus, index, uuid, flags)
 		self.service_path = '/org/bluez/example/service0'
 		# Status values: "0" = not started, "1" = in progress, "2" = completed, "-1" = error
@@ -17,6 +17,7 @@ class SystemActionsCharacteristic(BaseCharacteristic):
 		self.api_client = APIClient()
 		# Lock for thread-safety when modifying action_status
 		self.lock = threading.Lock()
+		self.notifying = False
 	
 	@dbus.service.method("org.bluez.GattCharacteristic1", in_signature="a{sv}", out_signature="ay")
 	def ReadValue(self, options):
@@ -38,8 +39,9 @@ class SystemActionsCharacteristic(BaseCharacteristic):
 		action = bytes(value).decode("utf-8").strip().lower()
 		with self.lock:
 			self.action_status = "1"  # in progress
+		self._notify_clients()
 		# Start the system action in a separate thread.
-		threading.Thread(target=self._perform_action, args=(action,)).start()
+		threading.Thread(target=self._perform_action, args=(action,), daemon=True).start()
 	
 	def _perform_action(self, action):
 		"""
@@ -62,6 +64,7 @@ class SystemActionsCharacteristic(BaseCharacteristic):
 				logger.error(f"Unknown system action: {action}")
 				with self.lock:
 					self.action_status = "-1"
+					self._notify_clients()
 				return
 
 			# If a response is received, check its status code
@@ -69,12 +72,36 @@ class SystemActionsCharacteristic(BaseCharacteristic):
 				response.raise_for_status()
 				with self.lock:
 					self.action_status = "2"
+				self._notify_clients()
 				logger.info(f"System action '{action}' succeeded")
 			else:
 				with self.lock:
 					self.action_status = "-1"
+				self._notify_clients()
 				logger.error(f"System action '{action}' failed: no response")
 		except Exception as e:
 			logger.error(f"Error performing system action '{action}': {e}")
 			with self.lock:
 				self.action_status = "-1"
+			self._notify_clients()
+	
+	@dbus.service.method("org.bluez.GattCharacteristic1", in_signature="", out_signature="")
+	def StartNotify(self):
+		logger.info("SystemActionsCharacteristic: StartNotify")
+		self.notifying = True
+	
+	@dbus.service.method("org.bluez.GattCharacteristic1", in_signature="", out_signature="")
+	def StopNotify(self):
+		logger.info("SystemActionsCharacteristic: StopNotify")
+		self.notifying = False
+	
+	def _notify_clients(self):
+		if not self.notifying:
+			return
+		with self.lock:
+			arr = [dbus.Byte(b) for b in self.action_status.encode('utf-8')]
+		self.PropertiesChanged(
+			"org.bluez.GattCharacteristic1",
+			{"Value": dbus.Array(arr, signature='y')},
+			[]
+		)
