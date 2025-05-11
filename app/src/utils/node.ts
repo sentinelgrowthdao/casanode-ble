@@ -600,7 +600,7 @@ class NodeManager
 	private buildStdinCommand(passphrase: string|null = null, passphraseRepeat: number = 1, stdin: string[]|null = null): string[]|null
 	{
 		// If passphrase required, add it to the stdin
-		if (this.nodeConfig.backend === 'file' && passphrase !== null)
+		if (passphrase !== null)
 		{
 			if (stdin === null)
 				stdin = [];
@@ -619,7 +619,7 @@ class NodeManager
 	public isPassphraseValid(passphrase: string | null): boolean
 	{
 		// Return false if the passphrase is required but not provided
-		if (this.nodeConfig.backend === 'file' && (passphrase === null || passphrase?.trim().length === 0))
+		if (this.passphraseRequired() && (passphrase === null || passphrase?.trim().length === 0))
 			return false;
 		// Return true if the passphrase is valid
 		return true;
@@ -1229,7 +1229,17 @@ class NodeManager
 	 */
 	public passphraseRequired(): boolean
 	{
-		return this.nodeConfig.backend === 'file';
+		if (this.nodeConfig.backend !== 'file')
+			return false;
+		// Check if the keyring folder exists
+		const keyringPath = path.join(config.CONFIG_DIR, 'keyring-file');
+		if (fs.existsSync(keyringPath))
+		{
+			// Check if the keyring folder contains any address files
+			const files = fs.readdirSync(keyringPath);
+			return files.some((file) => file.endsWith('.address'));
+		}
+		return false;
 	}
 	
 	/**
