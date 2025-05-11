@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Logger } from '@utils/logger';
 import config from '@utils/configuration';
-import nodeManager from '@utils/node';
+import nodeManager, { isWalletAvailable } from '@utils/node';
 import {
 	walletLoadAddresses,
 	walletBalance,
@@ -504,17 +504,6 @@ export async function nodePassphrase(req: Request, res: Response): Promise<void>
 {
 	try
 	{
-		// Check if passphrase is required
-		if (nodeManager.passphraseRequired() === false)
-		{
-			Logger.error('Passphrase is not required, but it was sent via API.');
-			res.status(400).json({
-				error: true,
-				invalide: false,
-				message: 'Passphrase is not required for this node.'
-			});
-			return ;
-		}
 		
 		// Get the passphrase value from the request body
 		const { passphrase } = req.body;
@@ -531,19 +520,23 @@ export async function nodePassphrase(req: Request, res: Response): Promise<void>
 			return ;
 		}
 		
-		// Try to unlock the wallet with the given passphrase
-		const canUnlockWallet = await walletUnlock(passphrase);
-		
-		// If the passphrase is invalid
-		if (!canUnlockWallet)
+		// Check if the wallet is available
+		if (await isWalletAvailable())
 		{
-			Logger.error('Invalid passphrase received via API for unlocking the wallet.');
-			res.status(401).json({
-				error: true,
-				invalide: true,
-				message: 'Invalid passphrase. Unable to unlock wallet.'
-			});
-			return ;
+			// Try to unlock the wallet with the given passphrase
+			const canUnlockWallet = await walletUnlock(passphrase);
+			
+			// If the passphrase is invalid
+			if (!canUnlockWallet)
+			{
+				Logger.error('Invalid passphrase received via API for unlocking the wallet.');
+				res.status(401).json({
+					error: true,
+					invalide: true,
+					message: 'Invalid passphrase. Unable to unlock wallet.'
+				});
+				return ;
+			}
 		}
 		
 		// Set the passphrase in the configuration
