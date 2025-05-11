@@ -2,6 +2,53 @@
 
 Application for Bluetooth communication between phone and casanode node.
 
+## Installation
+
+### Docker (Rootless Mode on Raspberry Pi)
+Docker must be run in rootless mode on Raspberry Pi to ensure the proper functioning of the development environment. This guarantees that all files created by containers remain under the control of the current user and that the application runs smoothly.
+
+#### Install Docker in rootless mode
+
+1. **Log in as a non-root user** (e.g. `raspberry`):
+   ```bash
+   su - raspberry
+   ```
+
+2. **Download and install rootless Docker**:
+   ```bash
+   curl -fsSL https://get.docker.com/rootless | sh
+   ```
+
+3. **Update environment variables**  
+   Add the following to your `~/.bashrc`:
+   ```bash
+   export PATH=$HOME/bin:$PATH
+   export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
+   ```
+
+   Then reload your shell:
+   ```bash
+   source ~/.bashrc
+   ```
+
+4. **Start the Docker daemon**:
+   ```bash
+   systemctl --user start docker
+   systemctl --user enable docker
+   ```
+
+5. **Check that Docker is running in rootless mode**:
+   ```bash
+   docker info
+   ```
+
+#### Notes
+
+- Containers launched as root will not be visible in rootless mode.
+- Files and volumes will be owned by the current user.
+- Binding to ports below 1024 may require additional configuration.
+- This setup is ideal for single-user devices like Raspberry Pi.
+
 ## Web server
 
 The application listens to two network ports, one in HTTP that gives access to the QR Code connection and the other in HTTPS to enable requests to the REST APIs.
