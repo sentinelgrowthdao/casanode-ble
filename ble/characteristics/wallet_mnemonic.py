@@ -88,7 +88,7 @@ class WalletMnemonicCharacteristic(BaseCharacteristic):
         On error, sets self._mnemonic_data to b"error".
         """
         try:
-            response = self.api_client.post("api/v1/wallet/create")
+            response = self.api_client.post("api/v1/wallet/create", timeout=30)
             if response is None:
                 logger.error("NodeMnemonicCharacteristic: No response from /wallet/create")
                 self._mnemonic_data = b"error"
@@ -178,7 +178,7 @@ class WalletMnemonicCharacteristic(BaseCharacteristic):
                 # If valid, call the wallet restore API
                 logger.info("NodeMnemonicCharacteristic: Hash valid, restoring wallet...")
                 payload = {"mnemonic": mnemonic}
-                resp = self.api_client.post("api/v1/wallet/restore", json=payload)
+                resp = self.api_client.post("api/v1/wallet/restore", json=payload, timeout=30)
                 if resp is not None and resp.status_code == 200:
                     logger.info("NodeMnemonicCharacteristic: Wallet restore successful")
                 else:
@@ -186,6 +186,6 @@ class WalletMnemonicCharacteristic(BaseCharacteristic):
                                 f" {resp.status_code if resp else 'None'}")
             else:
                 logger.error("NodeMnemonicCharacteristic: Hash mismatch, mnemonic not restored")
-
+        
         except ValueError:
             logger.error("NodeMnemonicCharacteristic: Invalid mnemonic + hash format (no space found)")
