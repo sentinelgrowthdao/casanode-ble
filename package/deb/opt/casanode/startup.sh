@@ -8,6 +8,38 @@ FLAGFILE="/opt/$USER/.docker_rootless_installed"
 # Clear the log file at the start of each execution
 > "$LOGFILE"
 
+# Stop bluetoothd to release lock files
+Stop bluetoothd to release les fichiers de lock
+echo "Stopping bluetooth service…" | tee -a "$LOGFILE"
+systemctl stop bluetooth.service
+
+# Clean up stale BlueZ GATT database to avoid registration errors
+if [ -d /var/lib/bluetooth ]
+then
+	echo "Cleaning up BlueZ GATT database…" | tee -a "$LOGFILE"
+	for adapter in /var/lib/bluetooth/*
+	do
+		gatt_dir="$adapter/gatt"
+		cache_dir="$adapter/cache"
+		
+		if [ -d "$gatt_dir" ]
+		then
+			rm -rf "$gatt_dir" \
+			&& echo "Removed $gatt_dir" | tee -a "$LOGFILE"
+		fi
+
+		if [ -d "$cache_dir" ]
+		then
+			rm -rf "$cache_dir" \
+			&& echo "Removed $cache_dir" | tee -a "$LOGFILE"
+		fi
+	done
+fi
+
+# Restart bluetoothd so qu’il puisse recréer sa database propre
+echo "Restarting bluetooth service…" | tee -a "$LOGFILE"
+systemctl start bluetooth.service
+
 # Check if Docker socket file exist
 if [ ! -f "$FLAGFILE" ]
 then
