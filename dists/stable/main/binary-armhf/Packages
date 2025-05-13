@@ -1,6 +1,6 @@
 Package: casanode
 Source: casanode
-Version: 1.0.0-alpha6.4
+Version: 1.0.0-alpha6.5
 Architecture: all
 Maintainer: FoxinouFr <foxinou@foxinodes.net>
 Depends: nodejs,
@@ -18,11 +18,11 @@ Depends: nodejs,
      libdbus-1-dev,
      libbluetooth-dev,
      bluez
-Filename: pool/main/casanode_1.0.0-alpha6.4_all.deb
-Size: 297360
-MD5sum: 4337a40e7b1a0759c9f779c66300591d
-SHA1: f7b1cd4064065723d91a79350b7b45849f489605
-SHA256: 3b79f6d4879f251413c6e21528a8b55c0733b04e7ba401d8f35d5930ba3bece7
+Filename: pool/main/casanode_1.0.0-alpha6.5_all.deb
+Size: 297920
+MD5sum: e53dfc7ad6bef6af8a073c4c84400b8f
+SHA1: c25faf18ca0c45942b078d35bbdfeeb0453a562c
+SHA256: 53f6b45bc8a485bb63a36221a12b0b70e4e28cf090a395dc981660f9970d0baa
 Section: net
 Priority: optional
 Homepage: https://github.com/sentinelgrowthdao/casanode-ble
