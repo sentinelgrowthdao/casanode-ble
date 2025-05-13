@@ -8,8 +8,7 @@ FLAGFILE="/opt/$USER/.docker_rootless_installed"
 # Clear the log file at the start of each execution
 > "$LOGFILE"
 
-# Stop bluetoothd to release lock files
-Stop bluetoothd to release les fichiers de lock
+# Stop bluetoothd to release les fichiers de lock
 echo "Stopping bluetooth service…" | tee -a "$LOGFILE"
 systemctl stop bluetooth.service
 
