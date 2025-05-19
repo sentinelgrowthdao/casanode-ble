@@ -70,7 +70,7 @@ then
 	# Install Docker rootless
 	echo "Installing Docker rootless..." | tee -a "$LOGFILE"
 	su - "$USER" -s /bin/bash -l -c \
-		"dockerd-rootless-setuptool.sh install -f --skip-iptables" | tee -a "$LOGFILE"
+		"dockerd-rootless-setuptool.sh install -f" | tee -a "$LOGFILE"
 	
 	# Create the systemd user directory if it doesn't exist
 	if [ ! -d /opt/casanode/.config/systemd/user/docker.service.d ]
