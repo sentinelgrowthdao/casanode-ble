@@ -140,4 +140,13 @@ else
 	echo "UFW is already active." | tee -a "$LOGFILE"
 fi
 
+# Unblock Bluetooth if necessary
+if rfkill list bluetooth | grep -q "Soft blocked: yes"; then
+	echo "  → Bluetooth is soft-blocked, unblocking…" | tee -a "$LOGFILE"
+	rfkill unblock bluetooth \
+		&& echo "    ✓ Bluetooth unblocked" | tee -a "$LOGFILE" \
+		|| echo "    ✗ Failed to unblock Bluetooth" | tee -a "$LOGFILE"
+else
+	echo "  → Bluetooth is not soft-blocked, no need to unblock" | tee -a "$LOGFILE"
+fi
 exit 0
