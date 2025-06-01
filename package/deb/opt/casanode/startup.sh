@@ -2,7 +2,9 @@
 
 CONFIGFILE="/etc/casanode.conf"
 LOGFILE="/var/log/casanode/startup.log"
+LOGFILE_ROOTLESS="/var/log/casanode/rootless.log"
 USER="casanode"
+UID_USER=$(id -u "$USER")
 FLAGFILE="/opt/$USER/.docker_rootless_installed"
 
 # Clear the log file at the start of each execution
@@ -40,69 +42,90 @@ fi
 echo "Restarting bluetooth service…" | tee -a "$LOGFILE"
 systemctl start bluetooth.service
 
-# Check if Docker socket file exist
-if [ ! -f "$FLAGFILE" ]
-then
-	echo "Docker rootless is not installed. Installing..." | tee -a "$LOGFILE"
-	
-	# Stop Docker rootful
-	echo "Stopping rootful Docker..." | tee -a "$LOGFILE"
-	systemctl disable --now docker.service docker.socket
-	rm -f /var/run/docker.sock
-	echo "Docker rootful stopped." | tee -a "$LOGFILE"
-	
-	# Enable linger
-	loginctl enable-linger "$USER"
-	echo "Linger enabled for $USER user." | tee -a "$LOGFILE"
-	
-	# Add entries to /etc/subuid and /etc/subgid if they do not already exist
-	if ! grep -q "^${USER}:" /etc/subuid
-	then
-		echo "${USER}:100000:65536" >> /etc/subuid
-	fi
-	if ! grep -q "^${USER}:" /etc/subgid
-	then
-		echo "${USER}:100000:65536" >> /etc/subgid
-	fi
-	
-	# Ensure ownership of .config
-	chown -R casanode:casanode /opt/casanode/.config
-	
-	# Install Docker rootless
-	echo "Installing Docker rootless..." | tee -a "$LOGFILE"
-	su - "$USER" -s /bin/bash -l -c \
-		"dockerd-rootless-setuptool.sh install -f" | tee -a "$LOGFILE"
-	
-	# Create the systemd user directory if it doesn't exist
-	if [ ! -d /opt/casanode/.config/systemd/user/docker.service.d ]
-	then
-		mkdir -p /opt/casanode/.config/systemd/user/docker.service.d
-	fi
-	# Create the environment file for systemd user service
-	cat > /opt/casanode/.config/systemd/user/docker.service.d/env.conf <<'EOT'
-[Service]
-Environment=XDG_RUNTIME_DIR=/run/user/%U
-EOT
-	# Change ownership of the systemd directory
-	chown -R casanode:casanode /opt/casanode/.config/systemd/
-	
-	# Create the installation flag to avoid reinstalling on the next startup
-	touch "$FLAGFILE"
-else
-	echo "Docker rootless already installed." | tee -a "$LOGFILE"
+# Start the systemd-user instance for casanode
+echo "Launching user@$UID_USER.service…" | tee -a "$LOGFILE"
+systemctl start user@"$UID_USER".service || {
+	echo "✗ Unable to start user@$UID_USER.service" | tee -a "$LOGFILE"
+	exit 1
+}
+
+# Wait for the D-Bus bus to appear (max 5s)
+echo "Waiting for /run/user/$UID_USER/bus…" | tee -a "$LOGFILE"
+for i in {1..10}; do
+	su - "$USER" -s /bin/bash -c \
+	  "XDG_RUNTIME_DIR=/run/user/$UID_USER systemctl --user is-system-running --quiet"
+	[ $? -le 1 ] && break   # 0=running, 1=degraded → ok
+	sleep 1
+done
+if ! [ -S "/run/user/$UID_USER/bus" ]; then
+	echo "✗ D-Bus bus still missing, aborting." | tee -a "$LOGFILE"; exit 1
 fi
 
-# Ensure that Docker rootless is started (check via systemctl --user)
-if ! su -s /bin/bash -l "$USER" -c 'systemctl --user is-active docker' >/dev/null 2>&1
-then
-	echo "Starting Docker rootless for user $USER..." | tee -a "$LOGFILE"
-	su - "$USER" -s /bin/bash -l -c "XDG_RUNTIME_DIR=/run/user/$(id -u $USER) systemctl --user start docker"
+# Always export the variable for 'su - casanode' commands
+export XDG_RUNTIME_DIR="/run/user/$UID_USER"
+
+# Install Docker rootless if necessary
+if [ ! -f "$FLAGFILE" ]; then
+	echo "Docker rootless not installed. Installing…" | tee -a "$LOGFILE"
+	
+	# Stop Docker rootful
+	echo "  → Stopping rootful Docker..." | tee -a "$LOGFILE"
+	systemctl disable --now docker.service docker.socket &>>"$LOGFILE"
+	rm -f /var/run/docker.sock                                 &>>"$LOGFILE"
+	echo "  → Rootful Docker stopped." | tee -a "$LOGFILE"
+	
+	# Enable linger
+	loginctl enable-linger "$USER" &>>"$LOGFILE"
+	echo "  → Linger enabled for $USER." | tee -a "$LOGFILE"
+	
+	# Add entries to /etc/subuid and /etc/subgid if they do not already exist
+	grep -q "^${USER}:" /etc/subuid  || echo "${USER}:100000:65536" >> /etc/subuid
+	grep -q "^${USER}:" /etc/subgid  || echo "${USER}:100000:65536" >> /etc/subgid
+	
+	# Ensure ownership of .config
+	chown -R casanode:casanode /opt/casanode/.config &>>"$LOGFILE"
+	
+	# Check rootless Docker prerequisites
+	echo "  → Checking rootless prerequisites…" | tee -a "$LOGFILE"
+	
+	# Load nf_tables module as root (instead of sudo modprobe)
+	if ! lsmod | grep -q '^nf_tables'; then
+		echo "    • Loading nf_tables module as root…" | tee -a "$LOGFILE"
+		modprobe nf_tables || {
+			echo "      ✗ modprobe nf_tables failed" | tee -a "$LOGFILE"
+			exit 1
+		}
+	fi
+
+	# Install Docker rootless
+	echo "  → Calling dockerd-rootless-setuptool.sh…" | tee -a "$LOGFILE"
+	su - "$USER" -s /bin/bash -c \
+		"PATH=/usr/local/sbin:/usr/sbin:/usr/local/bin:/usr/bin:/bin \
+		XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR dockerd-rootless-setuptool.sh install -f" \
+		2>&1 | tee "$LOGFILE_ROOTLESS"
+	RC=${PIPESTATUS[0]}
+	echo "→ install exit code = $RC" | tee -a "$LOGFILE"
+	
+	if [ $RC -eq 0 ]; then
+		echo "  → Enabling rootless Docker service…" | tee -a "$LOGFILE"
+		su - "$USER" -s /bin/bash -c \
+			"XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR systemctl --user enable --now docker" \
+			| tee -a "$LOGFILE"
+		touch "$FLAGFILE"
+		echo "  ✓ Docker rootless installation successful." | tee -a "$LOGFILE"
+	else
+		echo "✗ Rootless installation failed, will retry on next boot." | tee -a "$LOGFILE"
+	fi
 else
-	echo "Docker rootless is already running." | tee -a "$LOGFILE"
+	echo "Docker rootless already installed." | tee -a "$LOGFILE"
+	echo "  → Starting (or restarting) rootless Docker service…" | tee -a "$LOGFILE"
+	su - "$USER" -s /bin/bash -c \
+		"XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR systemctl --user restart docker" \
+		| tee -a "$LOGFILE"
 fi
 
 # Check and apply necessary capabilities to node if needed
-NODE_PATH=$(eval readlink -f $(which node))
+NODE_PATH=$(eval readlink -f "$(which node)")
 if ! getcap "$NODE_PATH" | grep -q "cap_net_raw+eip"
 then
 	echo "Applying necessary capabilities to node..." | tee -a "$LOGFILE"
