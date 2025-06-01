@@ -7,6 +7,7 @@ FLAGFILE="/opt/$USER/.docker_rootless_installed"
 
 # Clear the log file at the start of each execution
 > "$LOGFILE"
+echo "=== Casanode startup begin ===" | tee -a "$LOGFILE"
 
 # Stop bluetoothd to release lock files
 echo "Stopping bluetooth service…" | tee -a "$LOGFILE"
@@ -149,4 +150,6 @@ if rfkill list bluetooth | grep -q "Soft blocked: yes"; then
 else
 	echo "  → Bluetooth is not soft-blocked, no need to unblock" | tee -a "$LOGFILE"
 fi
+
+echo "=== Casanode startup finished ===" | tee -a "$LOGFILE"
 exit 0
