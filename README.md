@@ -268,6 +268,21 @@ The creation of the .deb package is done in a Docker container. To do this, foll
 2. Once the container is started, execute the `build.sh` script.
 3. To send the .deb file to the GitHub repository, use the `deb-push.sh` bash script (outside the container) available at the root of the project. This script clones a repository and sends everything to the `gh-pages` branch of the repository.
 
+## Tests
+
+Node tests are located in `app/tests` and can be executed with:
+
+```bash
+cd app
+npm test
+```
+
+Python tests reside in `ble/tests` and can be run using Pytest:
+
+```bash
+PYTHONPATH=ble pytest
+```
+
 ## License
 
 This project is licensed under the GPL v3 License - see the LICENSE file for details.
